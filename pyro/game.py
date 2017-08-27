@@ -1,7 +1,7 @@
 import random
 import tdl
 from pyro.gamemap import WALL, World
-from pyro.entities import NORTH, SOUTH, EAST, WEST
+from pyro.math import NORTH, SOUTH, EAST, WEST
 
 
 SCREEN_WIDTH = 80
@@ -43,6 +43,8 @@ class Game(object):
         self.player.set_position(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
 
     def game_loop(self):
+        assert self.world is not None
+
         while not tdl.event.is_window_closed():
             self.render_all()
             tdl.flush()
@@ -77,7 +79,9 @@ class Game(object):
             return True
 
     def handle_keys(self):
+        # this is for turn based rendering!
         user_input = tdl.event.key_wait()
+
         player_pos = self.player.get_position()
 
         if user_input.key == 'ESCAPE':
