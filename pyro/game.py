@@ -1,6 +1,6 @@
 import random
 import tdl
-from pyro.gamemap import WALL, World
+from pyro.gamemap import WALL, ROOM, World
 from pyro.math import NORTH, SOUTH, EAST, WEST
 
 
@@ -10,6 +10,7 @@ FONT = 'consolas10x10_gs_tc.png'
 
 COLOR_FLOOR = (79, 79, 79)
 COLOR_WALL = (205, 133, 63)
+COLOR_ROOM = (255, 211, 155)
 
 
 class Game(object):
@@ -56,11 +57,15 @@ class Game(object):
     def render_all(self):
         game_map = self.world.get_current_map()
 
+        self.console.clear()
+
         for y in xrange(self.game_height):
             for x in range(self.game_width):
                 cell = game_map.get_at(x, y)
                 if cell.kind == WALL:
                     self.console.draw_char(x, y, '#', bg=None, fg=COLOR_WALL)
+                elif cell.kind == ROOM:
+                    self.console.draw_char(x, y, '*', bg=None, fg=COLOR_ROOM)
                 else:
                     self.console.draw_char(x, y, '.', bg=None, fg=COLOR_FLOOR)
 
