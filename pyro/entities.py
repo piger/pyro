@@ -6,10 +6,25 @@ import pkg_resources
 DEFAULT_ENTITY_COLOR = (255, 127, 36) # chocolate1
 
 
-class Position(object):
+class Vector2(object):
     def __init__(self, x_, y_):
         self.x = x_
         self.y = y_
+
+    def __sub__(self, other):
+        return Vector2(self.x - other.x, self.y - other.y)
+
+    def __add__(self, other):
+        return Vector2(self.x + other.x, self.y + other.y)
+
+    def __repr__(self):
+        return 'Vector2(%d, %d)' % (self.x, self.y)
+
+
+NORTH = Vector2(0, -1)
+EAST = Vector2(1, 0)
+WEST = Vector2(-1, 0)
+SOUTH = Vector2(0, 1)
 
 
 class Component(object):
@@ -42,7 +57,7 @@ class Entity(object):
         self.name = name
         self.avatar = avatar
         self.color = color
-        self.position = Position(0, 0)
+        self.position = Vector2(0, 0)
         self.components = {}
 
     def add_component(self, name, component):

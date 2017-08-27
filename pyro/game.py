@@ -1,6 +1,7 @@
 import random
 import tdl
 from pyro.gamemap import WALL, World
+from pyro.entities import NORTH, SOUTH, EAST, WEST
 
 
 SCREEN_WIDTH = 80
@@ -69,17 +70,31 @@ class Game(object):
         self.console.draw_char(player_pos.x, player_pos.y, '@', bg=None, fg=(255, 255, 255))
         self.root.blit(self.console, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0)
 
+    def attempt_move(self, dest_vec):
+        game_map = self.world.get_current_map()
+        dcell = game_map.get_at(dest_vec.x, dest_vec.y)
+        if not dcell.entities:
+            return True
+
     def handle_keys(self):
         user_input = tdl.event.key_wait()
-
         player_pos = self.player.get_position()
-        if user_input.key == 'UP':
-            player_pos.y -= 1
-        elif user_input.key == 'DOWN':
-            player_pos.y += 1
-        elif user_input.key == 'LEFT':
-            player_pos.x -= 1
-        elif user_input.key == 'RIGHT':
-            player_pos.x += 1
-        elif user_input.key == 'ESCAPE':
+
+        if user_input.key == 'ESCAPE':
             return True
+        elif user_input.key == 'UP':
+            direction = NORTH
+        elif user_input.key == 'DOWN':
+           direction = SOUTH
+        elif user_input.key == 'LEFT':
+            direction = WEST
+        elif user_input.key == 'RIGHT':
+            direction = EAST
+        else:
+            direction = None
+
+        if direction is not None:
+            dest_vec = player_pos + direction
+            can = self.attempt_move(dest_vec)
+            if can:
+                self.player.set_position(dest_vec.x, dest_vec.y)
