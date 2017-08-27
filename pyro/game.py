@@ -4,23 +4,22 @@ from pyro.gamemap import WALL, World
 
 
 SCREEN_WIDTH = 80
-SCREEN_HEIGHT = 50
+SCREEN_HEIGHT = 60
+FONT = 'consolas10x10_gs_tc.png'
 
-
-class Player(object):
-    def __init__(self):
-        self.x = 0
-        self.y = 0
+COLOR_FLOOR = (79, 79, 79)
+COLOR_WALL = (205, 133, 63)
 
 
 class Game(object):
-    def __init__(self, seed):
+    def __init__(self, seed, game_width=SCREEN_WIDTH, game_height=SCREEN_HEIGHT):
         self.seed = seed
+        self.game_width = game_width
+        self.game_height = game_height
+
         self.root = None
         self.console = None
-        self.player = Player()
-        self.game_width = 80
-        self.game_height = 50
+        self.player = None
         self.world = None
         self.game_map = None
 
@@ -31,13 +30,15 @@ class Game(object):
 
     def init_game(self):
         # https://github.com/HexDecimal/python-tdl/tree/master/fonts/libtcod
-        tdl.set_font('arial10x10.png', greyscale=True, altLayout=True)
+        tdl.set_font(FONT, greyscale=True, altLayout=True)
         self.root = tdl.init(SCREEN_WIDTH, SCREEN_HEIGHT, title="PyRo", fullscreen=False)
         self.console = tdl.Console(SCREEN_WIDTH, SCREEN_HEIGHT)
-        tdl.setFPS(20)
+        # tdl.setFPS(20)
 
         self.world = World()
         self.world.create_map(self.game_width, self.game_height, 1)
+
+        self.player = self.world.entity_manager.create_entity('player')
 
         self.player.x = SCREEN_WIDTH // 2
         self.player.y = SCREEN_HEIGHT // 2        
@@ -58,9 +59,9 @@ class Game(object):
             for x in range(self.game_width):
                 cell = game_map.get_at(x, y)
                 if cell.kind == WALL:
-                    self.console.draw_char(x, y, '#', bg=None, fg=(255, 255, 255))
+                    self.console.draw_char(x, y, '#', bg=None, fg=COLOR_WALL)
                 else:
-                    self.console.draw_char(x, y, '.', bg=None, fg=(255, 255, 255))
+                    self.console.draw_char(x, y, '.', bg=None, fg=COLOR_FLOOR)
 
                 for eid in cell.entities:
                     entity = self.world.entity_manager.get_entity(eid)
