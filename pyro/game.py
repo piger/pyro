@@ -78,6 +78,19 @@ class Game(object):
         if not dcell.entities:
             return True
 
+        em = self.world.entity_manager
+        can_fight = []
+        for eid in dcell.entities:
+            # get entity
+            entity = em.get_entity(eid)
+            # get combat component, if any
+            cc = em.combat_components.get(entity.eid)
+            if cc is not None:
+                can_fight.append((entity, cc))
+
+        for entity, cc in can_fight:
+            print "fight between player and %r (%d/%d)" % (entity.name, cc.damage, cc.armor)
+
     def handle_keys(self):
         # this is for turn based rendering!
         user_input = tdl.event.key_wait()
