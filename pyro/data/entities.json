@@ -1,0 +1,22 @@
+{
+  "entities": [
+    {
+      "name": "player",
+      "health": 100,
+      "damage": 1,
+      "armor": 2,
+      "avatar": "@"
+    },
+    {
+      "name": "boar",
+      "health": 10,
+      "damage": 1,
+      "armor": 2,
+      "avatar": "b"
+    },
+    {
+      "name": "fairy",
+      "avatar": "F"
+    }
+  ]
+}
