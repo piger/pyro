@@ -39,9 +39,7 @@ class Game(object):
         self.world.create_map(self.game_width, self.game_height, 1)
 
         self.player = self.world.entity_manager.create_entity('player')
-
-        self.player.x = SCREEN_WIDTH // 2
-        self.player.y = SCREEN_HEIGHT // 2        
+        self.player.set_position(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
 
     def game_loop(self):
         while not tdl.event.is_window_closed():
@@ -67,19 +65,21 @@ class Game(object):
                     entity = self.world.entity_manager.get_entity(eid)
                     self.console.draw_char(x, y, entity.avatar, bg=None, fg=entity.color)
 
-        self.console.draw_char(self.player.x, self.player.y, '@', bg=None, fg=(255, 255, 255))
+        player_pos = self.player.get_position()
+        self.console.draw_char(player_pos.x, player_pos.y, '@', bg=None, fg=(255, 255, 255))
         self.root.blit(self.console, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0)
 
     def handle_keys(self):
         user_input = tdl.event.key_wait()
 
+        player_pos = self.player.get_position()
         if user_input.key == 'UP':
-            self.player.y -= 1
+            player_pos.y -= 1
         elif user_input.key == 'DOWN':
-            self.player.y += 1
+            player_pos.y += 1
         elif user_input.key == 'LEFT':
-            self.player.x -= 1
+            player_pos.x -= 1
         elif user_input.key == 'RIGHT':
-            self.player.x += 1
+            player_pos.x += 1
         elif user_input.key == 'ESCAPE':
             return True

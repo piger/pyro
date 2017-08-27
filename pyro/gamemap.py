@@ -36,6 +36,7 @@ class GameMap(object):
                 print "Cell already occupied"
                 continue
             entity = entity_manager.create_entity('boar')
+            entity.set_position(rx, ry)
             cell.entities.append(entity.eid)
 
         for _ in xrange(3):
@@ -46,6 +47,7 @@ class GameMap(object):
                 print "Cell already occupied for fairy"
                 continue
             entity = entity_manager.create_entity('fairy')
+            entity.set_position(rx, ry)
             cell.entities.append(entity.eid)
 
     def get_at(self, x, y):

@@ -6,6 +6,12 @@ import pkg_resources
 DEFAULT_ENTITY_COLOR = (255, 127, 36) # chocolate1
 
 
+class Position(object):
+    def __init__(self, x_, y_):
+        self.x = x_
+        self.y = y_
+
+
 class Component(object):
     def __init__(self, name):
         self.name = name
@@ -36,6 +42,7 @@ class Entity(object):
         self.name = name
         self.avatar = avatar
         self.color = color
+        self.position = Position(0, 0)
         self.components = {}
 
     def add_component(self, name, component):
@@ -43,6 +50,13 @@ class Entity(object):
 
     def get_component(self, name):
         return self.components[name]
+
+    def set_position(self, x, y):
+        self.position.x = x
+        self.position.y = y
+
+    def get_position(self):
+        return self.position
 
 
 class EntityManager(object):
