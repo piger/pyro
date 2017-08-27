@@ -59,7 +59,7 @@ class Game(object):
         self.camera = Camera(SCREEN_WIDTH, SCREEN_HEIGHT)
 
         self.player = self.world.entity_manager.create_entity('player')
-        self.player.set_position(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
+        self.player.set_position(self.game_width / 2, self.game_height / 2)
 
     def game_loop(self):
         assert self.world is not None
@@ -85,11 +85,11 @@ class Game(object):
                 yy = y - self.camera.y
                 if xx < 0:
                     continue
-                if xx >= self.camera.width:
+                if xx >= self.game_width:
                     continue
                 if yy < 0:
                     continue
-                if yy >= self.camera.height:
+                if yy >= self.game_height:
                     continue
                 cell = game_map.get_at(xx, yy)
                 if cell.kind == WALL:
