@@ -13,6 +13,21 @@ COLOR_WALL = (205, 133, 63)
 COLOR_ROOM = (255, 211, 155)
 
 
+class Camera(object):
+    def __init__(self, width, height):
+        self.x = 0
+        self.y = 0
+        self.width = width
+        self.height = height
+
+    def center_on(self, x, y):
+        self.x = x - (self.width / 2)
+        self.y = y - (self.height / 2)
+
+    def __repr__(self):
+        return "Camera(x=%d, y=%d, w=%d, h=%d)" % (self.x, self.y, self.width, self.height)
+
+
 class Game(object):
     def __init__(self, seed, game_width=SCREEN_WIDTH, game_height=SCREEN_HEIGHT):
         self.seed = seed
@@ -24,6 +39,7 @@ class Game(object):
         self.player = None
         self.world = None
         self.game_map = None
+        self.camera = None
 
         self.init_random()
 
@@ -39,6 +55,8 @@ class Game(object):
 
         self.world = World()
         self.world.create_map(self.game_width, self.game_height, 1)
+
+        self.camera = Camera(SCREEN_WIDTH, SCREEN_HEIGHT)
 
         self.player = self.world.entity_manager.create_entity('player')
         self.player.set_position(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
@@ -58,10 +76,22 @@ class Game(object):
         game_map = self.world.get_current_map()
 
         self.console.clear()
+        player_pos = self.player.get_position()
+        self.camera.center_on(player_pos.x, player_pos.y)
 
-        for y in xrange(self.game_height):
-            for x in range(self.game_width):
-                cell = game_map.get_at(x, y)
+        for y in xrange(self.camera.height):
+            for x in range(self.camera.width):
+                xx = x - self.camera.x
+                yy = y - self.camera.y
+                if xx < 0:
+                    continue
+                if xx >= self.camera.width:
+                    continue
+                if yy < 0:
+                    continue
+                if yy >= self.camera.height:
+                    continue
+                cell = game_map.get_at(xx, yy)
                 if cell.kind == WALL:
                     self.console.draw_char(x, y, '#', bg=None, fg=COLOR_WALL)
                 elif cell.kind == ROOM:
@@ -73,8 +103,7 @@ class Game(object):
                     entity = self.world.entity_manager.get_entity(eid)
                     self.console.draw_char(x, y, entity.avatar, bg=None, fg=entity.color)
 
-        player_pos = self.player.get_position()
-        self.console.draw_char(player_pos.x, player_pos.y, '@', bg=None, fg=(255, 255, 255))
+        self.console.draw_char(player_pos.x - self.camera.x, player_pos.y - self.camera.y, '@', bg=None, fg=(255, 255, 255))
         self.root.blit(self.console, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0)
 
     def attempt_move(self, dest_vec):
