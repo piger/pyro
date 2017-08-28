@@ -134,6 +134,7 @@ class Game(object):
             enemy_hc.health -= player_cc.damage
             if enemy_hc.health <= 0:
                 print "enemy morto"
+                self.world.destroy_entity(entity.eid)
             else:
                 player_hc.health -= cc.damage
                 if player_hc.health <= 0:

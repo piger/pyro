@@ -38,13 +38,6 @@ class Entity(object):
         self.avatar = avatar
         self.color = color
         self.position = Vector2(0, 0)
-        self.components = {}
-
-    def add_component(self, name, component):
-        self.components[name] = component
-
-    def get_component(self, name):
-        return self.components[name]
 
     def set_position(self, x, y):
         self.position.x = x
@@ -96,6 +89,15 @@ class EntityManager(object):
 
         self.entities[entity.eid] = entity
         return entity
+
+    def destroy_entity(self, eid):
+        if eid in self.health_components:
+            del self.health_components[eid]
+
+        if eid in self.combat_components:
+            del self.combat_components[eid]
+
+        del self.entities[eid]
 
     def get_entity(self, eid):
         return self.entities[eid]

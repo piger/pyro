@@ -197,3 +197,14 @@ class World(object):
 
     def get_current_map(self):
         return self.maps[self.current_map]
+
+    def destroy_entity(self, eid):
+        entity = self.entity_manager.get_entity(eid)
+        pos = entity.get_position()
+        cell = self.maps[self.current_map].get_at(pos.x, pos.y)
+        if eid not in cell.entities:
+            print "BUGGONE"
+        else:
+            cell.entities.remove(eid)
+
+        self.entity_manager.destroy_entity(eid)
