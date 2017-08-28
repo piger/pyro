@@ -14,7 +14,7 @@ def main():
     if opts.seed is None:
         seed = int(time.time())
     else:
-        seed = opts.seed
+        seed = int(opts.seed)
 
     game = Game(seed, opts.width, opts.height)
     game.init_game()
