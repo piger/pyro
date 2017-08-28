@@ -108,12 +108,12 @@ class GameMap(object):
             n2 = Rect(node2.x, node2.y, node2.width, node2.height)
 
             for room in rooms:
-                if n1.intersect(room):
+                if room.intersect(n1):
                     room_a = room
                     break
 
             for room in rooms:
-                if n2.intersect(room):
+                if room.intersect(n2):
                     room_b = room
                     break
 
