@@ -18,7 +18,7 @@ class HealthComponent(Component):
 
     def __init__(self, value):
         super(HealthComponent, self).__init__(self.NAME)
-        self.value = value
+        self.health = value
 
 
 class CombatComponent(Component):

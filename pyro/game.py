@@ -80,8 +80,8 @@ class Game(object):
         player_pos = self.player.get_position()
         self.camera.center_on(player_pos.x, player_pos.y)
 
-        for y in xrange(self.camera.height):
-            for x in range(self.camera.width):
+        for y in xrange(self.game_height):
+            for x in range(self.game_width):
                 xx = x - self.camera.x
                 yy = y - self.camera.y
                 if xx < 0:
@@ -92,19 +92,19 @@ class Game(object):
                     continue
                 if yy >= self.game_height:
                     continue
-                cell = game_map.get_at(xx, yy)
+                cell = game_map.get_at(x, y)
                 if cell.kind == WALL:
-                    self.console.draw_char(x, y, '#', bg=None, fg=COLOR_WALL)
+                    self.console.draw_char(xx, yy, '#', bg=None, fg=COLOR_WALL)
                 elif cell.kind == ROOM:
-                    self.console.draw_char(x, y, '*', bg=None, fg=COLOR_ROOM)
+                    self.console.draw_char(xx, yy, '*', bg=None, fg=COLOR_ROOM)
                 elif cell.kind == CORRIDOR:
-                    self.console.draw_char(x, y, '=', bg=None, fg=COLOR_ROOM)
+                    self.console.draw_char(xx, yy, '=', bg=None, fg=COLOR_ROOM)
                 else:
-                    self.console.draw_char(x, y, '.', bg=None, fg=COLOR_FLOOR)
+                    self.console.draw_char(xx, yy, '.', bg=None, fg=COLOR_FLOOR)
 
                 for eid in cell.entities:
                     entity = self.world.entity_manager.get_entity(eid)
-                    self.console.draw_char(x, y, entity.avatar, bg=None, fg=entity.color)
+                    self.console.draw_char(xx, yy, entity.avatar, bg=None, fg=entity.color)
 
         self.console.draw_char(player_pos.x - self.camera.x, player_pos.y - self.camera.y, '@', bg=None, fg=(255, 255, 255))
         self.root.blit(self.console, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0)
@@ -125,8 +125,19 @@ class Game(object):
             if cc is not None:
                 can_fight.append((entity, cc))
 
+        player_cc = em.combat_components.get(self.player.eid)
+        player_hc = em.health_components.get(self.player.eid)
+            
         for entity, cc in can_fight:
             print "fight between player and %r (%d/%d)" % (entity.name, cc.damage, cc.armor)
+            enemy_hc = em.health_components.get(entity.eid)
+            enemy_hc.health -= player_cc.damage
+            if enemy_hc.health <= 0:
+                print "enemy morto"
+            else:
+                player_hc.health -= cc.damage
+                if player_hc.health <= 0:
+                    print "player morto!"
 
     def handle_keys(self):
         # this is for turn based rendering!
@@ -148,7 +159,7 @@ class Game(object):
             direction = None
 
         if direction is not None:
-            dest_vec = player_pos + direction
+            dest_vec = player_pos - direction
             can = self.attempt_move(dest_vec)
             if can:
                 self.player.set_position(dest_vec.x, dest_vec.y)
