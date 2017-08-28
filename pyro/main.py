@@ -1,6 +1,7 @@
 import time
 from optparse import OptionParser
 from pyro.game import Game
+import better_exceptions
 
 
 def main():

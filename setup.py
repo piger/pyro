@@ -8,6 +8,7 @@ setup(
     author_email='daniel@spatof.org',
     install_requires=[
         'tdl==4.1.0',
+        'better_exceptions',
     ],
     packages=find_packages(),
     zip_safe=False,
