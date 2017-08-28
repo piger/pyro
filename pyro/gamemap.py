@@ -90,13 +90,12 @@ class GameMap(object):
             sx, sy = room1.center
             dx, dy = room2.center
 
-            for x in xrange(min(sx, dx), max(sx, dx) + 1):
-                if self.cells[x][sy].kind != ROOM:
-                    self.cells[x][sy].kind = CORRIDOR
-
-            for y in xrange(min(sy, dy), max(sy, dy) + 1):
-                if self.cells[dx][y].kind != ROOM:
-                    self.cells[dx][y].kind = CORRIDOR
+            if random.randint(0, 1) == 0:
+                self.create_horizontal_tunnel(sx, dx, sy)
+                self.create_vertical_tunnel(sy, dy, dx)
+            else:
+                self.create_vertical_tunnel(sy, dy, sx)
+                self.create_horizontal_tunnel(sx, dx, dy)
 
         def connect_rooms(node):
             room_a, room_b = None, None
@@ -123,6 +122,12 @@ class GameMap(object):
                 return
             elif room_a and room_b is None:
                 print "room_a is OK, room_b is None"
+                return
+            elif room_a == room_b:
+                print "room_a and room_b are the SAME"
+                return
+            elif node1.level != node2.level:
+                print "node1 and node2 are different levels!"
                 return
             else:
                 print "connect %r to %r" % (room_a, room_b)
@@ -162,6 +167,14 @@ class GameMap(object):
             entity = entity_manager.create_entity('fairy')
             entity.set_position(rx, ry)
             cell.entities.append(entity.eid)
+
+    def create_horizontal_tunnel(self, x1, x2, y):
+        for x in xrange(min(x1, x2), max(x1, x2) + 1):
+            self.cells[x][y].kind = CORRIDOR
+
+    def create_vertical_tunnel(self, y1, y2, x):
+        for y in xrange(min(y1, y2), max(y1, y2) + 1):
+            self.cells[x][y].kind = CORRIDOR
 
     def get_at(self, x, y):
         return self.cells[x][y]

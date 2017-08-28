@@ -31,6 +31,10 @@ class Rect(object):
         self.endX = self.x + self.width
         self.endY = self.y + self.height
 
+    def __eq__(self, other):
+        return (self.x == other.x and self.y == other.y and self.width == other.width and
+                self.height == other.height)
+
     @property
     def center(self):
         center_x = int((self.x + self.endX) / 2)
