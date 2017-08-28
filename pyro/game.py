@@ -1,6 +1,6 @@
 import random
 import tdl
-from pyro.gamemap import WALL, ROOM, CORRIDOR, World
+from pyro.gamemap import WALL, ROOM, CORRIDOR, VOID, World
 from pyro.math import NORTH, SOUTH, EAST, WEST
 
 
@@ -96,6 +96,8 @@ class Game(object):
                 cell = game_map.get_at(x, y)
                 if cell.kind == WALL:
                     self.console.draw_char(xx, yy, '#', bg=None, fg=COLOR_WALL)
+                elif cell.kind == VOID:
+                    self.console.draw_char(xx, yy, ' ', bg=None, fg=(0, 0, 0))
                 elif cell.kind == ROOM:
                     self.console.draw_char(xx, yy, '*', bg=None, fg=COLOR_ROOM)
                 elif cell.kind == CORRIDOR:

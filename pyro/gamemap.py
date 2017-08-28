@@ -4,13 +4,16 @@ from pyro.entities import EntityManager
 from pyro.math import Rect
 
 
-WALL = 0
-FLOOR = 1
-ROOM = 2
-CORRIDOR = 3
+VOID = 0
+WALL = 1
+FLOOR = 2
+ROOM = 3
+CORRIDOR = 4
 
 
 def create_room_inside(x, y, min_width, min_height, max_width, max_height):
+    """Place a Rect inside another Rect, with random padding"""
+
     width = random.randint(min_width, max_width)
     height = random.randint(min_height, max_height)
     pad_x = max_width - width
@@ -26,6 +29,8 @@ def create_room_inside(x, y, min_width, min_height, max_width, max_height):
 
 
 class Room(Rect):
+    """Holds coordinates for a Room"""
+
     LAST_ID = 0
 
     def __init__(self, *args, **kwargs):
@@ -41,13 +46,16 @@ class Room(Rect):
 
 
 class GameCell(object):
+    """A single dungeon cell"""
+
     def __init__(self):
-        self.kind = FLOOR
+        self.kind = VOID
         self.entities = []
         self.room_id = None
 
 
 class GameMap(object):
+    """The dungeon"""
 
     def __init__(self, width, height, min_room_width=6, min_room_height=6):
         self.width = width
@@ -123,8 +131,6 @@ class GameMap(object):
         elif node1.level != node2.level:
             print "node1 and node2 are different levels!"
             return
-        else:
-            print "connect %r to %r" % (room_a, room_b)
 
         self._draw_corridor(room_a, room_b)
         self.rooms[room_a.rid].connected = True
@@ -135,11 +141,32 @@ class GameMap(object):
         dx, dy = room2.center
 
         if random.randint(0, 1) == 0:
-            self.create_horizontal_tunnel(sx, dx, sy)
-            self.create_vertical_tunnel(sy, dy, dx)
+            self._create_horizontal_tunnel(sx, dx, sy)
+            self._create_vertical_tunnel(sy, dy, dx)
         else:
-            self.create_vertical_tunnel(sy, dy, sx)
-            self.create_horizontal_tunnel(sx, dx, dy)
+            self._create_vertical_tunnel(sy, dy, sx)
+            self._create_horizontal_tunnel(sx, dx, dy)
+
+    def _create_horizontal_tunnel(self, x1, x2, y):
+        for x in xrange(min(x1, x2), max(x1, x2) + 1):
+            room_id = self.cells[x][y].room_id
+            if room_id:
+                self.rooms[room_id].connected = True
+            self.cells[x][y].kind = CORRIDOR
+
+    def _create_vertical_tunnel(self, y1, y2, x):
+        for y in xrange(min(y1, y2), max(y1, y2) + 1):
+            room_id = self.cells[x][y].room_id
+            if room_id:
+                self.rooms[room_id].connected = True
+            self.cells[x][y].kind = CORRIDOR
+
+    def _cancel_room(self, room):
+        for y in xrange(room.y, room.endY):
+            for x in xrange(room.x, room.endX):
+                self.cells[x][y].kind = VOID
+                self.cells[x][y].room_id = None
+        del self.rooms[room.rid]
 
     # NOTES:
     # if we store a rect for each room and then in connect_rooms() we create a new Rect for both rooms
@@ -168,7 +195,7 @@ class GameMap(object):
         for room in self.rooms.values():
             if not room.connected:
                 print "room not connected: %r" % room
-                self.cancel_room(room)
+                self._cancel_room(room)
 
         # Clean 'tunnel' blocks inside rooms
         for room in self.rooms.values():
@@ -198,27 +225,6 @@ class GameMap(object):
             entity = entity_manager.create_entity('fairy')
             entity.set_position(rx, ry)
             cell.entities.append(entity.eid)
-
-    def create_horizontal_tunnel(self, x1, x2, y):
-        for x in xrange(min(x1, x2), max(x1, x2) + 1):
-            room_id = self.cells[x][y].room_id
-            if room_id:
-                self.rooms[room_id].connected = True
-            self.cells[x][y].kind = CORRIDOR
-
-    def create_vertical_tunnel(self, y1, y2, x):
-        for y in xrange(min(y1, y2), max(y1, y2) + 1):
-            room_id = self.cells[x][y].room_id
-            if room_id:
-                self.rooms[room_id].connected = True
-            self.cells[x][y].kind = CORRIDOR
-
-    def cancel_room(self, room):
-        for y in xrange(room.y, room.endY):
-            for x in xrange(room.x, room.endX):
-                self.cells[x][y].kind = FLOOR
-                self.cells[x][y].room_id = None
-        del self.rooms[room.rid]
 
     def get_at(self, x, y):
         return self.cells[x][y]
