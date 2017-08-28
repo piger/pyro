@@ -42,6 +42,9 @@ class GameMap(object):
     # if we store a rect for each room and then in connect_rooms() we create a new Rect for both rooms
     # and then we use Rect.intersect() to find the matching room.
     def generate(self, level, entity_manager):
+        min_room_width = 4
+        min_room_height = 4
+
         # place outer walls
         for x in xrange(self.width):
             self.cells[x][0].kind = WALL
@@ -53,7 +56,7 @@ class GameMap(object):
 
         # rooms
         bsp = tcod.bsp.BSP(x=1, y=1, width=self.width-2, height=self.height-2)
-        bsp.split_recursive(depth=7, min_width=4, min_height=4,
+        bsp.split_recursive(depth=7, min_width=min_room_width + 1, min_height=min_room_height + 1,
                             max_horizontal_ratio=1.5,
                             max_vertical_ratio=1.5)
 
@@ -66,7 +69,7 @@ class GameMap(object):
                 return
 
             # room = Room.create(node.x, node.y, 3, 3, node.width, node.height)
-            room = create_rect_inside(node.x, node.y, 3, 3, node.width, node.height)
+            room = create_rect_inside(node.x, node.y, min_room_width, min_room_height, node.width, node.height)
             rooms.append(room)
 
             print "Create a room: %r" % room
