@@ -159,7 +159,7 @@ class Game(object):
             direction = None
 
         if direction is not None:
-            dest_vec = player_pos - direction
+            dest_vec = player_pos + direction
             can = self.attempt_move(dest_vec)
             if can:
                 self.player.set_position(dest_vec.x, dest_vec.y)
