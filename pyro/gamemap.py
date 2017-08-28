@@ -42,8 +42,8 @@ class GameMap(object):
     # if we store a rect for each room and then in connect_rooms() we create a new Rect for both rooms
     # and then we use Rect.intersect() to find the matching room.
     def generate(self, level, entity_manager):
-        min_room_width = 4
-        min_room_height = 4
+        min_room_width = 6
+        min_room_height = 6
 
         # place outer walls
         for x in xrange(self.width):
@@ -63,16 +63,8 @@ class GameMap(object):
         rooms = []
 
         def create_room(node):
-            # TODO: add a chance to NOT generate a room
-            if random.randint(0, 100) > 85:
-                print "randomly skipping room"
-                return
-
-            # room = Room.create(node.x, node.y, 3, 3, node.width, node.height)
             room = create_rect_inside(node.x, node.y, min_room_width, min_room_height, node.width, node.height)
             rooms.append(room)
-
-            print "Create a room: %r" % room
 
             # room outer walls (y)
             for y in xrange(room.y, room.endY):
@@ -113,7 +105,7 @@ class GameMap(object):
                     break
 
             for room in rooms:
-                if room.intersect(n2):
+                if room.intersect(n2) and room != room_a:
                     room_b = room
                     break
 
@@ -173,11 +165,13 @@ class GameMap(object):
 
     def create_horizontal_tunnel(self, x1, x2, y):
         for x in xrange(min(x1, x2), max(x1, x2) + 1):
-            self.cells[x][y].kind = CORRIDOR
+            if self.cells[x][y].kind != ROOM:
+                self.cells[x][y].kind = CORRIDOR
 
     def create_vertical_tunnel(self, y1, y2, x):
         for y in xrange(min(y1, y2), max(y1, y2) + 1):
-            self.cells[x][y].kind = CORRIDOR
+            if self.cells[x][y].kind != ROOM:
+                self.cells[x][y].kind = CORRIDOR
 
     def get_at(self, x, y):
         return self.cells[x][y]
