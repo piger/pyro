@@ -1,6 +1,7 @@
 import random
 import tdl
-from pyro.gamemap import WALL, ROOM, CORRIDOR, VOID, World
+import tcod.map
+from pyro.gamemap import WALL, ROOM, CORRIDOR, VOID, FLOOR, World
 from pyro.math import NORTH, SOUTH, EAST, WEST
 
 
@@ -42,6 +43,7 @@ class Game(object):
         self.world = None
         self.game_map = None
         self.camera = None
+        self.fov_map = None
 
         self.init_random()
 
@@ -62,9 +64,18 @@ class Game(object):
 
         self.camera = Camera(SCREEN_WIDTH, SCREEN_HEIGHT)
 
+        fov_map = tcod.map.Map(width=self.game_width, height=self.game_height)
+        for y in xrange(self.game_height):
+            for x in xrange(self.game_width):
+                cell = cur_map.get_at(x, y)
+                if cell.kind in (FLOOR, ROOM, CORRIDOR):
+                    fov_map.walkable[y,x] = True
+                    fov_map.transparent[y,x] = True
+        self.fov_map = fov_map
+
         self.player = self.world.entity_manager.create_entity('player')
-        # self.player.set_position(self.game_width / 2, self.game_height / 2)
         self.player.set_position(cur_map.start_vec.x, cur_map.start_vec.y)
+        self.fov_map.compute_fov(cur_map.start_vec.x, cur_map.start_vec.y, radius=6)
 
     def game_loop(self):
         assert self.world is not None
@@ -96,6 +107,11 @@ class Game(object):
                     continue
                 if yy >= self.game_height:
                     continue
+
+                # do not print if not on FOV
+                if not self.fov_map.fov[y,x]:
+                    continue
+
                 cell = game_map.get_at(x, y)
                 if cell.kind == WALL:
                     self.console.draw_char(xx, yy, '#', bg=None, fg=COLOR_WALL)
@@ -170,3 +186,4 @@ class Game(object):
             can = self.attempt_move(dest_vec)
             if can:
                 self.player.set_position(dest_vec.x, dest_vec.y)
+                self.fov_map.compute_fov(dest_vec.x, dest_vec.y, radius=6)
