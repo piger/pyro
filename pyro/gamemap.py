@@ -34,8 +34,8 @@ class Room(Rect):
 
     LAST_ID = 0
 
-    def __init__(self, *args, **kwargs):
-        super(Room, self).__init__(*args, **kwargs)
+    def __init__(self, x, y, width, height):    
+        super(Room, self).__init__(x, y, width, height)
         self.connected = False
         self.rid = Room.next_id()
 
@@ -203,7 +203,10 @@ class GameMap(object):
 
     def _select_start_and_end(self, entity_manager):
         rooms = self.rooms.values()
-        start_room = random.choice(rooms)
+        if self.start_room_id is None:
+            start_room = random.choice(rooms)
+        else:
+            start_room = self.get_room(self.start_room_id)
         rooms.remove(start_room)
         end_room = random.choice(rooms)
 
@@ -264,6 +267,59 @@ class GameMap(object):
         self._select_start_and_end(entity_manager)
         self._place_creatures_in_rooms(level, entity_manager)
 
+    def generate_tunneling(self, level, entity_manager):
+        max_room_size = 16
+        min_room_size = 5
+        max_rooms = 30
+        rooms = []
+
+        for i in xrange(max_rooms):
+            width = random.randint(min_room_size, max_room_size)
+            height = random.randint(min_room_size, max_room_size)
+            x = random.randint(0, self.width - width - 1)
+            y = random.randint(0, self.height - height - 1)
+            room = Room(x, y, width, height)
+
+            failed = False
+            for other_room in rooms:
+                if room.intersect(other_room):
+                    failed = True
+                    break
+
+            if failed:
+                continue
+
+            self.rooms[room.rid] = room
+
+            # room outer walls (y)
+            for y in xrange(room.y, room.endY):
+                self.cells[room.x][y].kind = WALL
+                self.cells[room.x][y].room_id = room.rid
+                self.cells[room.endX-1][y].kind = WALL
+                self.cells[room.endX-1][y].room_id = room.rid
+
+            # room outer walls (x)
+            for x in xrange(room.x, room.endX):
+                self.cells[x][room.y].kind = WALL
+                self.cells[x][room.y].room_id = room.rid
+                self.cells[x][room.endY-1].kind = WALL
+                self.cells[x][room.endY-1].room_id = room.rid
+
+            # room interior
+            for y in xrange(room.y+1, room.endY-1):
+                for x in xrange(room.x+1, room.endX-1):
+                    self.cells[x][y].kind = ROOM
+                    self.cells[x][y].room_id = room.rid
+
+            if len(rooms) > 0:
+                self._draw_corridor(room, rooms[-1])
+            else:
+                self.start_room_id = room.rid
+            rooms.append(room)
+
+        self._select_start_and_end(entity_manager)
+        self._place_creatures_in_rooms(level, entity_manager)
+
     def get_at(self, x, y):
         return self.cells[x][y]
 
@@ -299,7 +355,7 @@ class World(object):
 
     def create_map(self, width, height, level):
         game_map = GameMap(width, height)
-        game_map.generate(level, self.entity_manager)
+        game_map.generate_tunneling(level, self.entity_manager)
         self.maps.append(game_map)
 
     def get_current_map(self):
