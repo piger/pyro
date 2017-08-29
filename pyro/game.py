@@ -9,8 +9,9 @@ SCREEN_HEIGHT = 60
 FONT = 'consolas10x10_gs_tc.png'
 
 COLOR_FLOOR = (79, 79, 79)
-COLOR_WALL = (205, 133, 63)
-COLOR_ROOM = (255, 211, 155)
+COLOR_WALL = (110, 110, 110)
+COLOR_ROOM = (46, 46, 46)
+COLOR_CORRIDOR = (238, 229, 222)
 
 
 class Camera(object):
@@ -103,7 +104,7 @@ class Game(object):
                 elif cell.kind == ROOM:
                     self.console.draw_char(xx, yy, '*', bg=None, fg=COLOR_ROOM)
                 elif cell.kind == CORRIDOR:
-                    self.console.draw_char(xx, yy, '=', bg=None, fg=COLOR_ROOM)
+                    self.console.draw_char(xx, yy, '=', bg=None, fg=COLOR_CORRIDOR)
                 else:
                     self.console.draw_char(xx, yy, '.', bg=None, fg=COLOR_FLOOR)
 
