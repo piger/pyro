@@ -248,6 +248,7 @@ class GameMap(object):
         start_cell = self.get_at(start_x, start_y)
 
         entity = entity_manager.create_entity('stairs_up')
+        entity.always_visible = True
         entity.set_position(start_x, start_y)
         start_cell.entities.append(entity.eid)
 
@@ -256,6 +257,7 @@ class GameMap(object):
         end_cell = self.get_at(end_x, end_y)
 
         entity = entity_manager.create_entity('stairs_down')
+        entity.always_visible = True
         entity.set_position(end_x, end_y)
         end_cell.entities.append(entity.eid)
 

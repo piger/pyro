@@ -13,6 +13,7 @@ COLOR_FLOOR = (79, 79, 79)
 COLOR_WALL = (110, 110, 110)
 COLOR_ROOM = (46, 46, 46)
 COLOR_CORRIDOR = (238, 229, 222)
+COLOR_PLAYER = (250, 128, 114)
 
 
 # https://stackoverflow.com/questions/6615002/given-an-rgb-value-how-do-i-create-a-tint-or-shade
@@ -171,11 +172,15 @@ class Game(object):
                 else:
                     print "unknown cell kind %r" % cell
 
+                # do not paint entities if they are not visibles.
+                # TODO: we must still paint items! or at least stairs!
                 for eid in cell.entities:
                     entity = self.world.entity_manager.get_entity(eid)
-                    self.console.draw_char(xx, yy, entity.avatar, bg=None, fg=entity.color)
+                    if is_visible or entity.always_visible:
+                        self.console.draw_char(xx, yy, entity.avatar, bg=None, fg=entity.color)
 
-        self.console.draw_char(player_pos.x - self.camera.x, player_pos.y - self.camera.y, '@', bg=None, fg=(255, 255, 255))
+        self.console.draw_char(player_pos.x - self.camera.x, player_pos.y - self.camera.y, '@',
+                               bg=None, fg=COLOR_PLAYER)
         self.root.blit(self.console, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0)
 
     def attempt_move(self, dest_vec):

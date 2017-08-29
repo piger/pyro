@@ -38,6 +38,7 @@ class Entity(object):
         self.avatar = avatar
         self.color = color
         self.position = Vector2(0, 0)
+        self.always_visible = False
 
     def set_position(self, x, y):
         self.position.x = x
