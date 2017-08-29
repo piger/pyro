@@ -156,25 +156,21 @@ class GameMap(object):
 
     def _create_horizontal_tunnel(self, x1, x2, y):
         for x in xrange(min(x1, x2), max(x1, x2) + 1):
-            room_id = self.cells[x][y].room_id
-            if room_id:
-                self.rooms[room_id].connected = True
-            self.cells[x][y].kind = CORRIDOR
-            # fill cells around this corridor cell if they are void
-            for c in self.get_around_at(x, y):
-                if c.kind == VOID:
-                    c.kind = WALL
+            self._create_tunnel(x, y)
 
     def _create_vertical_tunnel(self, y1, y2, x):
         for y in xrange(min(y1, y2), max(y1, y2) + 1):
-            room_id = self.cells[x][y].room_id
-            if room_id:
-                self.rooms[room_id].connected = True
-            self.cells[x][y].kind = CORRIDOR
-            # fill cells around this corridor cell if they are void
-            for c in self.get_around_at(x, y):
-                if c.kind == VOID:
-                    c.kind = WALL
+            self._create_tunnel(x, y)
+
+    def _create_tunnel(self, x, y):
+        room_id = self.cells[x][y].room_id
+        if room_id:
+            self.rooms[room_id].connected = True
+        self.cells[x][y].kind = CORRIDOR
+        # fill cells around this corridor cell if they are void
+        for c in self.get_around_at(x, y):
+            if c.kind == VOID:
+                c.kind = WALL
 
     def _cancel_room(self, room):
         for y in xrange(room.y, room.endY):
