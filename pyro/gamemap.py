@@ -132,9 +132,6 @@ class GameMap(object):
         elif room_a and room_b is None:
             print "room_a is OK, room_b is None"
             return
-        elif room_a == room_b:
-            print "room_a and room_b are the SAME"
-            return
         elif node1.level != node2.level:
             print "node1 and node2 are different levels!"
             return
@@ -168,7 +165,7 @@ class GameMap(object):
             self.rooms[room_id].connected = True
         self.cells[x][y].kind = CORRIDOR
         # fill cells around this corridor cell if they are void
-        for c in self.get_around_at(x, y):
+        for c in self.get_cells_around(x, y):
             if c.kind == VOID:
                 c.kind = WALL
 
@@ -268,10 +265,12 @@ class GameMap(object):
     def get_at(self, x, y):
         return self.cells[x][y]
 
-    def get_around_at(self, x, y):
+    def get_cells_around(self, x, y):
+        """Get cells around x, y, EXCEPT x,y!"""
+
         cells = []
         for dx, dy in ((-1, -1), (0, -1), (1, -1),
-                       (-1, 0), (0, 0), (1, 0),
+                       (-1, 0), (1, 0),
                        (-1, 1), (0, 1), (1, 1)):
             cells.append(self.get_at(x + dx, y + dy))
         return cells

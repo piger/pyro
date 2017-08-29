@@ -21,7 +21,6 @@ EAST = Vector2(1, 0)
 WEST = Vector2(-1, 0)
 
 
-
 class Rect(object):
     def __init__(self, x, y, width, height):
         self.x = x
