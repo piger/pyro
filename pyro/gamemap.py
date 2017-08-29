@@ -178,45 +178,6 @@ class GameMap(object):
                 self.cells[x][y].room_id = None
         del self.rooms[room.rid]
 
-    # NOTES:
-    # if we store a rect for each room and then in connect_rooms() we create a new Rect for both rooms
-    # and then we use Rect.intersect() to find the matching room.
-    def generate(self, level, entity_manager):
-        min_room_width = 6
-        min_room_height = 6
-
-        # place outer walls
-        for x in xrange(self.width):
-            self.cells[x][0].kind = WALL
-            self.cells[x][self.height-1].kind = WALL
-
-        for y in xrange(self.height):
-            self.cells[0][y].kind = WALL
-            self.cells[self.width-1][y].kind = WALL
-
-        # rooms
-        bsp = tcod.bsp.BSP(x=1, y=1, width=self.width-2, height=self.height-2)
-        bsp.split_recursive(depth=7, min_width=min_room_width + 1, min_height=min_room_height + 1,
-                            max_horizontal_ratio=1.5, max_vertical_ratio=1.5, seed=tcod_random.rng)
-
-        self._traverse(bsp)
-
-        # we're lazy and we just delete unconnected rooms
-        unconnected_rooms = [room for room in self.rooms.values() if not room.connected]
-        print "%d unconnected rooms" % len(unconnected_rooms)
-        for room in unconnected_rooms:
-            self._cancel_room(room)
-
-        # Convert 'tunnel' blocks inside rooms into room blocks
-        for room in self.rooms.values():
-            for y in xrange(room.y+1, room.endY-1):
-                for x in xrange(room.x+1, room.endX-1):
-                    self.cells[x][y].kind = ROOM
-
-        # select starting and ending rooms
-        self._select_start_and_end(entity_manager)
-        self._place_creatures_in_rooms(level, entity_manager)
-
     def _place_creatures_in_rooms(self, level, entity_manager):
         rooms = [room for room in self.rooms.values() if room.rid != self.start_room_id]
         creatures = [('boar', level * 20), ('fairy', 3)]
@@ -261,6 +222,42 @@ class GameMap(object):
         entity.always_visible = True
         entity.set_position(end_x, end_y)
         end_cell.entities.append(entity.eid)
+
+    # NOTES:
+    # if we store a rect for each room and then in connect_rooms() we create a new Rect for both rooms
+    # and then we use Rect.intersect() to find the matching room.
+    def generate(self, level, entity_manager):
+        # place outer walls
+        for x in xrange(self.width):
+            self.cells[x][0].kind = WALL
+            self.cells[x][self.height-1].kind = WALL
+
+        for y in xrange(self.height):
+            self.cells[0][y].kind = WALL
+            self.cells[self.width-1][y].kind = WALL
+
+        # rooms
+        bsp = tcod.bsp.BSP(x=1, y=1, width=self.width-2, height=self.height-2)
+        bsp.split_recursive(depth=7, min_width=self.min_room_width + 1, min_height=self.min_room_height + 1,
+                            max_horizontal_ratio=1.5, max_vertical_ratio=1.5, seed=tcod_random.rng)
+
+        self._traverse(bsp)
+
+        # we're lazy and we just delete unconnected rooms
+        unconnected_rooms = [room for room in self.rooms.values() if not room.connected]
+        print "%d unconnected rooms" % len(unconnected_rooms)
+        for room in unconnected_rooms:
+            self._cancel_room(room)
+
+        # Convert 'tunnel' blocks inside rooms into room blocks
+        for room in self.rooms.values():
+            for y in xrange(room.y+1, room.endY-1):
+                for x in xrange(room.x+1, room.endX-1):
+                    self.cells[x][y].kind = ROOM
+
+        # select starting and ending rooms
+        self._select_start_and_end(entity_manager)
+        self._place_creatures_in_rooms(level, entity_manager)
 
     def get_at(self, x, y):
         return self.cells[x][y]
