@@ -1,29 +1,23 @@
+import click
 import time
-from optparse import OptionParser
 from pyro.game import Game
 import better_exceptions
 
 
-def main():
-    parser = OptionParser()
-    parser.add_option('--seed', '-s')
-    parser.add_option('--width', '-W', type=int, default=80)
-    parser.add_option('--height', '-H', type=int, default=60)
-    parser.add_option('--debug')
-    (opts, _) = parser.parse_args()
-    if opts.seed is None:
+@click.command()
+@click.option('--seed', '-s', type=click.INT, help="Specify random seed")
+@click.option('--size', '-S', default='80x60', help="Specify map size (i.e. 80x100)")
+@click.option('--debug', '-D', is_flag=True)
+@click.option('--font', '-f', default='consolas10x10_gs_tc.png', help="Specify the font")
+def main(seed, size, debug, font):
+    if seed is None:
         seed = int(time.time())
-    else:
-        seed = int(opts.seed)
 
-    game = Game(seed, opts.width, opts.height)
+    width, height = [int(x) for x in size.split("x")]
+    game = Game(seed, width, height, font)
     game.init_game()
 
-    if opts.debug:
+    if debug:
         game.DEBUG = True
 
     game.game_loop()
-
-
-if __name__ == '__main__':
-    main()

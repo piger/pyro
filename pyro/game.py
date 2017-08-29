@@ -7,12 +7,19 @@ from pyro.math import NORTH, SOUTH, EAST, WEST
 
 SCREEN_WIDTH = 80
 SCREEN_HEIGHT = 60
-FONT = 'consolas10x10_gs_tc.png'
 
 COLOR_FLOOR = (79, 79, 79)
 COLOR_WALL = (110, 110, 110)
 COLOR_ROOM = (46, 46, 46)
 COLOR_CORRIDOR = (238, 229, 222)
+
+
+# https://stackoverflow.com/questions/6615002/given-an-rgb-value-how-do-i-create-a-tint-or-shade
+def darken_color(color, amount=0.50):
+    red = int(color[0] * amount)
+    green = int(color[1] * amount)
+    blue = int(color[2] * amount)
+    return (red, green, blue)
 
 
 class Camera(object):
@@ -31,11 +38,12 @@ class Camera(object):
 
 
 class Game(object):
-    def __init__(self, seed, game_width=SCREEN_WIDTH, game_height=SCREEN_HEIGHT):
+    def __init__(self, seed, game_width, game_height, font):
         self.seed = seed
         self.game_width = game_width
         self.game_height = game_height
         self.DEBUG = False
+        self.font = font
 
         self.root = None
         self.console = None
@@ -54,7 +62,7 @@ class Game(object):
 
     def init_game(self):
         # https://github.com/HexDecimal/python-tdl/tree/master/fonts/libtcod
-        tdl.set_font(FONT, greyscale=True, altLayout=True)
+        tdl.set_font(self.font, greyscale=True, altLayout=True)
         self.root = tdl.init(SCREEN_WIDTH, SCREEN_HEIGHT, title="PyRo", fullscreen=False)
         self.console = tdl.Console(SCREEN_WIDTH, SCREEN_HEIGHT)
         # tdl.setFPS(20)
@@ -126,25 +134,38 @@ class Game(object):
                 # do not print if not on FOV
                 is_visible = self.fov_map.fov[y,x]
                 is_visited = self.visited[x][y]
+                has_fog_of_war = False
 
                 if not is_visible and not is_visited:
                     continue
                 elif not is_visible and is_visited:
                     # gray out visited but not currently visible cells
-                    bg_color = (20, 20, 20)
+                    has_fog_of_war = True
                 elif is_visible and not is_visited:
                     # mark visible cells as visited
                     self.visited[x][y] = True
 
                 cell = game_map.get_at(x, y)
                 if cell.kind == WALL:
-                    self.console.draw_char(xx, yy, '#', bg=bg_color, fg=COLOR_WALL)
+                    if has_fog_of_war:
+                        color = darken_color(COLOR_WALL)
+                    else:
+                        color = COLOR_WALL
+                    self.console.draw_char(xx, yy, '#', bg=bg_color, fg=color)
                 elif cell.kind == VOID:
                     self.console.draw_char(xx, yy, ' ', bg=None, fg=(0, 0, 0))
                 elif cell.kind == ROOM or cell.kind == FLOOR:
-                    self.console.draw_char(xx, yy, '.', bg=bg_color, fg=COLOR_FLOOR)
+                    if has_fog_of_war:
+                        color = darken_color(COLOR_FLOOR)
+                    else:
+                        color = COLOR_FLOOR
+                    self.console.draw_char(xx, yy, '.', bg=bg_color, fg=color)
                 elif cell.kind == CORRIDOR:
-                    self.console.draw_char(xx, yy, '=', bg=bg_color, fg=COLOR_CORRIDOR)
+                    if has_fog_of_war:
+                        color = darken_color(COLOR_CORRIDOR)
+                    else:
+                        color = COLOR_CORRIDOR
+                    self.console.draw_char(xx, yy, '=', bg=bg_color, fg=color)
                 else:
                     print "unknown cell kind %r" % cell
 
