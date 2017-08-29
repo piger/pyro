@@ -20,6 +20,14 @@
       "color": [
         60, 179,113
       ]
+    },
+    {
+      "name": "stairs_up",
+      "avatar": "<"
+    },
+    {
+      "name": "stairs_down",
+      "avatar": ">"
     }
   ]
 }

@@ -57,11 +57,13 @@ class Game(object):
 
         self.world = World()
         self.world.create_map(self.game_width, self.game_height, 1)
+        cur_map = self.world.get_current_map()
 
         self.camera = Camera(SCREEN_WIDTH, SCREEN_HEIGHT)
 
         self.player = self.world.entity_manager.create_entity('player')
-        self.player.set_position(self.game_width / 2, self.game_height / 2)
+        # self.player.set_position(self.game_width / 2, self.game_height / 2)
+        self.player.set_position(cur_map.start_vec.x, cur_map.start_vec.y)
 
     def game_loop(self):
         assert self.world is not None

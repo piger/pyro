@@ -1,7 +1,7 @@
 import random
 import tcod.bsp
 from pyro.entities import EntityManager
-from pyro.math import Rect
+from pyro.math import Rect, Vector2
 
 
 VOID = 0
@@ -62,8 +62,11 @@ class GameMap(object):
         self.height = height
         self.min_room_width = min_room_width
         self.min_room_height = min_room_height
+
         self.cells = [[GameCell() for y in xrange(self.height)] for x in xrange(self.width)]
         self.rooms = {}
+        self.start_vec = None
+        self.end_vec = None
 
     def _create_room(self, node):
         room = create_room_inside(node.x, node.y, self.min_room_width, self.min_room_height,
@@ -192,17 +195,22 @@ class GameMap(object):
 
         self._traverse(bsp)
 
+        # we're lazy and we just delete unconnected rooms
         for room in self.rooms.values():
             if not room.connected:
                 print "room not connected: %r" % room
                 self._cancel_room(room)
 
-        # Clean 'tunnel' blocks inside rooms
+        # Convert 'tunnel' blocks inside rooms into room blocks
         for room in self.rooms.values():
             for y in xrange(room.y+1, room.endY-1):
                 for x in xrange(room.x+1, room.endX-1):
                     self.cells[x][y].kind = ROOM
 
+        # select starting and ending rooms
+        self._select_start_and_end(entity_manager)
+
+        # place stuff
         num_boars = level * 3
         for _ in xrange(num_boars):
             rx = random.randint(1, self.width-2)
@@ -225,6 +233,28 @@ class GameMap(object):
             entity = entity_manager.create_entity('fairy')
             entity.set_position(rx, ry)
             cell.entities.append(entity.eid)
+
+    def _select_start_and_end(self, entity_manager):
+        rooms = self.rooms.values()
+        start_room = random.choice(rooms)
+        rooms.remove(start_room)
+        end_room = random.choice(rooms)
+
+        start_x, start_y = start_room.center
+        self.start_vec = Vector2(start_x, start_y)
+        start_cell = self.get_at(start_x, start_y)
+
+        entity = entity_manager.create_entity('stairs_up')
+        entity.set_position(start_x, start_y)
+        start_cell.entities.append(entity.eid)
+
+        end_x, end_y = end_room.center
+        self.end_vec = Vector2(end_x, end_y)
+        end_cell = self.get_at(end_x, end_y)
+
+        entity = entity_manager.create_entity('stairs_down')
+        entity.set_position(end_x, end_y)
+        end_cell.entities.append(entity.eid)
 
     def get_at(self, x, y):
         return self.cells[x][y]
