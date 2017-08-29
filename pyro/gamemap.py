@@ -183,15 +183,20 @@ class GameMap(object):
         creatures = [('boar', level * 20), ('fairy', 3)]
         for creature_name, amount in creatures:
             for _ in xrange(amount):
-                room = random.choice(rooms)
-                x = random.randint(room.x + 1, room.endX - 2)
-                y = random.randint(room.y + 1, room.endY - 2)
-                cell = self.get_at(x, y)
-                if len(cell.entities):
-                    continue
-                entity = entity_manager.create_entity(creature_name)
-                entity.set_position(x, y)
-                cell.entities.append(entity.eid)
+                for j in xrange(5):
+                    # retries 5 times
+                    room = random.choice(rooms)
+                    if len(self.get_entities_in_room(room.rid)) > 4:
+                        continue
+                    x = random.randint(room.x + 1, room.endX - 2)
+                    y = random.randint(room.y + 1, room.endY - 2)
+                    cell = self.get_at(x, y)
+                    if len(cell.entities):
+                        continue
+                    entity = entity_manager.create_entity(creature_name)
+                    entity.set_position(x, y)
+                    cell.entities.append(entity.eid)
+                    break
 
     def _place_items_in_rooms(self):
         pass
@@ -274,6 +279,15 @@ class GameMap(object):
 
     def get_room(self, room_id):
         return self.rooms[room_id]
+
+    def get_entities_in_room(self, room_id):
+        room = self.get_room(room_id)
+        result = []
+        for x in xrange(room.x, room.endX):
+            for y in xrange(room.y, room.endY):
+                cell = self.get_at(x, y)
+                result.extend(cell.entities)
+        return result
 
 
 class World(object):
