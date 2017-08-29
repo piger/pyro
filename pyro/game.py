@@ -258,5 +258,6 @@ class Game(object):
             can = self.attempt_move(dest_vec)
             if can:
                 self.player.set_position(dest_vec.x, dest_vec.y)
-                self.fov_map.compute_fov(dest_vec.x, dest_vec.y, radius=self.fov_radius)
+                self.fov_map.compute_fov(dest_vec.x, dest_vec.y, radius=self.fov_radius,
+                                         algorithm=tcod.FOV_DIAMOND)
                 self.visited[dest_vec.x][dest_vec.y] = True
