@@ -117,7 +117,7 @@ class Game(object):
     def attempt_move(self, dest_vec):
         game_map = self.world.get_current_map()
         dcell = game_map.get_at(dest_vec.x, dest_vec.y)
-        if not dcell.entities:
+        if not dcell.entities and dcell.kind not in (VOID, WALL):
             return True
 
         em = self.world.entity_manager
