@@ -172,7 +172,12 @@ class Game(object):
                     color = darken_color(symbol['color'])
                 else:
                     color = symbol['color']
-                self.console.draw_char(xx, yy, symbol['symbol'], bg=bg_color, fg=color)
+
+                if self.DEBUG and cell.value is not None:
+                    char = str(cell.value)
+                else:
+                    char = symbol['symbol']
+                self.console.draw_char(xx, yy, char, bg=bg_color, fg=color)
 
                 # do not paint entities if they are not visibles.
                 # TODO: we must still paint items! or at least stairs!

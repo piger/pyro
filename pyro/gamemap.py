@@ -53,6 +53,7 @@ class GameCell(object):
         self.kind = VOID
         self.entities = []
         self.room_id = None
+        self.value = None
 
     def __repr__(self):
         return "GameCell(kind=%r, entities=%r, room_id=%r)" % (self.kind, self.entities, self.room_id)
@@ -73,6 +74,7 @@ class GameMap(object):
         self.end_vec = None
         self.start_room_id = None
         self.end_room_id = None
+        self.tunnel_id = 0
 
     def _create_room(self, node):
         room = create_room_inside(node.x, node.y, self.min_room_width, self.min_room_height,
@@ -146,26 +148,30 @@ class GameMap(object):
         sx, sy = room1.center
         dx, dy = room2.center
 
+        v = self.tunnel_id
+        self.tunnel_id += 1
         if random.randint(0, 1) == 0:
-            self._create_horizontal_tunnel(sx, dx, sy)
-            self._create_vertical_tunnel(sy, dy, dx)
+            self._create_horizontal_tunnel(sx, dx, sy, v)
+            self._create_vertical_tunnel(sy, dy, dx, v)
         else:
-            self._create_vertical_tunnel(sy, dy, sx)
-            self._create_horizontal_tunnel(sx, dx, dy)
+            self._create_vertical_tunnel(sy, dy, sx, v)
+            self._create_horizontal_tunnel(sx, dx, dy, v)
 
-    def _create_horizontal_tunnel(self, x1, x2, y):
+    def _create_horizontal_tunnel(self, x1, x2, y, v=None):
         for x in xrange(min(x1, x2), max(x1, x2) + 1):
-            self._create_tunnel(x, y)
+            self._create_tunnel(x, y, v)
 
-    def _create_vertical_tunnel(self, y1, y2, x):
+    def _create_vertical_tunnel(self, y1, y2, x, v=None):
         for y in xrange(min(y1, y2), max(y1, y2) + 1):
-            self._create_tunnel(x, y)
+            self._create_tunnel(x, y, v)
 
-    def _create_tunnel(self, x, y):
+    def _create_tunnel(self, x, y, value=None):
         room_id = self.cells[x][y].room_id
         if room_id:
             self.rooms[room_id].connected = True
         self.cells[x][y].kind = CORRIDOR
+        if value is not None:
+            self.cells[x][y].value = value
         # fill cells around this corridor cell if they are void
         for c in self.get_cells_around(x, y):
             if c.kind == VOID:
