@@ -28,7 +28,14 @@ def clamp(num, min_value, max_value):
 
 # https://stackoverflow.com/questions/6615002/given-an-rgb-value-how-do-i-create-a-tint-or-shade
 def darken_color(color, amount=0.50):
-    red = int(color[0] * amount)
-    green = int(color[1] * amount)
-    blue = int(color[2] * amount)
-    return tuple([clamp(x, 0, 255) for x in (red, green, blue)])
+    red = color[0] * amount
+    green = color[1] * amount
+    blue = color[2] * amount
+    return tuple([clamp(int(x), 0, 255) for x in (red, green, blue)])
+
+
+def lighten_color(color, amount=0.50):
+    red = color[0] + (amount * (255 - color[0]))
+    green = color[1] + (amount * (255 - color[1]))
+    blue = color[2] + (amount * (255 - color[2]))
+    return tuple([clamp(int(x), 0, 255) for x in (red, green, blue)])
