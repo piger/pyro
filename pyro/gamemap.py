@@ -2,6 +2,7 @@ import random
 import tcod.bsp
 from pyro.entities import EntityManager
 from pyro.math import Rect, Vector2
+from pyro.utils import tcod_random
 
 
 VOID = 0
@@ -193,8 +194,7 @@ class GameMap(object):
         # rooms
         bsp = tcod.bsp.BSP(x=1, y=1, width=self.width-2, height=self.height-2)
         bsp.split_recursive(depth=7, min_width=min_room_width + 1, min_height=min_room_height + 1,
-                            max_horizontal_ratio=1.5,
-                            max_vertical_ratio=1.5)
+                            max_horizontal_ratio=1.5, max_vertical_ratio=1.5, seed=tcod_random.rng)
 
         self._traverse(bsp)
 

@@ -3,6 +3,7 @@ import tdl
 import tcod.map
 from pyro.gamemap import WALL, ROOM, CORRIDOR, VOID, FLOOR, World
 from pyro.math import NORTH, SOUTH, EAST, WEST
+from pyro.utils import tcod_random
 
 
 SCREEN_WIDTH = 80
@@ -59,6 +60,7 @@ class Game(object):
     def init_random(self):
         print "SEED = %r" % self.seed
         random.seed(self.seed)
+        tcod_random.init(self.seed)
 
     def init_game(self):
         # https://github.com/HexDecimal/python-tdl/tree/master/fonts/libtcod
