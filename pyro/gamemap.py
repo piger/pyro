@@ -71,6 +71,8 @@ class GameMap(object):
         self.rooms = {}
         self.start_vec = None
         self.end_vec = None
+        self.start_room_id = None
+        self.end_room_id = None
 
     def _create_room(self, node):
         room = create_room_inside(node.x, node.y, self.min_room_width, self.min_room_height,
@@ -213,36 +215,34 @@ class GameMap(object):
 
         # select starting and ending rooms
         self._select_start_and_end(entity_manager)
+        self._place_creatures_in_rooms(level, entity_manager)
 
-        # place stuff
-        num_boars = level * 3
-        for _ in xrange(num_boars):
-            rx = random.randint(1, self.width-2)
-            ry = random.randint(1, self.height-2)
-            cell = self.get_at(rx, ry)
-            if len(cell.entities):
-                print "Cell already occupied"
-                continue
-            entity = entity_manager.create_entity('boar')
-            entity.set_position(rx, ry)
-            cell.entities.append(entity.eid)
+    def _place_creatures_in_rooms(self, level, entity_manager):
+        rooms = [room for room in self.rooms.values() if room.rid != self.start_room_id]
+        creatures = [('boar', level * 20), ('fairy', 3)]
+        for creature_name, amount in creatures:
+            for _ in xrange(amount):
+                room = random.choice(rooms)
+                x = random.randint(room.x + 1, room.endX - 2)
+                y = random.randint(room.y + 1, room.endY - 2)
+                cell = self.get_at(x, y)
+                if len(cell.entities):
+                    continue
+                entity = entity_manager.create_entity(creature_name)
+                entity.set_position(x, y)
+                cell.entities.append(entity.eid)
 
-        for _ in xrange(3):
-            rx = random.randint(1, self.width-2)
-            ry = random.randint(1, self.height-2)
-            cell = self.get_at(rx, ry)
-            if len(cell.entities):
-                print "Cell already occupied for fairy"
-                continue
-            entity = entity_manager.create_entity('fairy')
-            entity.set_position(rx, ry)
-            cell.entities.append(entity.eid)
+    def _place_items_in_rooms(self):
+        pass
 
     def _select_start_and_end(self, entity_manager):
         rooms = self.rooms.values()
         start_room = random.choice(rooms)
         rooms.remove(start_room)
         end_room = random.choice(rooms)
+
+        self.start_room_id = start_room.rid
+        self.end_room_id = end_room.rid
 
         start_x, start_y = start_room.center
         self.start_vec = Vector2(start_x, start_y)

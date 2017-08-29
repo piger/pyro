@@ -150,7 +150,8 @@ class Game(object):
                 has_fog_of_war = not is_visible and is_visited
 
                 if not is_visible and not is_visited:
-                    continue
+                    if not self.DEBUG:
+                        continue
                 elif is_visible and not is_visited:
                     # mark visible cells as visited
                     self.visited[x][y] = True
@@ -177,7 +178,7 @@ class Game(object):
                 # TODO: we must still paint items! or at least stairs!
                 for eid in cell.entities:
                     entity = self.world.entity_manager.get_entity(eid)
-                    if is_visible or entity.always_visible:
+                    if is_visible or entity.always_visible or self.DEBUG:
                         self.console.draw_char(xx, yy, entity.avatar, bg=None, fg=entity.color)
 
         self.console.draw_char(player_pos.x - self.camera.x, player_pos.y - self.camera.y,
