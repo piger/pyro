@@ -76,22 +76,19 @@ class GameMap(object):
         self.end_room_id = None
         self.tunnel_id = '0' # note: it's a str!
 
-    def _create_room(self, node):
-        room = create_room_inside(node.x, node.y, self.min_room_width, self.min_room_height,
-                                  node.width, node.height)
-        self.rooms[room.rid] = room
-        self._dig_room(room)
-
     def _traverse(self, node):
         for child in node.children:
             self._traverse(child)
 
         if node.children:
-            self._connect_rooms(node)
+            self._connect_nodes(node)
         else:
-            self._create_room(node)
+            room = create_room_inside(node.x, node.y, self.min_room_width, self.min_room_height,
+                                      node.width, node.height)
+            self.rooms[room.rid] = room
+            self._dig_room(room)
 
-    def _connect_rooms(self, node):
+    def _connect_nodes(self, node):
         room_a, room_b = None, None
 
         node1, node2 = node.children
@@ -222,9 +219,9 @@ class GameMap(object):
         end_cell.entities.append(entity.eid)
 
     # NOTES:
-    # if we store a rect for each room and then in connect_rooms() we create a new Rect for both rooms
+    # if we store a rect for each room and then in connect_nodes() we create a new Rect for both rooms
     # and then we use Rect.intersect() to find the matching room.
-    def generate(self, level, entity_manager):
+    def generate_bsp(self, level, entity_manager):
         # place outer walls
         for x in xrange(self.width):
             self.cells[x][0].kind = WALL
@@ -356,7 +353,7 @@ class World(object):
         game_map = GameMap(width, height)
 
         if dungeon_algorithm is None or dungeon_algorithm == 'bsp':
-            game_map.generate(level, self.entity_manager)
+            game_map.generate_bsp(level, self.entity_manager)
         elif dungeon_algorithm == 'tunneling':
             game_map.generate_tunneling(level, self.entity_manager)
         else:
