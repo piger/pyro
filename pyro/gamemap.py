@@ -53,6 +53,9 @@ class GameCell(object):
         self.entities = []
         self.room_id = None
 
+    def __repr__(self):
+        return "GameCell(kind=%r, entities=%r, room_id=%r)" % (self.kind, self.entities, self.room_id)
+
 
 class GameMap(object):
     """The dungeon"""
@@ -258,6 +261,9 @@ class GameMap(object):
 
     def get_at(self, x, y):
         return self.cells[x][y]
+
+    def get_room(self, room_id):
+        return self.rooms[room_id]
 
 
 class World(object):

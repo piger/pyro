@@ -44,6 +44,7 @@ class Game(object):
         self.game_map = None
         self.camera = None
         self.fov_map = None
+        self.visited = None
 
         self.init_random()
 
@@ -77,6 +78,18 @@ class Game(object):
         self.player.set_position(cur_map.start_vec.x, cur_map.start_vec.y)
         self.fov_map.compute_fov(cur_map.start_vec.x, cur_map.start_vec.y, radius=6)
 
+        self.init_visited()
+
+    def init_visited(self):
+        cur_map = self.world.get_current_map()
+        self.visited = [[False for y in xrange(self.game_height)] for x in xrange(self.game_width)]
+        start_cell = cur_map.get_at(cur_map.start_vec.x, cur_map.start_vec.y)
+        start_room = cur_map.get_room(start_cell.room_id)
+
+        for y in xrange(start_room.y, start_room.y + start_room.height):
+            for x in xrange(start_room.x, start_room.x + start_room.width):
+                self.visited[x][y] = True
+
     def game_loop(self):
         assert self.world is not None
 
@@ -108,21 +121,32 @@ class Game(object):
                 if yy >= self.game_height:
                     continue
 
+                bg_color = None
+
                 # do not print if not on FOV
-                if not self.fov_map.fov[y,x]:
+                is_visible = self.fov_map.fov[y,x]
+                is_visited = self.visited[x][y]
+
+                if not is_visible and not is_visited:
                     continue
+                elif not is_visible and is_visited:
+                    # gray out visited but not currently visible cells
+                    bg_color = (20, 20, 20)
+                elif is_visible and not is_visited:
+                    # mark visible cells as visited
+                    self.visited[x][y] = True
 
                 cell = game_map.get_at(x, y)
                 if cell.kind == WALL:
-                    self.console.draw_char(xx, yy, '#', bg=None, fg=COLOR_WALL)
+                    self.console.draw_char(xx, yy, '#', bg=bg_color, fg=COLOR_WALL)
                 elif cell.kind == VOID:
                     self.console.draw_char(xx, yy, ' ', bg=None, fg=(0, 0, 0))
-                elif cell.kind == ROOM:
-                    self.console.draw_char(xx, yy, '*', bg=None, fg=COLOR_ROOM)
+                elif cell.kind == ROOM or cell.kind == FLOOR:
+                    self.console.draw_char(xx, yy, '.', bg=bg_color, fg=COLOR_FLOOR)
                 elif cell.kind == CORRIDOR:
-                    self.console.draw_char(xx, yy, '=', bg=None, fg=COLOR_CORRIDOR)
+                    self.console.draw_char(xx, yy, '=', bg=bg_color, fg=COLOR_CORRIDOR)
                 else:
-                    self.console.draw_char(xx, yy, '.', bg=None, fg=COLOR_FLOOR)
+                    print "unknown cell kind %r" % cell
 
                 for eid in cell.entities:
                     entity = self.world.entity_manager.get_entity(eid)
@@ -149,7 +173,7 @@ class Game(object):
 
         player_cc = em.combat_components.get(self.player.eid)
         player_hc = em.health_components.get(self.player.eid)
-            
+
         for entity, cc in can_fight:
             print "fight between player and %r (%d/%d)" % (entity.name, cc.damage, cc.armor)
             enemy_hc = em.health_components.get(entity.eid)
@@ -187,3 +211,5 @@ class Game(object):
             if can:
                 self.player.set_position(dest_vec.x, dest_vec.y)
                 self.fov_map.compute_fov(dest_vec.x, dest_vec.y, radius=6)
+                # self.set_visited_room(dest_vec.x, dest_vec.y)
+                self.visited[dest_vec.x][dest_vec.y] = True
