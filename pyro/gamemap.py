@@ -297,18 +297,22 @@ class GameMap(object):
 
             self.rooms[room.rid] = room
 
-            # room outer walls (y)
+            # room outer walls (y) - do not overwrite existing tunnel tho!
             for y in xrange(room.y, room.endY):
-                self.cells[room.x][y].kind = WALL
+                if self.cells[room.x][y].kind == VOID:
+                    self.cells[room.x][y].kind = WALL
                 self.cells[room.x][y].room_id = room.rid
-                self.cells[room.endX-1][y].kind = WALL
+                if self.cells[room.endX-1][y].kind == VOID:
+                    self.cells[room.endX-1][y].kind = WALL
                 self.cells[room.endX-1][y].room_id = room.rid
 
             # room outer walls (x)
             for x in xrange(room.x, room.endX):
-                self.cells[x][room.y].kind = WALL
+                if self.cells[x][room.y].kind == VOID:
+                    self.cells[x][room.y].kind = WALL
                 self.cells[x][room.y].room_id = room.rid
-                self.cells[x][room.endY-1].kind = WALL
+                if self.cells[x][room.endY-1].kind == VOID:
+                    self.cells[x][room.endY-1].kind = WALL
                 self.cells[x][room.endY-1].room_id = room.rid
 
             # room interior
