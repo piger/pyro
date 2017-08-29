@@ -9,12 +9,14 @@ import better_exceptions
 @click.option('--size', '-S', default='80x60', help="Specify map size (i.e. 80x100)")
 @click.option('--debug', '-D', is_flag=True)
 @click.option('--font', '-f', default='consolas10x10_gs_tc.png', help="Specify the font")
-def main(seed, size, debug, font):
+@click.option('--algo', '-a', type=click.Choice(['bsp', 'tunneling']), default='bsp')
+def main(seed, size, debug, font, algo):
     if seed is None:
         seed = int(time.time())
 
     width, height = [int(x) for x in size.split("x")]
     game = Game(seed, width, height, font)
+    game.dungeon_algorithm = algo
     game.init_game()
 
     if debug:

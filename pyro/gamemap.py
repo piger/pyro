@@ -352,10 +352,16 @@ class World(object):
         self.entity_manager = EntityManager()
         self.entity_manager.load()
 
-    def create_map(self, width, height, level):
+    def create_map(self, width, height, level=1, dungeon_algorithm=None):
         game_map = GameMap(width, height)
-        game_map.generate(level, self.entity_manager)
-        # game_map.generate_tunneling(level, self.entity_manager)
+
+        if dungeon_algorithm is None or dungeon_algorithm == 'bsp':
+            game_map.generate(level, self.entity_manager)
+        elif dungeon_algorithm == 'tunneling':
+            game_map.generate_tunneling(level, self.entity_manager)
+        else:
+            raise Exception("Dungeon algorithm %s do not exists" % dungeon_algorithm)
+
         self.maps.append(game_map)
 
     def get_current_map(self):

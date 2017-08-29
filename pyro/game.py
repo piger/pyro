@@ -70,6 +70,9 @@ class Game(object):
         self.fov_map = None
         self.visited = None
 
+        # devel options
+        self.dungeon_algorithm = None
+
         self.init_random()
 
     def init_random(self):
@@ -84,7 +87,8 @@ class Game(object):
         self.console = tdl.Console(SCREEN_WIDTH, SCREEN_HEIGHT)
 
         self.world = World()
-        self.world.create_map(self.game_width, self.game_height, 1)
+        self.world.create_map(self.game_width, self.game_height, level=1,
+                              dungeon_algorithm=self.dungeon_algorithm)
         cur_map = self.world.get_current_map()
 
         self.camera = Camera(SCREEN_WIDTH, SCREEN_HEIGHT)
