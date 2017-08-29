@@ -159,8 +159,11 @@ class GameMap(object):
                 c.kind = WALL
 
     def _cancel_room(self, room):
-        for y in xrange(room.y, room.endY):
-            for x in xrange(room.x, room.endX):
+        """To avoid deleting pieces of other rooms or corridors don't delete
+        the outer walls of this room."""
+
+        for y in xrange(room.y + 1, room.endY - 1):
+            for x in xrange(room.x + 1, room.endX - 1):
                 self.cells[x][y].kind = VOID
                 self.cells[x][y].room_id = None
         del self.rooms[room.rid]
@@ -310,6 +313,9 @@ class GameMap(object):
         # room interior
         for y in xrange(room.y+1, room.endY-1):
             for x in xrange(room.x+1, room.endX-1):
+                # detect when a room is digged over an existing corridor.
+                if self.cells[x][y].kind == CORRIDOR:
+                    room.connected = True
                 self.cells[x][y].kind = ROOM
                 self.cells[x][y].room_id = room.rid
 
