@@ -69,6 +69,7 @@ class Game(object):
         self.camera = None
         self.fov_map = None
         self.visited = None
+        self.enemies_turn = False
 
         # devel options
         self.dungeon_algorithm = None
@@ -225,6 +226,9 @@ class Game(object):
                 if player_hc.health <= 0:
                     print "player morto!"
 
+    def move_enemies(self):
+        self.enemies_turn = False
+
     def game_loop(self):
         """Game loop, 1 frame for keypress"""
 
@@ -238,10 +242,12 @@ class Game(object):
             if exit_game:
                 break
 
+            if self.enemies_turn:
+                self.move_enemies()
+
     def handle_keys(self):
         # this is for turn based rendering!
         user_input = tdl.event.key_wait()
-
         player_pos = self.player.get_position()
 
         if user_input.key == 'ESCAPE':
@@ -265,3 +271,4 @@ class Game(object):
                 self.fov_map.compute_fov(dest_vec.x, dest_vec.y, radius=self.fov_radius,
                                          algorithm=tcod.FOV_DIAMOND)
                 self.visited[dest_vec.x][dest_vec.y] = True
+                self.enemies_turn = True
