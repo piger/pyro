@@ -3,7 +3,7 @@ import tdl
 import tcod.map
 from pyro.gamemap import WALL, ROOM, CORRIDOR, VOID, FLOOR, World
 from pyro.math import NORTH, SOUTH, EAST, WEST
-from pyro.utils import tcod_random
+from pyro.utils import tcod_random, darken_color
 
 
 SCREEN_WIDTH = 80
@@ -35,14 +35,6 @@ SYMBOLS = {
         'color': (250, 128, 114),
     },
 }
-
-
-# https://stackoverflow.com/questions/6615002/given-an-rgb-value-how-do-i-create-a-tint-or-shade
-def darken_color(color, amount=0.50):
-    red = int(color[0] * amount)
-    green = int(color[1] * amount)
-    blue = int(color[2] * amount)
-    return (red, green, blue)
 
 
 class Camera(object):
