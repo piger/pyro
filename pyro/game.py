@@ -68,13 +68,29 @@ class Game(object):
         tdl.set_font(self.font, greyscale=True, altLayout=True)
         self.root = tdl.init(SCREEN_WIDTH, SCREEN_HEIGHT, title="PyRo", fullscreen=False)
         self.console = tdl.Console(SCREEN_WIDTH, SCREEN_HEIGHT)
-        # tdl.setFPS(20)
 
         self.world = World()
         self.world.create_map(self.game_width, self.game_height, 1)
         cur_map = self.world.get_current_map()
 
         self.camera = Camera(SCREEN_WIDTH, SCREEN_HEIGHT)
+
+        # setup FOV
+        self.init_fov(cur_map)
+
+        # setup player
+        self.player = self.world.entity_manager.create_entity('player')
+        self.player.set_position(cur_map.start_vec.x, cur_map.start_vec.y)
+        self.fov_map.compute_fov(cur_map.start_vec.x, cur_map.start_vec.y, radius=6)
+
+        # setup visited cells
+        self.init_visited()
+
+    def init_fov(self, cur_map):
+        """Initialize the Field of View handler
+
+        NOTE: fov requires [y,x] addressing!
+        """
 
         fov_map = tcod.map.Map(width=self.game_width, height=self.game_height)
         for y in xrange(self.game_height):
@@ -84,12 +100,6 @@ class Game(object):
                     fov_map.walkable[y,x] = True
                     fov_map.transparent[y,x] = True
         self.fov_map = fov_map
-
-        self.player = self.world.entity_manager.create_entity('player')
-        self.player.set_position(cur_map.start_vec.x, cur_map.start_vec.y)
-        self.fov_map.compute_fov(cur_map.start_vec.x, cur_map.start_vec.y, radius=6)
-
-        self.init_visited()
 
     def init_visited(self):
         cur_map = self.world.get_current_map()
@@ -101,17 +111,6 @@ class Game(object):
             for x in xrange(start_room.x, start_room.x + start_room.width):
                 self.visited[x][y] = True
 
-    def game_loop(self):
-        assert self.world is not None
-
-        while not tdl.event.is_window_closed():
-            self.render_all()
-            tdl.flush()
-
-            exit_game = self.handle_keys()
-            if exit_game:
-                break
-
     def render_all(self):
         game_map = self.world.get_current_map()
 
@@ -121,15 +120,11 @@ class Game(object):
 
         for y in xrange(self.game_height):
             for x in range(self.game_width):
+                # from camera coordinates to game world coordinates
                 xx = x - self.camera.x
                 yy = y - self.camera.y
-                if xx < 0:
-                    continue
-                if xx >= self.game_width:
-                    continue
-                if yy < 0:
-                    continue
-                if yy >= self.game_height:
+
+                if xx < 0 or xx >= self.game_width or yy < 0 or yy >= self.game_height:
                     continue
 
                 bg_color = None
@@ -137,13 +132,10 @@ class Game(object):
                 # do not print if not on FOV
                 is_visible = self.fov_map.fov[y,x]
                 is_visited = self.visited[x][y]
-                has_fog_of_war = False
+                has_fog_of_war = not is_visible and is_visited
 
                 if not is_visible and not is_visited:
                     continue
-                elif not is_visible and is_visited:
-                    # gray out visited but not currently visible cells
-                    has_fog_of_war = True
                 elif is_visible and not is_visited:
                     # mark visible cells as visited
                     self.visited[x][y] = True
@@ -213,6 +205,19 @@ class Game(object):
                 player_hc.health -= cc.damage
                 if player_hc.health <= 0:
                     print "player morto!"
+
+    def game_loop(self):
+        """Game loop, 1 frame for keypress"""
+
+        assert self.world is not None
+
+        while not tdl.event.is_window_closed():
+            self.render_all()
+            tdl.flush()
+
+            exit_game = self.handle_keys()
+            if exit_game:
+                break
 
     def handle_keys(self):
         # this is for turn based rendering!
