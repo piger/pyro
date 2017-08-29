@@ -9,11 +9,32 @@ from pyro.utils import tcod_random
 SCREEN_WIDTH = 80
 SCREEN_HEIGHT = 60
 
-COLOR_FLOOR = (79, 79, 79)
-COLOR_WALL = (110, 110, 110)
-COLOR_ROOM = (46, 46, 46)
-COLOR_CORRIDOR = (238, 229, 222)
-COLOR_PLAYER = (250, 128, 114)
+SYMBOLS = {
+    'FLOOR': {
+        'symbol': '.',
+        'color': (79, 79, 79),
+    },
+    'WALL': {
+        'symbol': '#',
+        'color': (110, 110, 110),
+    },
+    'ROOM': {
+        'symbol': '.',
+        'color': (46, 46, 46),
+    },
+    'CORRIDOR': {
+        'symbol': '.',
+        'color': (238, 229, 222),
+    },
+    'VOID': {
+        'symbol': ' ',
+        'color': (0, 0, 0),
+    },
+    'PLAYER': {
+        'symbol': '@',
+        'color': (250, 128, 114),
+    },
+}
 
 
 # https://stackoverflow.com/questions/6615002/given-an-rgb-value-how-do-i-create-a-tint-or-shade
@@ -46,6 +67,7 @@ class Game(object):
         self.game_height = game_height
         self.DEBUG = False
         self.font = font
+        self.fov_radius = 6
 
         self.root = None
         self.console = None
@@ -124,6 +146,7 @@ class Game(object):
                 xx = x - self.camera.x
                 yy = y - self.camera.y
 
+                # skip rendering of cells out of the camera view
                 if xx < 0 or xx >= self.game_width or yy < 0 or yy >= self.game_height:
                     continue
 
@@ -142,27 +165,21 @@ class Game(object):
 
                 cell = game_map.get_at(x, y)
                 if cell.kind == WALL:
-                    if has_fog_of_war:
-                        color = darken_color(COLOR_WALL)
-                    else:
-                        color = COLOR_WALL
-                    self.console.draw_char(xx, yy, '#', bg=bg_color, fg=color)
+                    symbol = SYMBOLS['WALL']
                 elif cell.kind == VOID:
-                    self.console.draw_char(xx, yy, ' ', bg=None, fg=(0, 0, 0))
+                    symbol = SYMBOLS['VOID']
                 elif cell.kind == ROOM or cell.kind == FLOOR:
-                    if has_fog_of_war:
-                        color = darken_color(COLOR_FLOOR)
-                    else:
-                        color = COLOR_FLOOR
-                    self.console.draw_char(xx, yy, '.', bg=bg_color, fg=color)
+                    symbol = SYMBOLS['FLOOR']
                 elif cell.kind == CORRIDOR:
-                    if has_fog_of_war:
-                        color = darken_color(COLOR_CORRIDOR)
-                    else:
-                        color = COLOR_CORRIDOR
-                    self.console.draw_char(xx, yy, '=', bg=bg_color, fg=color)
+                    symbol = SYMBOLS['CORRIDOR']
                 else:
                     print "unknown cell kind %r" % cell
+
+                if has_fog_of_war:
+                    color = darken_color(symbol['color'])
+                else:
+                    color = symbol['color']
+                self.console.draw_char(xx, yy, symbol['symbol'], bg=bg_color, fg=color)
 
                 # do not paint entities if they are not visibles.
                 # TODO: we must still paint items! or at least stairs!
@@ -171,8 +188,8 @@ class Game(object):
                     if is_visible or entity.always_visible:
                         self.console.draw_char(xx, yy, entity.avatar, bg=None, fg=entity.color)
 
-        self.console.draw_char(player_pos.x - self.camera.x, player_pos.y - self.camera.y, '@',
-                               bg=None, fg=COLOR_PLAYER)
+        self.console.draw_char(player_pos.x - self.camera.x, player_pos.y - self.camera.y,
+                               SYMBOLS['PLAYER']['symbol'], bg=None, fg=SYMBOLS['PLAYER']['color'])
         self.root.blit(self.console, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0)
 
     def attempt_move(self, dest_vec):
@@ -243,6 +260,5 @@ class Game(object):
             can = self.attempt_move(dest_vec)
             if can:
                 self.player.set_position(dest_vec.x, dest_vec.y)
-                self.fov_map.compute_fov(dest_vec.x, dest_vec.y, radius=6)
-                # self.set_visited_room(dest_vec.x, dest_vec.y)
+                self.fov_map.compute_fov(dest_vec.x, dest_vec.y, radius=self.fov_radius)
                 self.visited[dest_vec.x][dest_vec.y] = True
