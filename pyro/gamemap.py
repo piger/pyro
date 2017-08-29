@@ -199,10 +199,10 @@ class GameMap(object):
         self._traverse(bsp)
 
         # we're lazy and we just delete unconnected rooms
-        for room in self.rooms.values():
-            if not room.connected:
-                print "room not connected: %r" % room
-                self._cancel_room(room)
+        unconnected_rooms = [room for room in self.rooms.values() if not room.connected]
+        print "%d unconnected rooms" % len(unconnected_rooms)
+        for room in unconnected_rooms:
+            self._cancel_room(room)
 
         # Convert 'tunnel' blocks inside rooms into room blocks
         for room in self.rooms.values():
