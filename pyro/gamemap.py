@@ -90,6 +90,8 @@ class GameMap(object):
             self._dig_room(room)
 
     def _connect_nodes(self, node):
+        """Creates two Rooms from two BSP nodes and connect them with a corridor"""
+
         room_a, room_b = None, None
 
         node1, node2 = node.children
@@ -119,11 +121,13 @@ class GameMap(object):
             print "node1 and node2 are different levels!"
             return
 
-        self._draw_corridor(room_a, room_b)
+        self._connect_rooms(room_a, room_b)
         self.rooms[room_a.rid].connected = True
         self.rooms[room_b.rid].connected = True
 
-    def _draw_corridor(self, room1, room2):
+    def _connect_rooms(self, room1, room2):
+        """Connects two rooms with a corridor"""
+
         sx, sy = room1.center
         dx, dy = room2.center
 
@@ -145,19 +149,28 @@ class GameMap(object):
             self._create_tunnel(x, y, v)
 
     def _create_tunnel(self, x, y, value=None):
+        """Create a single corridor tile and perform some checks"""
+
+        # if this tunnel touches a room, tell it that it is connected now
         room_id = self.cells[x][y].room_id
         if room_id:
             self.rooms[room_id].connected = True
+
         self.cells[x][y].kind = CORRIDOR
+
+        # set up DEBUG value
         if value is not None:
             self.cells[x][y].value = value
+
         # fill cells around this corridor cell if they are void
         for c in self.get_cells_around(x, y):
             if c.kind == VOID:
                 c.kind = WALL
 
     def _cancel_room(self, room):
-        """To avoid deleting pieces of other rooms or corridors don't delete
+        """Remove a room from the map. Used by BSP.
+
+        To avoid deleting pieces of other rooms or corridors don't delete
         the outer walls of this room."""
 
         for y in xrange(room.y + 1, room.endY - 1):
@@ -190,6 +203,8 @@ class GameMap(object):
         pass
 
     def _select_start_and_end(self, entity_manager):
+        """Place stairs up and stairs down"""
+
         rooms = self.rooms.values()
         if self.start_room_id is None:
             start_room = random.choice(rooms)
@@ -300,7 +315,7 @@ class GameMap(object):
                 is_weird = False
 
             if len(rooms) > 0:
-                self._draw_corridor(room, rooms[-1])
+                self._connect_rooms(room, rooms[-1])
             else:
                 self.start_room_id = room.rid
             rooms.append(room)
@@ -353,6 +368,8 @@ class GameMap(object):
         return self.rooms[room_id]
 
     def get_entities_in_room(self, room_id):
+        """Get all the entities ID for the entities in a room"""
+
         room = self.get_room(room_id)
         result = []
         for x in xrange(room.x, room.endX):
