@@ -3,6 +3,7 @@ import tcod.bsp
 from pyro.entities import EntityManager
 from pyro.math import Rect, Vector2
 from pyro.utils import tcod_random
+from pyro.rooms import room_1
 
 
 VOID = 0
@@ -34,7 +35,7 @@ class Room(Rect):
 
     LAST_ID = 0
 
-    def __init__(self, x, y, width, height):    
+    def __init__(self, x, y, width, height):
         super(Room, self).__init__(x, y, width, height)
         self.connected = False
         self.rid = Room.next_id()
@@ -178,7 +179,7 @@ class GameMap(object):
                     x = random.randint(room.x + 1, room.endX - 2)
                     y = random.randint(room.y + 1, room.endY - 2)
                     cell = self.get_at(x, y)
-                    if len(cell.entities):
+                    if cell.kind not in (ROOM, CORRIDOR) and len(cell.entities) > 0:
                         continue
                     entity = entity_manager.create_entity(creature_name)
                     entity.set_position(x, y)
@@ -259,10 +260,22 @@ class GameMap(object):
         min_room_size = 5
         max_rooms = 30
         rooms = []
+        weird_done = False
+        is_weird = False
 
         for i in xrange(max_rooms):
-            width = random.randint(min_room_size, max_room_size)
-            height = random.randint(min_room_size, max_room_size)
+            lines = []
+            if random.randint(0, 100) > 80 and not weird_done:
+                template = room_1.strip()
+                lines = template.split("\n")
+                width = len(lines[0])
+                height = len(lines)
+                weird_done = True
+                is_weird = True
+            else:
+                width = random.randint(min_room_size, max_room_size)
+                height = random.randint(min_room_size, max_room_size)
+
             x = random.randint(0, self.width - width - 1)
             y = random.randint(0, self.height - height - 1)
             room = Room(x, y, width, height)
@@ -278,6 +291,13 @@ class GameMap(object):
 
             self.rooms[room.rid] = room
             self._dig_room(room)
+
+            if is_weird:
+                for y, line in enumerate(lines):
+                    for x, c in enumerate(line):
+                        if c == '#':
+                            self.cells[room.x + x][room.y + y].kind = WALL
+                is_weird = False
 
             if len(rooms) > 0:
                 self._draw_corridor(room, rooms[-1])
