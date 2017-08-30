@@ -6,9 +6,6 @@ from pyro.math import NORTH, SOUTH, EAST, WEST
 from pyro.utils import tcod_random, darken_color
 
 
-SCREEN_WIDTH = 80
-SCREEN_HEIGHT = 60
-
 SYMBOLS = {
     'FLOOR': {
         'symbol': '.',
@@ -53,12 +50,14 @@ class Camera(object):
 
 
 class Game(object):
-    def __init__(self, seed, game_width, game_height, font):
+    def __init__(self, seed, game_width, game_height, font, screen_width, screen_height):
         self.seed = seed
         self.game_width = game_width
         self.game_height = game_height
         self.DEBUG = False
         self.font = font
+        self.screen_width = screen_width
+        self.screen_height = screen_height
         self.fov_radius = 6
 
         self.root = None
@@ -84,15 +83,15 @@ class Game(object):
     def init_game(self):
         # https://github.com/HexDecimal/python-tdl/tree/master/fonts/libtcod
         tdl.set_font(self.font, greyscale=True, altLayout=True)
-        self.root = tdl.init(SCREEN_WIDTH, SCREEN_HEIGHT, title="PyRo", fullscreen=False)
-        self.console = tdl.Console(SCREEN_WIDTH, SCREEN_HEIGHT)
+        self.root = tdl.init(self.screen_width, self.screen_height, title="PyRo", fullscreen=False)
+        self.console = tdl.Console(self.screen_width, self.screen_height)
 
         self.world = World()
         self.world.create_map(self.game_width, self.game_height, level=1,
                               dungeon_algorithm=self.dungeon_algorithm)
         cur_map = self.world.get_current_map()
 
-        self.camera = Camera(SCREEN_WIDTH, SCREEN_HEIGHT)
+        self.camera = Camera(self.screen_width, self.screen_height)
 
         # setup FOV
         self.init_fov(cur_map)
@@ -193,7 +192,7 @@ class Game(object):
 
         self.console.draw_char(player_pos.x - self.camera.x, player_pos.y - self.camera.y,
                                SYMBOLS['PLAYER']['symbol'], bg=None, fg=SYMBOLS['PLAYER']['color'])
-        self.root.blit(self.console, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0)
+        self.root.blit(self.console, 0, 0, self.screen_width, self.screen_height, 0, 0)
 
     def attempt_move(self, dest_vec):
         game_map = self.world.get_current_map()
