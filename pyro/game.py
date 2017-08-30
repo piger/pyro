@@ -2,7 +2,8 @@ import random
 import tdl
 import tcod.map
 from pyro.gamemap import WALL, ROOM, CORRIDOR, VOID, FLOOR, World
-from pyro.math import NORTH, SOUTH, EAST, WEST
+from pyro.math import (NORTH, SOUTH, EAST, WEST, NORTH_EAST, NORTH_WEST,
+                       SOUTH_EAST, SOUTH_WEST)
 from pyro.utils import tcod_random, darken_color
 
 
@@ -251,14 +252,22 @@ class Game(object):
 
         if user_input.key == 'ESCAPE':
             return True
-        elif user_input.key == 'UP':
+        elif user_input.key == 'UP' or user_input.char == 'k':
             direction = NORTH
-        elif user_input.key == 'DOWN':
+        elif user_input.char == 'u':
+            direction = NORTH_WEST
+        elif user_input.char == 'i':
+            direction = NORTH_EAST
+        elif user_input.key == 'DOWN' or user_input.char == 'j':
            direction = SOUTH
-        elif user_input.key == 'LEFT':
+        elif user_input.key == 'LEFT' or user_input.char == 'h':
             direction = WEST
-        elif user_input.key == 'RIGHT':
+        elif user_input.key == 'RIGHT' or user_input.char == 'l':
             direction = EAST
+        elif user_input.char == 'n':
+            direction = SOUTH_WEST
+        elif user_input.char == 'm':
+            direction = SOUTH_EAST
         else:
             direction = None
 

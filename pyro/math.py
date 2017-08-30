@@ -19,6 +19,10 @@ NORTH = Vector2(0, -1)
 SOUTH = Vector2(0, 1)
 EAST = Vector2(1, 0)
 WEST = Vector2(-1, 0)
+NORTH_EAST = Vector2(1, -1)
+NORTH_WEST = Vector2(-1, -1)
+SOUTH_EAST = Vector2(1, 1)
+SOUTH_WEST = Vector2(-1, 1)
 
 
 class Rect(object):
