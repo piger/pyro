@@ -194,6 +194,7 @@ class Game(object):
         self.console.draw_char(player_pos.x - self.camera.x, player_pos.y - self.camera.y,
                                SYMBOLS['PLAYER']['symbol'], bg=None, fg=SYMBOLS['PLAYER']['color'])
         self.root.blit(self.console, 0, 0, self.screen_width, self.screen_height, 0, 0)
+        tdl.flush()
 
     def attempt_move(self, dest_vec):
         game_map = self.world.get_current_map()
@@ -236,7 +237,6 @@ class Game(object):
 
         while not tdl.event.is_window_closed():
             self.render_all()
-            tdl.flush()
 
             exit_game = self.handle_keys()
             if exit_game:
@@ -248,7 +248,7 @@ class Game(object):
     def handle_keys(self):
         # this is for turn based rendering!
         user_input = tdl.event.key_wait()
-        player_pos = self.player.get_position()
+        direction = None
 
         if user_input.key == 'ESCAPE':
             return True
@@ -268,15 +268,16 @@ class Game(object):
             direction = SOUTH_WEST
         elif user_input.char == 'n':
             direction = SOUTH_EAST
-        else:
-            direction = None
 
         if direction is not None:
-            dest_vec = player_pos + direction
-            can = self.attempt_move(dest_vec)
-            if can:
-                self.player.set_position(dest_vec.x, dest_vec.y)
-                self.fov_map.compute_fov(dest_vec.x, dest_vec.y, radius=self.fov_radius,
-                                         algorithm=tcod.FOV_DIAMOND)
-                self.visited[dest_vec.x][dest_vec.y] = True
-                self.enemies_turn = True
+            self.move_player(direction)
+
+    def move_player(self, direction):
+        dest_vec = self.player.get_position() + direction
+        can = self.attempt_move(dest_vec)
+        if can:
+            self.player.set_position(dest_vec.x, dest_vec.y)
+            self.fov_map.compute_fov(dest_vec.x, dest_vec.y, radius=self.fov_radius,
+                                     algorithm=tcod.FOV_DIAMOND)
+            self.visited[dest_vec.x][dest_vec.y] = True
+            self.enemies_turn = True
