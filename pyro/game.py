@@ -254,9 +254,9 @@ class Game(object):
             return True
         elif user_input.key == 'UP' or user_input.char == 'k':
             direction = NORTH
-        elif user_input.char == 'u':
+        elif user_input.char == 'y':
             direction = NORTH_WEST
-        elif user_input.char == 'i':
+        elif user_input.char == 'u':
             direction = NORTH_EAST
         elif user_input.key == 'DOWN' or user_input.char == 'j':
            direction = SOUTH
@@ -264,9 +264,9 @@ class Game(object):
             direction = WEST
         elif user_input.key == 'RIGHT' or user_input.char == 'l':
             direction = EAST
-        elif user_input.char == 'n':
+        elif user_input.char == 'b':
             direction = SOUTH_WEST
-        elif user_input.char == 'm':
+        elif user_input.char == 'n':
             direction = SOUTH_EAST
         else:
             direction = None
