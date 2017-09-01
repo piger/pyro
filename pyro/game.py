@@ -85,6 +85,7 @@ class Game(object):
         # https://github.com/HexDecimal/python-tdl/tree/master/fonts/libtcod
         tdl.set_font(self.font, greyscale=True, altLayout=True)
         self.root = tdl.init(self.screen_width, self.screen_height, title="PyRo", fullscreen=False)
+        tdl.set_fps(30)
         self.console = tdl.Console(self.screen_width, self.screen_height)
 
         self.world = World()
@@ -235,19 +236,28 @@ class Game(object):
 
         assert self.world is not None
 
-        while not tdl.event.is_window_closed():
+        running = True
+        while running:
             self.render_all()
-
-            exit_game = self.handle_keys()
+            exit_game = self.handle_events()
             if exit_game:
+                running = False
                 break
 
             if self.enemies_turn:
                 self.move_enemies()
 
-    def handle_keys(self):
-        # this is for turn based rendering!
-        user_input = tdl.event.key_wait()
+    def handle_events(self):
+        result = False
+        for event in tdl.event.get():
+            if event.type == 'KEYDOWN':
+                result = self.handle_keys(event)
+                if result:
+                    break
+
+        return result
+
+    def handle_keys(self, user_input):
         direction = None
 
         if user_input.key == 'ESCAPE':
