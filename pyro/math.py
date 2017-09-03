@@ -3,6 +3,9 @@ class Vector2(object):
         self.x = x_
         self.y = y_
 
+    def copy(self):
+        return Vector2(self.x, self.y)
+
     def __sub__(self, other):
         return Vector2(self.x - other.x, self.y - other.y)
 

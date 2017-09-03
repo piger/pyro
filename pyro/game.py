@@ -36,6 +36,8 @@ SYMBOLS = {
     },
 }
 
+DARK_BACKGROUND = (8, 8, 8)
+
 
 class Camera(object):
     def __init__(self, width, height):
@@ -72,6 +74,9 @@ class Game(object):
         self.fov_map = None
         self.visited = None
         self.enemies_turn = False
+
+        self.is_looking = False
+        self.eye_position = None
 
         # devel options
         self.dungeon_algorithm = None
@@ -139,7 +144,7 @@ class Game(object):
     def render_all(self):
         game_map = self.world.get_current_map()
 
-        self.console.clear()
+        self.console.clear(bg=DARK_BACKGROUND)
         player_pos = self.player.get_position()
         self.camera.center_on(player_pos.x, player_pos.y)
 
@@ -153,7 +158,10 @@ class Game(object):
                 if xx < 0 or xx >= self.game_width or yy < 0 or yy >= self.game_height:
                     continue
 
-                bg_color = None
+                if self.is_looking and x == self.eye_position.x and y == self.eye_position.y:
+                    bg_color = (194, 194, 194)
+                else:
+                    bg_color = DARK_BACKGROUND
 
                 # do not print if not on FOV
                 is_visible = self.fov_map.fov[y,x]
@@ -161,6 +169,8 @@ class Game(object):
                 has_fog_of_war = not is_visible and is_visited
 
                 if not is_visible and not is_visited:
+                    if self.is_looking:
+                        self.console.draw_char(xx, yy, ' ', bg=bg_color, fg=(0, 0, 0))
                     if not self.DEBUG:
                         continue
                 elif is_visible and not is_visited:
@@ -271,6 +281,13 @@ class Game(object):
 
         if user_input.key == 'ESCAPE':
             return True
+        elif user_input.key == 'ENTER':
+            if self.is_looking is True:
+                self.is_looking = False
+            else:
+                self.eye_position = self.player.get_position().copy()
+                self.is_looking = True
+            return
         elif user_input.key == 'UP' or user_input.char == 'k':
             direction = NORTH
         elif user_input.char == 'y':
@@ -289,7 +306,10 @@ class Game(object):
             direction = SOUTH_EAST
 
         if direction is not None:
-            self.move_player(direction)
+            if self.is_looking:
+                self.move_eye(direction)
+            else:
+                self.move_player(direction)
 
     def move_player(self, direction):
         dest_vec = self.player.get_position() + direction
@@ -300,3 +320,8 @@ class Game(object):
                                      algorithm=tcod.FOV_DIAMOND)
             self.visited[dest_vec.x][dest_vec.y] = True
             self.enemies_turn = True
+
+    def move_eye(self, direction):
+        dest_vec = self.eye_position + direction
+        self.eye_position.x = dest_vec.x
+        self.eye_position.y = dest_vec.y
