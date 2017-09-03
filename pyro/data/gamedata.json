@@ -35,6 +35,7 @@
       "name": "grass",
       "avatar": "\"",
       "color": [0, 139, 69],
+      "description": "a patch of grass",
       "can": [
         "burn"
       ]
@@ -43,19 +44,35 @@
       "name": "floor",
       "avatar": ".",
       "color": [],
+      "description": "your standard dungeon stone floor",
       "can": []
     },
     {
       "name": "dirt",
       "avatar": ".",
       "color": [107, 66, 38],
+      "description": "some dirt",
       "can": []
     },
     {
       "name": "water",
       "avatar": "~",
       "color": [72, 118, 255],
+      "description": "fresh water",
       "can": []
     }
+  ],
+  "potions": [
+    {
+      "name": "health",
+      "good": true
+    },
+    {
+      "name": "poison",
+      "good": false
+    }
+  ],
+  "scrolls": [
+
   ]
 }
