@@ -5,6 +5,7 @@ from pyro.gamemap import WALL, ROOM, CORRIDOR, VOID, FLOOR, World
 from pyro.math import (NORTH, SOUTH, EAST, WEST, NORTH_EAST, NORTH_WEST,
                        SOUTH_EAST, SOUTH_WEST)
 from pyro.utils import tcod_random, darken_color
+from pyro.gamedata import gamedata
 
 
 SYMBOLS = {
@@ -22,7 +23,8 @@ SYMBOLS = {
     },
     'CORRIDOR': {
         'symbol': '.',
-        'color': (238, 229, 222),
+        # 'color': (238, 229, 222),
+        'color': (79, 79, 79),
     },
     'VOID': {
         'symbol': ' ',
@@ -87,6 +89,9 @@ class Game(object):
         self.root = tdl.init(self.screen_width, self.screen_height, title="PyRo", fullscreen=False)
         tdl.set_fps(30)
         self.console = tdl.Console(self.screen_width, self.screen_height)
+
+        # load game data
+        gamedata.load()
 
         self.world = World()
         self.world.create_map(self.game_width, self.game_height, level=1,
@@ -183,6 +188,10 @@ class Game(object):
                     char = str(cell.value)
                 else:
                     char = symbol['symbol']
+                    if cell.kind in (ROOM, FLOOR, CORRIDOR) and cell.feature in ('dirt', 'grass', 'water'):
+                        feature = gamedata.get_feature(cell.feature)
+                        char = feature['avatar']
+                        color = feature['color']
                 self.console.draw_char(xx, yy, char, bg=bg_color, fg=color)
 
                 # do not paint entities if they are not visibles.

@@ -1,5 +1,6 @@
 import random
 import tcod.bsp
+import noise
 from pyro.entities import EntityManager
 from pyro.math import Rect, Vector2
 from pyro.utils import tcod_random
@@ -54,6 +55,8 @@ class GameCell(object):
         self.kind = VOID
         self.entities = []
         self.room_id = None
+        self.feature = None
+        # a debug value
         self.value = None
 
     def __repr__(self):
@@ -269,6 +272,7 @@ class GameMap(object):
         # select starting and ending rooms
         self._select_start_and_end(entity_manager)
         self._place_creatures_in_rooms(level, entity_manager)
+        self._add_features()
 
     def generate_tunneling(self, level, entity_manager):
         max_room_size = 16
@@ -350,6 +354,32 @@ class GameMap(object):
                     room.connected = True
                 self.cells[x][y].kind = ROOM
                 self.cells[x][y].room_id = room.rid
+
+    def _add_features(self):
+        frequency = 8.0
+        fx = float(self.width) / frequency
+        fy = float(self.height) / frequency
+
+        # thresholds
+        # t1 = 0.2
+        # t2 = 0.4
+        # t3 = 0.5
+        t1 = random.uniform(0.2, 0.4)
+        t2 = t1 + random.uniform(0.1, 0.2)
+        t3 = t2 + 0.1
+
+        for y in xrange(1, self.height - 1):
+            for x in xrange(1, self.width - 1):
+                # get noise and transform to a value between 1 and 0
+                n = noise.pnoise2(x / fx, y / fy) * 0.5 + 0.5
+                if n <= t1:
+                    self.cells[x][y].feature = "water"
+                elif n <= t2:
+                    self.cells[x][y].feature = "grass"
+                elif n <= t3:
+                    self.cells[x][y].feature = "dirt"
+                else:
+                    self.cells[x][y].feature = "floor"
 
     def get_at(self, x, y):
         return self.cells[x][y]

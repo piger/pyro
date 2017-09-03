@@ -1,0 +1,61 @@
+{
+  "entities": [
+    {
+      "name": "player",
+      "health": 100,
+      "damage": 1,
+      "armor": 2,
+      "avatar": "@"
+    },
+    {
+      "name": "boar",
+      "health": 10,
+      "damage": 1,
+      "armor": 2,
+      "avatar": "b"
+    },
+    {
+      "name": "fairy",
+      "avatar": "F",
+      "color": [
+        60, 179,113
+      ]
+    },
+    {
+      "name": "stairs_up",
+      "avatar": "<"
+    },
+    {
+      "name": "stairs_down",
+      "avatar": ">"
+    }
+  ],
+  "features": [
+    {
+      "name": "grass",
+      "avatar": "\"",
+      "color": [0, 139, 69],
+      "can": [
+        "burn"
+      ]
+    },
+    {
+      "name": "floor",
+      "avatar": ".",
+      "color": [],
+      "can": []
+    },
+    {
+      "name": "dirt",
+      "avatar": ".",
+      "color": [107, 66, 38],
+      "can": []
+    },
+    {
+      "name": "water",
+      "avatar": "~",
+      "color": [72, 118, 255],
+      "can": []
+    }
+  ]
+}

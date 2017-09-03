@@ -8,6 +8,8 @@ setup(
     author_email='daniel@spatof.org',
     install_requires=[
         'tdl==4.1.0',
+        'noise==1.2.2',
+        'click==6.7',
         'better_exceptions',
     ],
     packages=find_packages(),
