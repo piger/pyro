@@ -136,7 +136,7 @@ class GameMap(object):
 
         v = self.tunnel_id
         self.tunnel_id = chr(ord(self.tunnel_id) + 1)
-        if random.randint(0, 1) == 0:
+        if random.random() < 0.5:
             self._create_horizontal_tunnel(sx, dx, sy, v)
             self._create_vertical_tunnel(sy, dy, dx, v)
         else:
@@ -284,7 +284,7 @@ class GameMap(object):
 
         for i in xrange(max_rooms):
             lines = []
-            if random.randint(0, 100) > 80 and not weird_done:
+            if random.random() > 0.8 and not weird_done:
                 template = room_1.strip()
                 lines = template.split("\n")
                 width = len(lines[0])
