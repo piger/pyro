@@ -1,6 +1,7 @@
 import json
 import pkg_resources
 from pyro.utils import Vector2
+from pyro.gamedata import gamedata
 
 
 # https://web.njit.edu/~kevin/rgb.txt.html
@@ -50,21 +51,10 @@ class Entity(object):
 
 class EntityManager(object):
     def __init__(self):
-        self.entity_data = {}
         self.eid = 0
         self.entities = {}
-
         self.health_components = {}
         self.combat_components = {}
-
-    def load(self):
-        data = json.load(pkg_resources.resource_stream('pyro', 'data/entities.json'))
-        for entity_data in data['entities']:
-            name = entity_data['name']
-            entity_data.setdefault('health', 0)
-            entity_data.setdefault('damage', 0)
-            entity_data.setdefault('armor', 0)
-            self.entity_data[name] = entity_data
 
     def next_eid(self):
         rv = self.eid
@@ -74,7 +64,7 @@ class EntityManager(object):
     def create_entity(self, name):
         eid = self.next_eid()
 
-        entity_data = self.entity_data.get(name)
+        entity_data = gamedata.get_entity(name)
         assert entity_data is not None, "Entity data for %s is None" % name
 
         color = entity_data.get('color', DEFAULT_ENTITY_COLOR)

@@ -449,7 +449,6 @@ class World(object):
         self.maps = []
         self.current_map = 0
         self.entity_manager = EntityManager()
-        self.entity_manager.load()
 
     def create_map(self, width, height, level=1, dungeon_algorithm=None):
         game_map = GameMap(width, height)
