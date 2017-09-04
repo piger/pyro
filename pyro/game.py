@@ -327,16 +327,19 @@ class Game(object):
 
         for entity, cc in can_fight:
             print "fight between player and %r (%d/%d)" % (entity.name, cc.damage, cc.armor)
-            self.post_message("you bump into an enemy")
             enemy_hc = em.health_components.get(entity.eid)
             enemy_hc.health -= player_cc.damage
+
+            self.post_message("You hit the %s for %d damage (%d left)" % (
+                entity.name, player_cc.damage, enemy_hc.health))
+
             if enemy_hc.health <= 0:
-                print "enemy morto"
+                self.post_message("%s is dead" % entity.name)
                 self.world.destroy_entity(entity.eid)
             else:
                 player_hc.health -= cc.damage
                 if player_hc.health <= 0:
-                    print "player morto!"
+                    self.post_message("You are dead!")
 
     def move_enemies(self):
         self.enemies_turn = False
