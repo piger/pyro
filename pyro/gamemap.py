@@ -59,7 +59,8 @@ class GameCell(object):
         self.value = None
 
     def __repr__(self):
-        return "GameCell(kind=%r, entities=%r, room_id=%r)" % (self.kind, self.entities, self.room_id)
+        return "GameCell(kind=%r, entities=%r, room_id=%r, feature=%r)" % (
+            self.kind, self.entities, self.room_id, self.feature)
 
 
 class GameMap(object):

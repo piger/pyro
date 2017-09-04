@@ -1,10 +1,11 @@
+import math
 import random
 import tdl
 import tcod.map
 from pyro.gamemap import WALL, ROOM, CORRIDOR, VOID, FLOOR, World
-from pyro.math import (NORTH, SOUTH, EAST, WEST, NORTH_EAST, NORTH_WEST,
-                       SOUTH_EAST, SOUTH_WEST)
-from pyro.utils import tcod_random, darken_color
+from pyro.utils import (NORTH, SOUTH, EAST, WEST, NORTH_EAST, NORTH_WEST,
+                        SOUTH_EAST, SOUTH_WEST)
+from pyro.utils import tcod_random, darken_color, clamp
 from pyro.gamedata import gamedata
 
 
@@ -36,7 +37,9 @@ SYMBOLS = {
     },
 }
 
+MESSAGE_COLOR = (224, 224, 224)
 DARK_BACKGROUND = (8, 8, 8)
+PANEL_TEXT_COLOR = (255, 100, 255)
 
 
 class Camera(object):
@@ -65,8 +68,27 @@ class Game(object):
         self.screen_height = screen_height
         self.fov_radius = 6
 
+        # size of info panel
+        self.panel_width = 30
+        self.panel_height = self.screen_height / 2
+
+        # size of map area console
+        self.display_width = self.screen_width - self.panel_width
+        self.display_height = self.screen_height - 1 # -1 for status bar
+
+        # size of message log console
+        self.log_width = self.panel_width
+        self.log_height = self.screen_height - self.panel_height
+
+        # size of status bar console
+        self.status_width = self.display_width
+        self.status_height = 1
+
         self.root = None
         self.console = None
+        self.panel = None
+        self.logpanel = None
+        self.status = None
         self.player = None
         self.world = None
         self.game_map = None
@@ -77,6 +99,8 @@ class Game(object):
 
         self.is_looking = False
         self.eye_position = None
+
+        self.message_log = []
 
         # devel options
         self.dungeon_algorithm = None
@@ -89,11 +113,19 @@ class Game(object):
         tcod_random.init(self.seed)
 
     def init_game(self):
+        # setup screen
         # https://github.com/HexDecimal/python-tdl/tree/master/fonts/libtcod
         tdl.set_font(self.font, greyscale=True, altLayout=True)
         self.root = tdl.init(self.screen_width, self.screen_height, title="PyRo", fullscreen=False)
-        tdl.set_fps(30)
-        self.console = tdl.Console(self.screen_width, self.screen_height)
+        tdl.set_fps(20)
+        self.console = tdl.Console(self.display_width, self.display_height)
+        self.panel = tdl.Console(self.panel_width, self.panel_height)
+
+        self.logpanel = tdl.Console(self.log_width, self.log_height)
+        self.logpanel.clear(bg=DARK_BACKGROUND)
+        self.logpanel.set_colors(fg=MESSAGE_COLOR, bg=DARK_BACKGROUND)
+
+        self.status = tdl.Console(self.status_width, self.status_height)
 
         # load game data
         gamedata.load()
@@ -103,7 +135,7 @@ class Game(object):
                               dungeon_algorithm=self.dungeon_algorithm)
         cur_map = self.world.get_current_map()
 
-        self.camera = Camera(self.screen_width, self.screen_height)
+        self.camera = Camera(self.display_width, self.display_height)
 
         # setup FOV
         self.init_fov(cur_map)
@@ -127,8 +159,8 @@ class Game(object):
             for x in xrange(self.game_width):
                 cell = cur_map.get_at(x, y)
                 if cell.kind in (FLOOR, ROOM, CORRIDOR):
-                    fov_map.walkable[y,x] = True
-                    fov_map.transparent[y,x] = True
+                    fov_map.walkable[y, x] = True
+                    fov_map.transparent[y, x] = True
         self.fov_map = fov_map
 
     def init_visited(self):
@@ -145,8 +177,22 @@ class Game(object):
         game_map = self.world.get_current_map()
 
         self.console.clear(bg=DARK_BACKGROUND)
+        self.panel.clear(bg=DARK_BACKGROUND)
+        self.status.clear(bg=DARK_BACKGROUND)
+
         player_pos = self.player.get_position()
         self.camera.center_on(player_pos.x, player_pos.y)
+
+        # Print some stuff into the info panel
+        self.panel.draw_str(0, 0, "You, the rogue.", fg=PANEL_TEXT_COLOR)
+        self.panel.draw_str(0, 1, "Player position: %d/%d" % (player_pos.x, player_pos.y),
+                            fg=PANEL_TEXT_COLOR)
+
+        # display informations from the 'look' command now
+        if self.is_looking:
+            self.panel.draw_str(0, 2, "Eye position: %d/%d" % (self.eye_position.x,
+                                                               self.eye_position.y))
+            self.render_look_command()
 
         for y in xrange(self.game_height):
             for x in range(self.game_width):
@@ -164,8 +210,8 @@ class Game(object):
                     bg_color = DARK_BACKGROUND
 
                 # do not print if not on FOV
-                is_visible = self.fov_map.fov[y,x]
-                is_visited = self.visited[x][y]
+                is_visible = self.is_visible(x, y)
+                is_visited = self.is_visited(x, y)
                 has_fog_of_war = not is_visible and is_visited
 
                 if not is_visible and not is_visited:
@@ -198,10 +244,14 @@ class Game(object):
                     char = str(cell.value)
                 else:
                     char = symbol['symbol']
-                    if cell.kind in (ROOM, FLOOR, CORRIDOR) and cell.feature in ('dirt', 'grass', 'water'):
+                    if (cell.kind in (ROOM, FLOOR, CORRIDOR) and
+                        cell.feature in ('dirt', 'grass', 'water')):
                         feature = gamedata.get_feature(cell.feature)
                         char = feature['avatar']
-                        color = feature['color']
+                        if has_fog_of_war:
+                            color = darken_color(feature['color'])
+                        else:
+                            color = feature['color']
                 self.console.draw_char(xx, yy, char, bg=bg_color, fg=color)
 
                 # do not paint entities if they are not visibles.
@@ -213,8 +263,36 @@ class Game(object):
 
         self.console.draw_char(player_pos.x - self.camera.x, player_pos.y - self.camera.y,
                                SYMBOLS['PLAYER']['symbol'], bg=None, fg=SYMBOLS['PLAYER']['color'])
-        self.root.blit(self.console, 0, 0, self.screen_width, self.screen_height, 0, 0)
+
+        # blit everything onto the root console
+        self.root.blit(self.console, 0, 0, self.display_width, self.display_height, 0, 0)
+
+        # info panel is a column on the right side of the screen, half the height of the window
+        self.root.blit(self.panel, self.display_width, 0, 0, 0)
+        # log panel is a column below info panel occupying the remaining half of the window
+        self.root.blit(self.logpanel, self.display_width, self.panel_height, 0, 0)
+
+        # status bar goes at the last line of the screen and it extends until the log panel
+        self.root.blit(self.status, 0, self.display_height, 0, 0)
+
         tdl.flush()
+
+    def render_look_command(self):
+        """Display informations about what the cursor is looking at"""
+
+        game_map = self.world.get_current_map()
+        cell = game_map.get_at(self.eye_position.x, self.eye_position.y)
+        if self.is_visited(self.eye_position.x, self.eye_position.y):
+            if self.is_visible(self.eye_position.x, self.eye_position.y):
+                prefix = "You see"
+            else:
+                prefix = "You remember seeing"
+
+            if cell.feature is not None:
+                feature = gamedata.get_feature(cell.feature)
+                if feature is not None and len(feature['description']):
+                    self.status.draw_str(0, 0, "%s %s" % (prefix, feature['description']),
+                                         fg=MESSAGE_COLOR)
 
     def attempt_move(self, dest_vec):
         game_map = self.world.get_current_map()
@@ -237,6 +315,7 @@ class Game(object):
 
         for entity, cc in can_fight:
             print "fight between player and %r (%d/%d)" % (entity.name, cc.damage, cc.armor)
+            self.post_message("you bump into an enemy")
             enemy_hc = em.health_components.get(entity.eid)
             enemy_hc.health -= player_cc.damage
             if enemy_hc.health <= 0:
@@ -282,11 +361,9 @@ class Game(object):
         if user_input.key == 'ESCAPE':
             return True
         elif user_input.key == 'ENTER':
+            self.is_looking = not(self.is_looking)
             if self.is_looking is True:
-                self.is_looking = False
-            else:
                 self.eye_position = self.player.get_position().copy()
-                self.is_looking = True
             return
         elif user_input.key == 'UP' or user_input.char == 'k':
             direction = NORTH
@@ -295,7 +372,7 @@ class Game(object):
         elif user_input.char == 'u':
             direction = NORTH_EAST
         elif user_input.key == 'DOWN' or user_input.char == 'j':
-           direction = SOUTH
+            direction = SOUTH
         elif user_input.key == 'LEFT' or user_input.char == 'h':
             direction = WEST
         elif user_input.key == 'RIGHT' or user_input.char == 'l':
@@ -323,5 +400,25 @@ class Game(object):
 
     def move_eye(self, direction):
         dest_vec = self.eye_position + direction
+        dest_vec.x = clamp(dest_vec.x, 0, self.game_width - 1)
+        dest_vec.y = clamp(dest_vec.y, 0, self.game_height - 1)
         self.eye_position.x = dest_vec.x
         self.eye_position.y = dest_vec.y
+
+        # debug
+        # game_map = self.world.get_current_map()
+        # print "Looking at cell: %r" % game_map.get_at(dest_vec.x, dest_vec.y)
+
+    def post_message(self, message):
+        n_lines = int(math.ceil(float(len(message)) / float(self.log_width)))
+        print n_lines
+        if n_lines < 1:
+            n_lines = 1
+        self.logpanel.scroll(0, n_lines)
+        self.logpanel.draw_str(0, 0, message)
+
+    def is_visible(self, x, y):
+        return self.fov_map.fov[y, x]
+
+    def is_visited(self, x, y):
+        return self.visited[x][y]
