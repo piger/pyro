@@ -1,6 +1,7 @@
 import random
 import tcod.bsp
 import noise
+from collections import OrderedDict
 from pyro.entities import EntityManager
 from pyro.utils import Rect, Vector2, tcod_random
 from pyro.rooms import room_1
@@ -73,7 +74,7 @@ class GameMap(object):
         self.min_room_height = min_room_height
 
         self.cells = [[GameCell() for y in xrange(self.height)] for x in xrange(self.width)]
-        self.rooms = {}
+        self.rooms = OrderedDict()
         self.start_vec = None
         self.end_vec = None
         self.start_room_id = None
@@ -278,11 +279,10 @@ class GameMap(object):
         max_room_size = 16
         min_room_size = 5
         max_rooms = 30
-        rooms = []
         weird_done = False
         is_weird = False
 
-        for i in xrange(max_rooms):
+        for _ in xrange(max_rooms):
             lines = []
             if random.random() > 0.8 and not weird_done:
                 template = room_1.strip()
@@ -300,7 +300,7 @@ class GameMap(object):
             room = Room(x, y, width, height)
 
             failed = False
-            for other_room in rooms:
+            for other_room in self.rooms.values():
                 if room.intersect(other_room):
                     failed = True
                     break
@@ -311,6 +311,7 @@ class GameMap(object):
             self.rooms[room.rid] = room
             self._dig_room(room)
 
+            # special case for creating prefab rooms
             if is_weird:
                 for y, line in enumerate(lines):
                     for x, c in enumerate(line):
@@ -318,11 +319,11 @@ class GameMap(object):
                             self.cells[room.x + x][room.y + y].kind = WALL
                 is_weird = False
 
-            if len(rooms) > 0:
-                self._connect_rooms(room, rooms[-1])
+            if len(self.rooms) > 1:
+                last_room = self.rooms.values()[-2]
+                self._connect_rooms(room, last_room)
             else:
                 self.start_room_id = room.rid
-            rooms.append(room)
 
         self._select_start_and_end(entity_manager)
         self._place_creatures_in_rooms(level, entity_manager)
