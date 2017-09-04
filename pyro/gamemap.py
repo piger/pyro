@@ -2,8 +2,7 @@ import random
 import tcod.bsp
 import noise
 from pyro.entities import EntityManager
-from pyro.math import Rect, Vector2
-from pyro.utils import tcod_random
+from pyro.utils import Rect, Vector2, tcod_random
 from pyro.rooms import room_1
 
 
@@ -370,6 +369,8 @@ class GameMap(object):
 
         for y in xrange(1, self.height - 1):
             for x in xrange(1, self.width - 1):
+                if self.cells[x][y].kind not in (ROOM, CORRIDOR, FLOOR):
+                    continue
                 # get noise and transform to a value between 1 and 0
                 n = noise.pnoise2(x / fx, y / fy) * 0.5 + 0.5
                 if n <= t1:
