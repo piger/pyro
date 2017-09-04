@@ -381,6 +381,9 @@ class Game(object):
 
         if user_input.key == 'ESCAPE':
             return True
+        elif user_input.char == 'q':
+            self.player_is_dead = True
+            return
         elif user_input.key == 'ENTER':
             self.is_looking = not(self.is_looking)
             if self.is_looking is True:
