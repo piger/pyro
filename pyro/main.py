@@ -15,13 +15,14 @@ def validate_size(ctx, param, value):
 @click.command()
 @click.option('--seed', '-s', type=click.INT, help="Specify random seed")
 @click.option('--window', metavar='SIZE', default='100x70', callback=validate_size,
-              help="Specify window size (in cells, 80x60)")
+              help="Specify window size", show_default=True)
 @click.option('--size', '-S', metavar='SIZE', default='80x60', callback=validate_size,
-              help="Specify map size (i.e. 80x100)")
+              help="Specify map size", show_default=True)
 @click.option('--debug', '-D', is_flag=True, help="Enable DEBUG features")
-@click.option('--font', '-f', default='consolas10x10_gs_tc.png', help="Specify a custom font")
+@click.option('--font', '-f', default='consolas10x10_gs_tc.png', help="Specify a custom font",
+              show_default=True)
 @click.option('--algo', '-a', type=click.Choice(['bsp', 'tunneling']), default='bsp',
-              help="Specify the dungeon generation algorithm")
+              help="Specify the dungeon generation algorithm", show_default=True)
 def main(seed, size, window, debug, font, algo):
     if seed is None:
         seed = int(time.time())
