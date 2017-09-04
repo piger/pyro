@@ -28,6 +28,10 @@
     {
       "name": "stairs_down",
       "avatar": ">"
+    },
+    {
+      "name": "door",
+      "avatar": "+"
     }
   ],
   "features": [
