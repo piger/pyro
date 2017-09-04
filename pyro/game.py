@@ -360,6 +360,8 @@ class Game(object):
             if self.enemies_turn:
                 self.move_enemies()
 
+        self.fizzlefade()
+
     def handle_events(self):
         result = False
         for event in tdl.event.get():
@@ -436,3 +438,37 @@ class Game(object):
 
     def is_visited(self, x, y):
         return self.visited[x][y]
+
+    def fizzlefade(self):
+        """Apply fizzlefade effect and return.
+
+        Stolen from http://fabiensanglard.net/fizzlefade/index.php
+        """
+
+        board = tdl.Console(self.screen_width, self.screen_height)
+        # copy the root content onto board
+        board.blit(self.root, 0, 0, self.screen_width, self.screen_height, 0, 0)
+        rndval = 1
+
+        running = True
+        i = 0
+
+        while running:
+            y = rndval & 0x000FF
+            x = (rndval & 0x1FF00) >> 8
+            lsb = rndval & 1
+            rndval >>= 1
+            if lsb != 0:
+                rndval ^= 0x00012000
+            if x < self.screen_width and y < self.screen_height:
+                board.draw_char(x, y, ' ', fg=(205, 38, 38), bg=(205, 38, 38))
+                i += 1
+                if i >= 100:
+                    i = 0
+                    self.root.blit(board, 0, 0, self.screen_width, self.screen_height, 0, 0)
+                    tdl.flush()
+
+            if rndval == 1:
+                running = False
+
+        tdl.flush()
