@@ -124,11 +124,11 @@ class Rect(object):
     def contains(self, other):
         if other.x < self.x:
             return False
-        if other.x > self.x + self.width:
+        if other.x > self.endX:
             return False
         if other.y < self.y:
             return False
-        if other.y > self.y + self.height:
+        if other.y > self.endY:
             return False
         return True
 
