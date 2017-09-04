@@ -55,6 +55,20 @@ class Vector2(object):
     def __add__(self, other):
         return Vector2(self.x + other.x, self.y + other.y)
 
+    def __mul__(self, other):
+        if isinstance(other, int) or isinstance(other, float):
+            return Vector2(other * self.x, other * self.y)
+        else:
+            return Vector2(self.x * other.x, self.y * other.y)
+
+    def __eq__(self, other):
+        if isinstance(other, Vector2):
+            return self.x == other.x and self.y == other.y
+        elif other is None:
+            return False
+        else:
+            raise NotImplementedError("eq not impelemented for type %s" % type(other))
+
     def __repr__(self):
         return 'Vector2(%d, %d)' % (self.x, self.y)
 
@@ -93,6 +107,21 @@ class Rect(object):
     def intersect(self, other):
         return (self.x <= other.endX and self.endX >= other.x and
                 self.y <= other.endY and self.endY >= other.y)
+
+    def contains(self, other):
+        if other.x < self.x:
+            return False
+        if other.x > self.x + self.width:
+            return False
+        if other.y < self.y:
+            return False
+        if other.y > self.y + self.height:
+            return False
+        return True
+
+    def inflate(self, distance):
+        return Rect(self.x - distance, self.y - distance,
+                    self.width + (distance * 2), self.height + (distance * 2))
 
     def __repr__(self):
         return 'Rect(x=%d, y=%d, width=%d, height=%d)' % (self.x, self.y, self.width, self.height)
