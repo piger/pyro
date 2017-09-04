@@ -14,7 +14,7 @@ def validate_size(ctx, param, value):
 
 @click.command()
 @click.option('--seed', '-s', type=click.INT, help="Specify random seed")
-@click.option('--window', metavar='SIZE', default='80x60', callback=validate_size,
+@click.option('--window', metavar='SIZE', default='100x70', callback=validate_size,
               help="Specify window size (in cells, 80x60)")
 @click.option('--size', '-S', metavar='SIZE', default='80x60', callback=validate_size,
               help="Specify map size (i.e. 80x100)")
