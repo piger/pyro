@@ -395,8 +395,8 @@ class BspGameMap(GameMap):
         # select starting and ending rooms
         self._select_start_and_end(entity_manager)
         self._place_creatures_in_rooms(level, entity_manager)
+        self._place_doors(entity_manager)
         self._add_features()
-
 
 
 class TunnelingGameMap(GameMap):
