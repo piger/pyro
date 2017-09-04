@@ -1,6 +1,6 @@
 import json
 import pkg_resources
-from pyro.math import Vector2
+from pyro.utils import Vector2
 
 
 # https://web.njit.edu/~kevin/rgb.txt.html
