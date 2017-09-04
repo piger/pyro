@@ -136,5 +136,8 @@ class Rect(object):
         return Rect(self.x - distance, self.y - distance,
                     self.width + (distance * 2), self.height + (distance * 2))
 
+    def collidepoint(self, x, y):
+        return x >= self.x and x <= self.endX and y >= self.y and y <= self.endY
+
     def __repr__(self):
         return 'Rect(x=%d, y=%d, width=%d, height=%d)' % (self.x, self.y, self.width, self.height)
