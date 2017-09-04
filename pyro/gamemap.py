@@ -409,9 +409,7 @@ class GameMap(object):
         cell = self.get_at(x, y)
         if cell.kind == CORRIDOR:
             if random.random() > 0.3:
-                entity = entity_manager.create_entity('door')
-                entity.always_visible = True
-                entity.set_position(x, y)
+                entity = entity_manager.create_door(x, y)
                 cell.entities.append(entity.eid)
 
     def get_at(self, x_or_pos, y=None):

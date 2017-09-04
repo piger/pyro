@@ -32,6 +32,15 @@ class CombatComponent(Component):
         self.armor = armor
 
 
+class DoorComponent(Component):
+
+    NAME = 'door'
+
+    def __init__(self, initial_state=True):
+        super(DoorComponent, self).__init__(self.NAME)
+        self.state = initial_state
+
+
 class Entity(object):
     def __init__(self, eid, name, avatar, color):
         self.eid = eid
@@ -55,6 +64,7 @@ class EntityManager(object):
         self.entities = {}
         self.health_components = {}
         self.combat_components = {}
+        self.door_components = {}
 
     def next_eid(self):
         rv = self.eid
@@ -79,6 +89,14 @@ class EntityManager(object):
             self.combat_components[entity.eid] = cc
 
         self.entities[entity.eid] = entity
+        return entity
+
+    def create_door(self, x, y):
+        entity = self.create_entity('door')
+        dc = DoorComponent()
+        self.door_components[entity.eid] = dc
+        entity.always_visible = True
+        entity.set_position(x, y)
         return entity
 
     def destroy_entity(self, eid):

@@ -172,6 +172,9 @@ class Game(object):
                 if cell.kind in (FLOOR, ROOM, CORRIDOR):
                     fov_map.walkable[y, x] = True
                     fov_map.transparent[y, x] = True
+                for entity_id in cell.entities:
+                    if entity_id in self.world.entity_manager.door_components:
+                        fov_map.transparent[y, x] = False
         self.fov_map = fov_map
 
     def init_visited(self):
@@ -308,40 +311,53 @@ class Game(object):
                                          fg=MESSAGE_COLOR)
 
     def attempt_move(self, dest_vec):
+        """Return False to negate passage, True to allow it"""
+
         game_map = self.world.get_current_map()
         dcell = game_map.get_at(dest_vec.x, dest_vec.y)
         if not dcell.entities and dcell.kind not in (VOID, WALL):
             return True
 
         em = self.world.entity_manager
-        can_fight = []
-        for eid in dcell.entities:
-            # get entity
-            entity = em.get_entity(eid)
-            # get combat component, if any
+        entities = [em.get_entity(eid) for eid in dcell.entities]
+
+        is_fight = False
+        for entity in entities:
             cc = em.combat_components.get(entity.eid)
             if cc is not None:
-                can_fight.append((entity, cc))
+                self.player_fight(entity, cc, em)
+                is_fight = True
+                break
 
+        if is_fight:
+            return False
+
+        for entity in entities:
+            dc = em.door_components.get(entity.eid)
+            if dc is not None:
+                print "open door"
+                # handle door opening...
+                return True
+
+    def player_fight(self, entity, entity_cc, em):
         player_cc = em.combat_components.get(self.player.eid)
         player_hc = em.health_components.get(self.player.eid)
 
-        for entity, cc in can_fight:
-            print "fight between player and %r (%d/%d)" % (entity.name, cc.damage, cc.armor)
-            enemy_hc = em.health_components.get(entity.eid)
-            enemy_hc.health -= player_cc.damage
+        print "fight between player and %r (%d/%d)" % (entity.name, entity_cc.damage, entity_cc.armor)
+        enemy_hc = em.health_components.get(entity.eid)
+        enemy_hc.health -= player_cc.damage
 
-            self.post_message("You hit the %s for %d damage (%d left)" % (
-                entity.name, player_cc.damage, enemy_hc.health))
+        self.post_message("You hit the %s for %d damage (%d left)" % (
+            entity.name, player_cc.damage, enemy_hc.health))
 
-            if enemy_hc.health <= 0:
-                self.post_message("%s is dead" % entity.name)
-                self.world.destroy_entity(entity.eid)
-            else:
-                player_hc.health -= cc.damage
-                if player_hc.health <= 0:
-                    self.post_message("You are dead!")
-                    self.player_is_dead = True
+        if enemy_hc.health <= 0:
+            self.post_message("%s is dead" % entity.name)
+            self.world.destroy_entity(entity.eid)
+        else:
+            player_hc.health -= entity_cc.damage
+            if player_hc.health <= 0:
+                self.post_message("You are dead!")
+                self.player_is_dead = True
 
     def move_enemies(self):
         self.enemies_turn = False
