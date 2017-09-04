@@ -3,7 +3,7 @@ import tcod.bsp
 import noise
 from collections import OrderedDict
 from pyro.entities import EntityManager
-from pyro.utils import Rect, Vector2, tcod_random, NORTH, SOUTH, EAST, WEST
+from pyro.utils import Rect, Vector2, tcod_random, Direction
 from pyro.rooms import room_1
 
 
@@ -81,53 +81,8 @@ class GameMap(object):
         self.end_room_id = None
         self.tunnel_id = '0' # note: it's a str!
 
-    def _traverse(self, node):
-        for child in node.children:
-            self._traverse(child)
-
-        if node.children:
-            self._connect_nodes(node)
-        else:
-            room = create_room_inside(node.x, node.y, self.min_room_width, self.min_room_height,
-                                      node.width, node.height)
-            self.rooms[room.rid] = room
-            self._dig_room(room)
-
-    def _connect_nodes(self, node):
-        """Creates two Rooms from two BSP nodes and connect them with a corridor"""
-
-        room_a, room_b = None, None
-
-        node1, node2 = node.children
-        n1 = Rect(node1.x, node1.y, node1.width, node1.height)
-        n2 = Rect(node2.x, node2.y, node2.width, node2.height)
-
-        for room in self.rooms.values():
-            if room.intersect(n1):
-                room_a = room
-                break
-
-        for room in self.rooms.values():
-            if room.intersect(n2) and room != room_a:
-                room_b = room
-                break
-
-        if room_a is None and room_b is None:
-            print "both room_a and room_b are None"
-            return
-        elif room_a is None and room_b:
-            print "room_a is None, room_b is OK"
-            return
-        elif room_a and room_b is None:
-            print "room_a is OK, room_b is None"
-            return
-        elif node1.level != node2.level:
-            print "node1 and node2 are different levels!"
-            return
-
-        self._connect_rooms(room_a, room_b)
-        self.rooms[room_a.rid].connected = True
-        self.rooms[room_b.rid].connected = True
+    def generate(self, level, entity_manager):
+        raise NotImplementedError
 
     def _connect_rooms(self, room1, room2):
         """Connects two rooms with a corridor"""
@@ -238,97 +193,6 @@ class GameMap(object):
         entity.set_position(end_x, end_y)
         end_cell.entities.append(entity.eid)
 
-    # NOTES:
-    # if we store a rect for each room and then in connect_nodes() we create a new Rect for both rooms
-    # and then we use Rect.intersect() to find the matching room.
-    def generate_bsp(self, level, entity_manager):
-        # place outer walls
-        for x in xrange(self.width):
-            self.cells[x][0].kind = WALL
-            self.cells[x][self.height-1].kind = WALL
-
-        for y in xrange(self.height):
-            self.cells[0][y].kind = WALL
-            self.cells[self.width-1][y].kind = WALL
-
-        # rooms
-        bsp = tcod.bsp.BSP(x=1, y=1, width=self.width-2, height=self.height-2)
-        bsp.split_recursive(depth=7, min_width=self.min_room_width + 1, min_height=self.min_room_height + 1,
-                            max_horizontal_ratio=1.5, max_vertical_ratio=1.5, seed=tcod_random.rng)
-
-        self._traverse(bsp)
-
-        # we're lazy and we just delete unconnected rooms
-        unconnected_rooms = [room for room in self.rooms.values() if not room.connected]
-        print "%d unconnected rooms" % len(unconnected_rooms)
-        for room in unconnected_rooms:
-            self._cancel_room(room)
-
-        # Convert 'tunnel' blocks inside rooms into room blocks
-        for room in self.rooms.values():
-            for y in xrange(room.y+1, room.endY-1):
-                for x in xrange(room.x+1, room.endX-1):
-                    self.cells[x][y].kind = ROOM
-
-        # select starting and ending rooms
-        self._select_start_and_end(entity_manager)
-        self._place_creatures_in_rooms(level, entity_manager)
-        self._add_features()
-
-    def generate_tunneling(self, level, entity_manager):
-        max_room_size = 16
-        min_room_size = 5
-        max_rooms = 30
-        weird_done = False
-        is_weird = False
-
-        for _ in xrange(max_rooms):
-            lines = []
-            if random.random() > 0.8 and not weird_done:
-                template = room_1.strip()
-                lines = template.split("\n")
-                width = len(lines[0])
-                height = len(lines)
-                weird_done = True
-                is_weird = True
-            else:
-                width = random.randint(min_room_size, max_room_size)
-                height = random.randint(min_room_size, max_room_size)
-
-            x = random.randint(0, self.width - width - 1)
-            y = random.randint(0, self.height - height - 1)
-            room = Room(x, y, width, height)
-
-            failed = False
-            for other_room in self.rooms.values():
-                if room.intersect(other_room):
-                    failed = True
-                    break
-
-            if failed:
-                continue
-
-            self.rooms[room.rid] = room
-            self._dig_room(room)
-
-            # special case for creating prefab rooms
-            if is_weird:
-                for y, line in enumerate(lines):
-                    for x, c in enumerate(line):
-                        if c == '#':
-                            self.cells[room.x + x][room.y + y].kind = WALL
-                is_weird = False
-
-            if len(self.rooms) > 1:
-                last_room = self.rooms.values()[-2]
-                self._connect_rooms(room, last_room)
-            else:
-                self.start_room_id = room.rid
-
-        self._select_start_and_end(entity_manager)
-        self._place_creatures_in_rooms(level, entity_manager)
-        self._place_doors(entity_manager)
-
     def _dig_room(self, room):
         # room outer walls (y) - do not overwrite existing tunnel tho!
         for y in xrange(room.y, room.endY):
@@ -394,15 +258,15 @@ class GameMap(object):
                 for i in (room.x, room.endX - 1):
                     pos = Vector2(i, y)
                     # a room can only be placed between two walls
-                    if (self.get_at(pos + NORTH).kind == WALL and
-                        self.get_at(pos + SOUTH).kind == WALL):
+                    if (self.get_at(pos + Direction.NORTH).kind == WALL and
+                        self.get_at(pos + Direction.SOUTH).kind == WALL):
                         self._maybe_place_door(entity_manager, i, y)
 
             for x in xrange(room.x + 1, room.endX - 1):
                 for i in (room.y, room.endY - 1):
                     pos = Vector2(x, i)
-                    if (self.get_at(pos + EAST).kind == WALL and
-                        self.get_at(pos + WEST).kind == WALL):
+                    if (self.get_at(pos + Direction.EAST).kind == WALL and
+                        self.get_at(pos + Direction.WEST).kind == WALL):
                         self._maybe_place_door(entity_manager, x, i)
 
     def _maybe_place_door(self, entity_manager, x ,y):
@@ -421,10 +285,8 @@ class GameMap(object):
         """Get cells around x, y, EXCEPT x,y!"""
 
         cells = []
-        for dx, dy in ((-1, -1), (0, -1), (1, -1),
-                       (-1, 0), (1, 0),
-                       (-1, 1), (0, 1), (1, 1)):
-            cells.append(self.get_at(x + dx, y + dy))
+        for pos in Direction.all():
+            cells.append(self.get_at(x + pos.x, y + pos.y))
         return cells
 
     def get_room(self, room_id):
@@ -442,6 +304,175 @@ class GameMap(object):
         return result
 
 
+class BspGameMap(GameMap):
+    """Pretty standard BSP based dungeon generation"""
+    def __init__(self, depth=7, *args, **kwargs):
+        super(BspGameMap, self).__init__(*args, **kwargs)
+        self.depth = depth
+
+    def _traverse(self, node):
+        for child in node.children:
+            self._traverse(child)
+
+        if node.children:
+            self._connect_nodes(node)
+        else:
+            room = create_room_inside(node.x, node.y, self.min_room_width, self.min_room_height,
+                                      node.width, node.height)
+            self.rooms[room.rid] = room
+            self._dig_room(room)
+
+    def _connect_nodes(self, node):
+        """Creates two Rooms from two BSP nodes and connect them with a corridor"""
+
+        room_a, room_b = None, None
+
+        node1, node2 = node.children
+        n1 = Rect(node1.x, node1.y, node1.width, node1.height)
+        n2 = Rect(node2.x, node2.y, node2.width, node2.height)
+
+        for room in self.rooms.values():
+            if room.intersect(n1):
+                room_a = room
+                break
+
+        for room in self.rooms.values():
+            if room.intersect(n2) and room != room_a:
+                room_b = room
+                break
+
+        if room_a is None and room_b is None:
+            print "both room_a and room_b are None"
+            return
+        elif room_a is None and room_b:
+            print "room_a is None, room_b is OK"
+            return
+        elif room_a and room_b is None:
+            print "room_a is OK, room_b is None"
+            return
+        elif node1.level != node2.level:
+            print "node1 and node2 are different levels!"
+            return
+
+        self._connect_rooms(room_a, room_b)
+        self.rooms[room_a.rid].connected = True
+        self.rooms[room_b.rid].connected = True
+
+    # NOTES:
+    # if we store a rect for each room and then in connect_nodes() we create a new Rect for both rooms
+    # and then we use Rect.intersect() to find the matching room.
+    def generate(self, level, entity_manager):
+        # place outer walls
+        for x in xrange(self.width):
+            self.cells[x][0].kind = WALL
+            self.cells[x][self.height-1].kind = WALL
+
+        for y in xrange(self.height):
+            self.cells[0][y].kind = WALL
+            self.cells[self.width-1][y].kind = WALL
+
+        # split game map with BSP
+        bsp = tcod.bsp.BSP(x=1, y=1, width=self.width-2, height=self.height-2)
+        bsp.split_recursive(depth=self.depth, min_width=self.min_room_width + 1,
+                            min_height=self.min_room_height + 1, max_horizontal_ratio=1.5,
+                            max_vertical_ratio=1.5, seed=tcod_random.rng)
+
+        # traverse all the nodes to place rooms and connect them
+        self._traverse(bsp)
+
+        # we're lazy and we just delete unconnected rooms
+        unconnected_rooms = [room for room in self.rooms.values() if not room.connected]
+        print "%d unconnected rooms" % len(unconnected_rooms)
+        for room in unconnected_rooms:
+            self._cancel_room(room)
+
+        # Convert 'tunnel' blocks inside rooms into room blocks
+        for room in self.rooms.values():
+            for y in xrange(room.y+1, room.endY-1):
+                for x in xrange(room.x+1, room.endX-1):
+                    self.cells[x][y].kind = ROOM
+
+        # select starting and ending rooms
+        self._select_start_and_end(entity_manager)
+        self._place_creatures_in_rooms(level, entity_manager)
+        self._add_features()
+
+
+
+class TunnelingGameMap(GameMap):
+    """Randomly places rooms into the map and the connected them. Very simple."""
+
+    def generate(self, level, entity_manager):
+        max_room_size = 16
+        min_room_size = 5
+        max_rooms = 30
+        weird_done = False
+        is_weird = False
+
+        # place outer walls
+        for x in xrange(self.width):
+            self.cells[x][0].kind = WALL
+            self.cells[x][self.height-1].kind = WALL
+
+        for y in xrange(self.height):
+            self.cells[0][y].kind = WALL
+            self.cells[self.width-1][y].kind = WALL
+
+        for _ in xrange(max_rooms):
+            lines = []
+            if random.random() > 0.8 and not weird_done:
+                template = room_1.strip()
+                lines = template.split("\n")
+                width = len(lines[0])
+                height = len(lines)
+                weird_done = True
+                is_weird = True
+            else:
+                width = random.randint(min_room_size, max_room_size)
+                height = random.randint(min_room_size, max_room_size)
+
+            x = random.randint(0, self.width - width - 1)
+            y = random.randint(0, self.height - height - 1)
+            room = Room(x, y, width, height)
+
+            failed = False
+            for other_room in self.rooms.values():
+                if room.intersect(other_room):
+                    failed = True
+                    break
+
+            if failed:
+                continue
+
+            self.rooms[room.rid] = room
+            self._dig_room(room)
+
+            # special case for creating prefab rooms
+            if is_weird:
+                for y, line in enumerate(lines):
+                    for x, c in enumerate(line):
+                        if c == '#':
+                            self.cells[room.x + x][room.y + y].kind = WALL
+                is_weird = False
+
+            if len(self.rooms) > 1:
+                last_room = self.rooms.values()[-2]
+                self._connect_rooms(room, last_room)
+            else:
+                self.start_room_id = room.rid
+
+        # Convert 'tunnel' blocks inside rooms into room blocks
+        for room in self.rooms.values():
+            for y in xrange(room.y+1, room.endY-1):
+                for x in xrange(room.x+1, room.endX-1):
+                    self.cells[x][y].kind = ROOM
+
+        self._select_start_and_end(entity_manager)
+        self._place_creatures_in_rooms(level, entity_manager)
+        self._place_doors(entity_manager)
+        self._add_features()
+
+
 class World(object):
     def __init__(self):
         self.maps = []
@@ -449,14 +480,13 @@ class World(object):
         self.entity_manager = EntityManager()
 
     def create_map(self, width, height, level=1, dungeon_algorithm=None):
-        game_map = GameMap(width, height)
-
-        if dungeon_algorithm is None or dungeon_algorithm == 'bsp':
-            game_map.generate_bsp(level, self.entity_manager)
-        elif dungeon_algorithm == 'tunneling':
-            game_map.generate_tunneling(level, self.entity_manager)
+        if dungeon_algorithm in (None, 'bsp'):
+            MapClass = BspGameMap
         else:
-            raise Exception("Dungeon algorithm %s do not exists" % dungeon_algorithm)
+            MapClass = TunnelingGameMap
+
+        game_map = MapClass(width, height)
+        game_map.generate(level, self.entity_manager)
 
         self.maps.append(game_map)
 

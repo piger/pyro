@@ -3,9 +3,7 @@ import random
 import tdl
 import tcod.map
 from pyro.gamemap import WALL, ROOM, CORRIDOR, VOID, FLOOR, World
-from pyro.utils import (NORTH, SOUTH, EAST, WEST, NORTH_EAST, NORTH_WEST,
-                        SOUTH_EAST, SOUTH_WEST)
-from pyro.utils import tcod_random, darken_color, clamp
+from pyro.utils import tcod_random, darken_color, clamp, Direction
 from pyro.gamedata import gamedata
 
 
@@ -406,21 +404,21 @@ class Game(object):
                 self.eye_position = self.player.get_position().copy()
             return
         elif user_input.key == 'UP' or user_input.char == 'k':
-            direction = NORTH
+            direction = Direction.NORTH
         elif user_input.char == 'y':
-            direction = NORTH_WEST
+            direction = Direction.NORTH_WEST
         elif user_input.char == 'u':
-            direction = NORTH_EAST
+            direction = Direction.NORTH_EAST
         elif user_input.key == 'DOWN' or user_input.char == 'j':
-            direction = SOUTH
+            direction = Direction.SOUTH
         elif user_input.key == 'LEFT' or user_input.char == 'h':
-            direction = WEST
+            direction = Direction.WEST
         elif user_input.key == 'RIGHT' or user_input.char == 'l':
-            direction = EAST
+            direction = Direction.EAST
         elif user_input.char == 'b':
-            direction = SOUTH_WEST
+            direction = Direction.SOUTH_WEST
         elif user_input.char == 'n':
-            direction = SOUTH_EAST
+            direction = Direction.SOUTH_EAST
 
         if direction is not None:
             if self.is_looking:

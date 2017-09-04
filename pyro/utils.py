@@ -73,16 +73,29 @@ class Vector2(object):
         return 'Vector2(%d, %d)' % (self.x, self.y)
 
 
-# Example:
-# move(player_pos + NORTH)
-NORTH = Vector2(0, -1)
-SOUTH = Vector2(0, 1)
-EAST = Vector2(1, 0)
-WEST = Vector2(-1, 0)
-NORTH_EAST = Vector2(1, -1)
-NORTH_WEST = Vector2(-1, -1)
-SOUTH_EAST = Vector2(1, 1)
-SOUTH_WEST = Vector2(-1, 1)
+class Direction(object):
+    NORTH = Vector2(0, -1)
+    SOUTH = Vector2(0, 1)
+    EAST = Vector2(1, 0)
+    WEST = Vector2(-1, 0)
+    NORTH_EAST = Vector2(1, -1)
+    NORTH_WEST = Vector2(-1, -1)
+    SOUTH_EAST = Vector2(1, 1)
+    SOUTH_WEST = Vector2(-1, 1)
+
+    @classmethod
+    def all(cls):
+        return (cls.NORTH_WEST, cls.NORTH, cls.NORTH_EAST,
+                cls.WEST, cls.EAST,
+                cls.SOUTH_WEST, cls.SOUTH, cls.SOUTH_EAST)
+
+    @classmethod
+    def cardinal(cls):
+        return (cls.NORTH, cls.EAST, cls.SOUTH, cls.WEST)
+
+    @classmethod
+    def intercardinal(cls):
+        return (cls.NORTH_EAST, cls.SOUTH_EAST, cls.SOUTH_WEST, cls.NORTH_WEST)
 
 
 class Rect(object):
