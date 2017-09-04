@@ -3,7 +3,7 @@ import tcod.bsp
 import noise
 from collections import OrderedDict
 from pyro.entities import EntityManager
-from pyro.utils import Rect, Vector2, tcod_random
+from pyro.utils import Rect, Vector2, tcod_random, NORTH, SOUTH, EAST, WEST
 from pyro.rooms import room_1
 
 
@@ -327,6 +327,7 @@ class GameMap(object):
 
         self._select_start_and_end(entity_manager)
         self._place_creatures_in_rooms(level, entity_manager)
+        self._place_doors(entity_manager)
 
     def _dig_room(self, room):
         # room outer walls (y) - do not overwrite existing tunnel tho!
@@ -384,8 +385,39 @@ class GameMap(object):
                 else:
                     self.cells[x][y].feature = "floor"
 
-    def get_at(self, x, y):
-        return self.cells[x][y]
+    def _place_doors(self, entity_manager):
+        for room in self.rooms.values():
+            # openings = []
+
+            # inspect room sides, except corners
+            for y in xrange(room.y + 1, room.endY - 1):
+                for i in (room.x, room.endX - 1):
+                    pos = Vector2(i, y)
+                    # a room can only be placed between two walls
+                    if (self.get_at(pos + NORTH).kind == WALL and
+                        self.get_at(pos + SOUTH).kind == WALL):
+                        self._maybe_place_door(entity_manager, i, y)
+
+            for x in xrange(room.x + 1, room.endX - 1):
+                for i in (room.y, room.endY - 1):
+                    pos = Vector2(x, i)
+                    if (self.get_at(pos + EAST).kind == WALL and
+                        self.get_at(pos + WEST).kind == WALL):
+                        self._maybe_place_door(entity_manager, x, i)
+
+    def _maybe_place_door(self, entity_manager, x ,y):
+        cell = self.get_at(x, y)
+        if cell.kind == CORRIDOR:
+            if random.random() > 0.3:
+                entity = entity_manager.create_entity('door')
+                entity.always_visible = True
+                entity.set_position(x, y)
+                cell.entities.append(entity.eid)
+
+    def get_at(self, x_or_pos, y=None):
+        if y is None and isinstance(x_or_pos, Vector2):
+            return self.cells[x_or_pos.x][x_or_pos.y]
+        return self.cells[x_or_pos][y]
 
     def get_cells_around(self, x, y):
         """Get cells around x, y, EXCEPT x,y!"""
