@@ -306,9 +306,9 @@ class GameMap(object):
 
 class BspGameMap(GameMap):
     """Pretty standard BSP based dungeon generation"""
-    def __init__(self, depth=7, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super(BspGameMap, self).__init__(*args, **kwargs)
-        self.depth = depth
+        self.depth = 7
 
     def _traverse(self, node):
         for child in node.children:
