@@ -39,7 +39,7 @@ SYMBOLS = {
 
 MESSAGE_COLOR = (224, 224, 224)
 DARK_BACKGROUND = (8, 8, 8)
-PANEL_TEXT_COLOR = (255, 100, 255)
+PANEL_TEXT_COLOR = (224, 224, 224)
 
 
 class Camera(object):
@@ -113,11 +113,20 @@ class Game(object):
         tcod_random.init(self.seed)
 
     def init_game(self):
-        # setup screen
-        # https://github.com/HexDecimal/python-tdl/tree/master/fonts/libtcod
+        # Other fonts: https://github.com/HexDecimal/python-tdl/tree/master/fonts/libtcod
         tdl.set_font(self.font, greyscale=True, altLayout=True)
         self.root = tdl.init(self.screen_width, self.screen_height, title="PyRo", fullscreen=False)
         tdl.set_fps(20)
+
+        # setup all the consoles
+        # +-------------+---+
+        # |A            |B  |  A = console (where you see the actual game)
+        # |             |   |  B = info panel
+        # |             +---+  C = status bar (for 'look' command)
+        # |             |D  |  D = log panel
+        # +-------------|   |
+        # |C____________|___|
+
         self.console = tdl.Console(self.display_width, self.display_height)
         self.panel = tdl.Console(self.panel_width, self.panel_height)
 
@@ -130,6 +139,7 @@ class Game(object):
         # load game data
         gamedata.load()
 
+        # Initialize world and current dungeon
         self.world = World()
         self.world.create_map(self.game_width, self.game_height, level=1,
                               dungeon_algorithm=self.dungeon_algorithm)
@@ -166,6 +176,8 @@ class Game(object):
     def init_visited(self):
         cur_map = self.world.get_current_map()
         self.visited = [[False for y in xrange(self.game_height)] for x in xrange(self.game_width)]
+
+        # the starting room is always entirely visited.
         start_cell = cur_map.get_at(cur_map.start_vec.x, cur_map.start_vec.y)
         start_room = cur_map.get_room(start_cell.room_id)
 
@@ -411,7 +423,6 @@ class Game(object):
 
     def post_message(self, message):
         n_lines = int(math.ceil(float(len(message)) / float(self.log_width)))
-        print n_lines
         if n_lines < 1:
             n_lines = 1
         self.logpanel.scroll(0, n_lines)
