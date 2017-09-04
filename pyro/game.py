@@ -96,6 +96,7 @@ class Game(object):
         self.fov_map = None
         self.visited = None
         self.enemies_turn = False
+        self.player_is_dead = False
 
         self.is_looking = False
         self.eye_position = None
@@ -340,6 +341,7 @@ class Game(object):
                 player_hc.health -= cc.damage
                 if player_hc.health <= 0:
                     self.post_message("You are dead!")
+                    self.player_is_dead = True
 
     def move_enemies(self):
         self.enemies_turn = False
@@ -360,7 +362,9 @@ class Game(object):
             if self.enemies_turn:
                 self.move_enemies()
 
-        self.fizzlefade()
+            if self.player_is_dead:
+                self.fizzlefade()
+                running = False
 
     def handle_events(self):
         result = False
@@ -440,7 +444,8 @@ class Game(object):
         return self.visited[x][y]
 
     def fizzlefade(self):
-        """Apply fizzlefade effect and return.
+        """Apply fizzlefade effect and return. Only works for window sizes up to 320x200
+        and it's really just for fun.
 
         Stolen from http://fabiensanglard.net/fizzlefade/index.php
         """
