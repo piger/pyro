@@ -1,3 +1,4 @@
+import math
 import random
 import tcod.bsp
 import noise
@@ -170,28 +171,37 @@ class GameMap(object):
         else:
             start_room = self.get_room(self.start_room_id)
         rooms.remove(start_room)
-        end_room = random.choice(rooms)
+
+        # for each remaining room calculate the distance from the starting room
+        distances = []
+        for room in rooms:
+            scx, scy = start_room.center
+            ocx, ocy = room.center
+
+            distance = math.sqrt((ocx - scx) ** 2 + (ocy - scy) ** 2)
+            distances.append((distance, room))
+
+        # pick a random rom between the 3 more far from the starting room
+        distances.sort(key=lambda x: x[0])
+        end_room = random.choice([x[1] for x in distances[-3:]])
 
         self.start_room_id = start_room.rid
         self.end_room_id = end_room.rid
 
         start_x, start_y = start_room.center
         self.start_vec = Vector2(start_x, start_y)
-        start_cell = self.get_at(start_x, start_y)
-
-        entity = entity_manager.create_entity('stairs_up')
-        entity.always_visible = True
-        entity.set_position(start_x, start_y)
-        start_cell.entities.append(entity.eid)
+        self._place_stairs(self.start_vec, 'stairs_up', entity_manager)
 
         end_x, end_y = end_room.center
         self.end_vec = Vector2(end_x, end_y)
-        end_cell = self.get_at(end_x, end_y)
+        self._place_stairs(self.end_vec, 'stairs_down', entity_manager)
 
-        entity = entity_manager.create_entity('stairs_down')
+    def _place_stairs(self, pos, kind, entity_manager):
+        cell = self.get_at(pos)
+        entity = entity_manager.create_entity(kind)
         entity.always_visible = True
-        entity.set_position(end_x, end_y)
-        end_cell.entities.append(entity.eid)
+        entity.set_position(pos.x, pos.y)
+        cell.entities.append(entity.eid)
 
     def _dig_room(self, room):
         # room outer walls (y) - do not overwrite existing tunnel tho!
