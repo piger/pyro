@@ -5,6 +5,7 @@ import tcod.map
 from pyro.gamemap import WALL, ROOM, CORRIDOR, VOID, FLOOR, World
 from pyro.utils import tcod_random, darken_color, clamp, Direction
 from pyro.gamedata import gamedata
+from pyro.combat import roll_to_hit, chance_to_hit
 
 
 SYMBOLS = {
@@ -339,23 +340,41 @@ class Game(object):
 
     def player_fight(self, entity, entity_cc, em):
         player_cc = em.combat_components.get(self.player.eid)
-        player_hc = em.health_components.get(self.player.eid)
-
-        print "fight between player and %r (%d/%d)" % (entity.name, entity_cc.damage, entity_cc.armor)
         enemy_hc = em.health_components.get(entity.eid)
-        enemy_hc.health -= player_cc.damage
 
-        self.post_message("You hit the %s for %d damage (%d left)" % (
-            entity.name, player_cc.damage, enemy_hc.health))
+        print "fight between player (%d/%d/%d) and %r (%d/%d/%d)" % (
+            player_cc.damage, player_cc.accuracy, player_cc.defense,
+            entity.name, entity_cc.damage, entity_cc.accuracy, entity_cc.defense)
+
+        if roll_to_hit(player_cc.accuracy, entity_cc.defense):
+            enemy_hc.health -= player_cc.damage
+            self.post_message("You hit the %s for %d damage (%d left)" % (
+                entity.name, player_cc.damage, enemy_hc.health))
+        else:
+            # show some details about the chance to hit
+            chance = chance_to_hit(player_cc.accuracy, entity_cc.defense)
+            self.post_message("You miss the %s (%d%%)" % (entity.name, chance))
 
         if enemy_hc.health <= 0:
             self.post_message("%s is dead" % entity.name)
             self.world.destroy_entity(entity.eid)
+
+    def enemy_fight(self, entity, entity_cc, other, other_cc, other_hc):
+        victim = other.name
+        if other.name == 'player':
+            victim = "you"
+        if roll_to_hit(entity_cc.accuracy, other_cc.defense):
+            self.post_message("the %s hits %s for %d damage" % (entity.name, victim, entity_cc.damage))
+            other_hc.health -= entity_cc.damage
         else:
-            player_hc.health -= entity_cc.damage
-            if player_hc.health <= 0:
+            self.post_message("the %s miss %s" % (entity.name, victim))
+
+        if other_hc.health <= 0:
+            if other.name == 'player':
                 self.post_message("You are dead!")
                 self.player_is_dead = True
+            else:
+                self.world.destroy_entity(entity.eid)
 
     def move_enemies(self):
         self.enemies_turn = False

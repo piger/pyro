@@ -1,3 +1,4 @@
+import re
 import json
 import pkg_resources
 from pyro.utils import Vector2
@@ -8,9 +9,19 @@ from pyro.gamedata import gamedata
 DEFAULT_ENTITY_COLOR = (255, 127, 36) # chocolate1
 
 
+def parse_capability(line):
+    name, line = line.split(':', 1)
+    results = re.split(r'(?<!\\):', line)
+    results = [x.replace('\\\\', '\\') for x in results]
+    return (name, results)
+
+
 class Component(object):
     def __init__(self, name):
         self.name = name
+
+    def config(self, values):
+        raise NotImplementedError
 
 
 class HealthComponent(Component):
@@ -26,10 +37,14 @@ class CombatComponent(Component):
 
     NAME = 'combat'
 
-    def __init__(self, damage, armor):
+    def __init__(self, damage=0, defense=0, accuracy=0):
         super(CombatComponent, self).__init__(self.NAME)
         self.damage = damage
-        self.armor = armor
+        self.defense = defense
+        self.accuracy = accuracy
+
+    def config(self, values):
+        self.damage, self.defense, self.accuracy = [int(x) for x in values]
 
 
 class DoorComponent(Component):
@@ -39,6 +54,13 @@ class DoorComponent(Component):
     def __init__(self, initial_state=True):
         super(DoorComponent, self).__init__(self.NAME)
         self.state = initial_state
+
+
+COMP_MAP = {
+    'combat': CombatComponent,
+    'door': DoorComponent,
+    'life': HealthComponent,
+}
 
 
 class Entity(object):
@@ -66,6 +88,12 @@ class EntityManager(object):
         self.combat_components = {}
         self.door_components = {}
 
+        self.comp_db = {
+            'health': self.health_components,
+            'combat': self.combat_components,
+            'door': self.door_components,
+        }
+
     def next_eid(self):
         rv = self.eid
         self.eid += 1
@@ -84,9 +112,13 @@ class EntityManager(object):
             hc = HealthComponent(entity_data['health'])
             self.health_components[entity.eid] = hc
 
-        if entity_data['damage'] > 0:
-            cc = CombatComponent(entity_data['damage'], entity_data['armor'])
-            self.combat_components[entity.eid] = cc
+        for cap in entity_data.get('can', []):
+            name, values = parse_capability(cap)
+            CompClass = COMP_MAP[name]
+            comp = CompClass(name)
+            comp.config(values)
+            db = self.comp_db[name]
+            db[entity.eid] = comp
 
         self.entities[entity.eid] = entity
         return entity

@@ -3,16 +3,18 @@
     {
       "name": "player",
       "health": 100,
-      "damage": 1,
-      "armor": 2,
-      "avatar": "@"
+      "avatar": "@",
+      "can": [
+        "combat:5:15:100"
+      ]
     },
     {
       "name": "boar",
       "health": 10,
-      "damage": 1,
-      "armor": 2,
-      "avatar": "b"
+      "avatar": "b",
+      "can": [
+        "combat:2:6:70"
+      ]
     },
     {
       "name": "fairy",

@@ -163,7 +163,11 @@ class GameMap(object):
         pass
 
     def _select_start_and_end(self, entity_manager):
-        """Place stairs up and stairs down"""
+        """Place stairs up and stairs down.
+
+        NOTE: the current algorithm will pick up the "end room" between the 3 rooms with the
+        most distance from the start room.
+        """
 
         rooms = self.rooms.values()
         if self.start_room_id is None:
