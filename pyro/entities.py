@@ -92,6 +92,12 @@ class MonsterAIComponent(Component):
             entity.position = dest
             old_cell.entities.remove(entity.eid)
             cell.entities.append(entity.eid)
+        elif cell.entities:
+            em = game.world.entity_manager
+            for entity_id in cell.entities:
+                victim = em.get_entity(entity_id)
+                if victim.name == 'player':
+                    game.enemy_fight_player(entity)
 
 
 COMP_MAP = {

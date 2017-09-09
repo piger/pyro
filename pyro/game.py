@@ -154,6 +154,8 @@ class Game(object):
         self.player = self.world.entity_manager.create_entity('player')
         self.player.set_position(cur_map.start_vec.x, cur_map.start_vec.y)
         self.fov_map.compute_fov(cur_map.start_vec.x, cur_map.start_vec.y, radius=6)
+        cell = cur_map.get_at(self.player.position)
+        cell.entities.append(self.player.eid)
 
         # setup visited cells
         self.init_visited()
@@ -359,6 +361,13 @@ class Game(object):
             self.post_message("%s is dead" % entity.name)
             self.world.destroy_entity(entity.eid)
 
+    def enemy_fight_player(self, entity):
+        em = self.world.entity_manager
+        entity_cc = em.combat_components.get(entity.eid)
+        player_cc = em.combat_components.get(self.player.eid)
+        player_hc = em.health_components.get(self.player.eid)
+        self.enemy_fight(entity, entity_cc, self.player, player_cc, player_hc)
+
     def enemy_fight(self, entity, entity_cc, other, other_cc, other_hc):
         victim = other.name
         if other.name == 'player':
@@ -443,6 +452,9 @@ class Game(object):
             direction = Direction.SOUTH_WEST
         elif user_input.char == 'n':
             direction = Direction.SOUTH_EAST
+        elif user_input.key == 'SPACE' or user_input.char == 'z':
+            self.enemies_turn = True
+            return
 
         if direction is not None:
             if self.is_looking:
@@ -454,6 +466,11 @@ class Game(object):
         dest_vec = self.player.get_position() + direction
         can = self.attempt_move(dest_vec)
         if can:
+            game_map = self.world.get_current_map()
+            cell = game_map.get_at(dest_vec)
+            old_cell = game_map.get_at(self.player.position)
+            old_cell.entities.remove(self.player.eid)
+            cell.entities.append(self.player.eid)
             self.player.set_position(dest_vec)
             self.fov_map.compute_fov(dest_vec.x, dest_vec.y, radius=self.fov_radius,
                                      algorithm=tcod.FOV_DIAMOND)
