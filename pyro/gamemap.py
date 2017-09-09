@@ -284,8 +284,16 @@ class GameMap(object):
                         self._maybe_place_door(entity_manager, x, i)
 
     def _maybe_place_door(self, entity_manager, x ,y):
+        pos = Vector2(x, y)
         cell = self.get_at(x, y)
         if cell.kind == CORRIDOR:
+            # check adjacent cells for already existing corridors
+            for d in Direction.cardinal():
+                a_cell = self.get_at(pos + d)
+                for entity_id in a_cell.entities:
+                    entity = entity_manager.get_entity(entity_id)
+                    if entity.name == 'door':
+                        return
             if random.random() > 0.3:
                 entity = entity_manager.create_door(x, y)
                 cell.entities.append(entity.eid)

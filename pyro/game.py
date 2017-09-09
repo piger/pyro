@@ -216,7 +216,7 @@ class Game(object):
                 yy = y - self.camera.y
 
                 # skip rendering of cells out of the camera view
-                if xx < 0 or xx >= self.game_width or yy < 0 or yy >= self.game_height:
+                if xx < 0 or xx > self.screen_width or yy < 0 or yy > self.screen_height:
                     continue
 
                 if self.is_looking and x == self.eye_position.x and y == self.eye_position.y:
