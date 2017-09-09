@@ -12,6 +12,8 @@ DEFAULT_ENTITY_COLOR = (255, 127, 36) # chocolate1
 
 
 def parse_capability(line):
+    if ':' not in line:
+        return (line, [])
     name, line = line.split(':', 1)
     results = re.split(r'(?<!\\):', line)
     results = [x.replace('\\\\', '\\') for x in results]
@@ -110,9 +112,13 @@ class Entity(object):
         self.position = Vector2(0, 0)
         self.always_visible = False
 
-    def set_position(self, x, y):
-        self.position.x = x
-        self.position.y = y
+    def set_position(self, x_or_pos, y=None):
+        if isinstance(x_or_pos, Vector2) and y is None:
+            self.position.x = x_or_pos.x
+            self.position.y = x_or_pos.y
+        else:
+            self.position.x = x_or_pos
+            self.position.y = y
 
     def get_position(self):
         return self.position

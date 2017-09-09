@@ -143,13 +143,13 @@ class GameMap(object):
                     room = random.choice(rooms)
                     if len(self.get_entities_in_room(room.rid)) > 4:
                         continue
-                    x = random.randint(room.x + 1, room.endX - 2)
-                    y = random.randint(room.y + 1, room.endY - 2)
-                    cell = self.get_at(x, y)
+                    pos = Vector2.random(room.x + 1, room.endX - 2,
+                                         room.y + 1, room.endY - 2)
+                    cell = self.get_at(pos)
                     if cell.kind not in (ROOM, CORRIDOR) and len(cell.entities) > 0:
                         continue
                     entity = entity_manager.create_entity(creature_name)
-                    entity.set_position(x, y)
+                    entity.set_position(pos)
                     cell.entities.append(entity.eid)
                     break
 
@@ -197,8 +197,7 @@ class GameMap(object):
     def _place_stairs(self, pos, kind, entity_manager):
         cell = self.get_at(pos)
         entity = entity_manager.create_entity(kind)
-        entity.always_visible = True
-        entity.set_position(pos.x, pos.y)
+        entity.set_position(pos)
         cell.entities.append(entity.eid)
 
     def _dig_room(self, room):

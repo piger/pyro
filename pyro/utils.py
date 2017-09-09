@@ -1,3 +1,4 @@
+import random
 from tcod.random import Random
 
 class TcodRandom(object):
@@ -48,6 +49,11 @@ class Vector2(object):
 
     def copy(self):
         return Vector2(self.x, self.y)
+
+    @classmethod
+    def random(cls, min_x, max_x, min_y, max_y):
+        return cls(random.randint(min_x, max_x),
+                   random.randint(min_y, max_y))
 
     def __sub__(self, other):
         return Vector2(self.x - other.x, self.y - other.y)

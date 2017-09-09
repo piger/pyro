@@ -13,7 +13,7 @@
       "avatar": "b",
       "can": [
         "combat:2:6:70",
-        "monster_ai:",
+        "monster_ai",
         "health:10"
       ]
     },
@@ -24,7 +24,7 @@
         60, 179,113
       ],
       "can": [
-        "monster_ai:"
+        "monster_ai"
       ]
     },
     {
@@ -42,7 +42,7 @@
       "avatar": "+",
       "always_visible": true,
       "can": [
-        "door:"
+        "door"
       ]
     }
   ],
