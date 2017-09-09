@@ -14,12 +14,12 @@ def validate_size(ctx, param, value):
 
 @click.command()
 @click.option('--seed', '-s', type=click.INT, help="Specify random seed")
-@click.option('--window', metavar='SIZE', default='100x70', callback=validate_size,
+@click.option('--window', metavar='SIZE', default='100x40', callback=validate_size,
               help="Specify window size", show_default=True)
 @click.option('--size', '-S', metavar='SIZE', default='80x60', callback=validate_size,
               help="Specify map size", show_default=True)
 @click.option('--debug', '-D', is_flag=True, help="Enable DEBUG features")
-@click.option('--font', '-f', default='consolas10x10_gs_tc.png', help="Specify a custom font",
+@click.option('--font', '-f', default='mononoki_16-19.png', help="Specify a custom font",
               show_default=True)
 @click.option('--algo', '-a', type=click.Choice(['bsp', 'tunneling']), default='bsp',
               help="Specify the dungeon generation algorithm", show_default=True)

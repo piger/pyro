@@ -114,7 +114,7 @@ class Game(object):
 
     def init_game(self):
         # Other fonts: https://github.com/HexDecimal/python-tdl/tree/master/fonts/libtcod
-        tdl.set_font(self.font, greyscale=True, altLayout=True)
+        tdl.set_font(self.font, columns=16, rows=16, greyscale=True, altLayout=False)
         self.root = tdl.init(self.screen_width, self.screen_height, title="PyRo", fullscreen=False)
         tdl.set_fps(20)
 
