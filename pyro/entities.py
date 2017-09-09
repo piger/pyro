@@ -1,7 +1,9 @@
+import random
 import re
 import json
 import pkg_resources
-from pyro.utils import Vector2
+from pyro.utils import Vector2, Direction
+from pyro import *
 from pyro.gamedata import gamedata
 
 
@@ -17,20 +19,27 @@ def parse_capability(line):
 
 
 class Component(object):
-    def __init__(self, name):
-        self.name = name
+
+    NAME = 'component'
 
     def config(self, values):
         raise NotImplementedError
+
+    @property
+    def name(self):
+        return self.NAME
 
 
 class HealthComponent(Component):
 
     NAME = 'health'
 
-    def __init__(self, value):
-        super(HealthComponent, self).__init__(self.NAME)
-        self.health = value
+    def __init__(self):
+        super(HealthComponent, self).__init__()
+        self.health = 0
+
+    def config(self, values):
+        self.health = int(values[0])
 
 
 class CombatComponent(Component):
@@ -38,7 +47,7 @@ class CombatComponent(Component):
     NAME = 'combat'
 
     def __init__(self, damage=0, defense=0, accuracy=0):
-        super(CombatComponent, self).__init__(self.NAME)
+        super(CombatComponent, self).__init__()
         self.damage = damage
         self.defense = defense
         self.accuracy = accuracy
@@ -52,14 +61,43 @@ class DoorComponent(Component):
     NAME = 'door'
 
     def __init__(self, initial_state=True):
-        super(DoorComponent, self).__init__(self.NAME)
+        super(DoorComponent, self).__init__()
         self.state = initial_state
+
+    def config(self, values):
+        pass
+
+
+class MonsterAIComponent(Component):
+    """AI for monsters."""
+
+    NAME = 'monster_ai'
+
+    def __init__(self):
+        super(MonsterAIComponent, self).__init__()
+
+    def config(self, values):
+        pass
+
+    def update(self, entity, game):
+        print "Moving %s" % entity.name
+        cur_map = game.world.get_current_map()
+        d = random.choice(Direction.all())
+        dest = entity.position + d
+        old_cell = cur_map.get_at(entity.position)
+        cell = cur_map.get_at(dest)
+        if cell.kind in (ROOM, CORRIDOR, FLOOR) and not cell.entities:
+            entity.position = dest
+            old_cell.entities.remove(entity.eid)
+            cell.entities.append(entity.eid)
 
 
 COMP_MAP = {
+    'health': HealthComponent,
     'combat': CombatComponent,
     'door': DoorComponent,
     'life': HealthComponent,
+    'monster_ai': MonsterAIComponent,
 }
 
 
@@ -87,11 +125,13 @@ class EntityManager(object):
         self.health_components = {}
         self.combat_components = {}
         self.door_components = {}
+        self.monster_ai_components = {}
 
         self.comp_db = {
             'health': self.health_components,
             'combat': self.combat_components,
             'door': self.door_components,
+            'monster_ai': self.monster_ai_components,
         }
 
     def next_eid(self):
@@ -107,15 +147,12 @@ class EntityManager(object):
 
         color = entity_data.get('color', DEFAULT_ENTITY_COLOR)
         entity = Entity(eid, name, entity_data['avatar'], color)
-
-        if entity_data['health'] > 0:
-            hc = HealthComponent(entity_data['health'])
-            self.health_components[entity.eid] = hc
+        entity.always_visible = entity_data.get('always_visible', False)
 
         for cap in entity_data.get('can', []):
             name, values = parse_capability(cap)
             CompClass = COMP_MAP[name]
-            comp = CompClass(name)
+            comp = CompClass()
             comp.config(values)
             db = self.comp_db[name]
             db[entity.eid] = comp
@@ -123,20 +160,10 @@ class EntityManager(object):
         self.entities[entity.eid] = entity
         return entity
 
-    def create_door(self, x, y):
-        entity = self.create_entity('door')
-        dc = DoorComponent()
-        self.door_components[entity.eid] = dc
-        entity.always_visible = True
-        entity.set_position(x, y)
-        return entity
-
     def destroy_entity(self, eid):
-        if eid in self.health_components:
-            del self.health_components[eid]
-
-        if eid in self.combat_components:
-            del self.combat_components[eid]
+        for db in self.comp_db.itervalues():
+            if eid in db:
+                del db[eid]
 
         del self.entities[eid]
 

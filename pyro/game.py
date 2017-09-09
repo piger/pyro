@@ -377,6 +377,11 @@ class Game(object):
                 self.world.destroy_entity(entity.eid)
 
     def move_enemies(self):
+        em = self.world.entity_manager
+        for entity_id, ai_cc in em.monster_ai_components.iteritems():
+            entity = em.get_entity(entity_id)
+            ai_cc.update(entity, self)
+
         self.enemies_turn = False
 
     def game_loop(self):

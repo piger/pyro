@@ -6,13 +6,7 @@ from collections import OrderedDict
 from pyro.entities import EntityManager
 from pyro.utils import Rect, Vector2, tcod_random, Direction
 from pyro.rooms import room_1
-
-
-VOID = 0
-WALL = 1
-FLOOR = 2
-ROOM = 3
-CORRIDOR = 4
+from pyro import *
 
 
 def create_room_inside(x, y, min_width, min_height, max_width, max_height):
@@ -295,8 +289,10 @@ class GameMap(object):
                     if entity.name == 'door':
                         return
             if random.random() > 0.3:
-                entity = entity_manager.create_door(x, y)
-                cell.entities.append(entity.eid)
+                door = entity_manager.create_entity('door')
+                door.position.x = x
+                door.position.y = y
+                cell.entities.append(door.eid)
 
     def get_at(self, x_or_pos, y=None):
         if y is None and isinstance(x_or_pos, Vector2):
