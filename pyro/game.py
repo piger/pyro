@@ -2,6 +2,7 @@ import math
 import random
 import tdl
 import tcod.map
+import tcod.path
 from pyro.gamemap import WALL, ROOM, CORRIDOR, VOID, FLOOR, World
 from pyro.utils import tcod_random, darken_color, clamp, Direction
 from pyro.gamedata import gamedata
@@ -160,6 +161,10 @@ class Game(object):
         # setup visited cells
         self.init_visited()
 
+        # init AI
+        for ai in self.world.entity_manager.monster_ai_components.values():
+            ai.setup(self)
+
     def init_fov(self, cur_map):
         """Initialize the Field of View handler
 
@@ -173,6 +178,7 @@ class Game(object):
                 if cell.kind in (FLOOR, ROOM, CORRIDOR):
                     fov_map.walkable[y, x] = True
                     fov_map.transparent[y, x] = True
+                # doors will block sight
                 for entity_id in cell.entities:
                     if entity_id in self.world.entity_manager.door_components:
                         fov_map.transparent[y, x] = False
@@ -316,7 +322,10 @@ class Game(object):
 
         game_map = self.world.get_current_map()
         dcell = game_map.get_at(dest_vec.x, dest_vec.y)
-        if not dcell.entities and dcell.kind not in (VOID, WALL):
+        if dcell.kind in (VOID, WALL):
+            return False
+
+        if not dcell.entities:
             return True
 
         em = self.world.entity_manager
@@ -333,12 +342,7 @@ class Game(object):
         if is_fight:
             return False
 
-        for entity in entities:
-            dc = em.door_components.get(entity.eid)
-            if dc is not None:
-                print "open door"
-                # handle door opening...
-                return True
+        return True
 
     def player_fight(self, entity, entity_cc, em):
         player_cc = em.combat_components.get(self.player.eid)

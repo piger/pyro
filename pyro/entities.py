@@ -1,7 +1,10 @@
+import copy
 import random
 import re
 import json
 import pkg_resources
+import tcod
+import tcod.path
 from pyro.utils import Vector2, Direction
 from pyro import *
 from pyro.gamedata import gamedata
@@ -77,27 +80,83 @@ class MonsterAIComponent(Component):
 
     def __init__(self):
         super(MonsterAIComponent, self).__init__()
+        self.fov_map = None
+        self.astar = None
+        self.radius = 6
+        self.chasing = False
 
     def config(self, values):
         pass
 
+    def setup(self, game):
+        """Must be called during game initialization, after fov_map is computed"""
+
+        self.fov_map = copy.deepcopy(game.fov_map)
+        self.astar = tcod.path.AStar(self.fov_map)
+
     def update(self, entity, game):
-        print "Moving %s" % entity.name
+        player = game.player
         cur_map = game.world.get_current_map()
-        d = random.choice(Direction.all())
-        dest = entity.position + d
-        old_cell = cur_map.get_at(entity.position)
-        cell = cur_map.get_at(dest)
-        if cell.kind in (ROOM, CORRIDOR, FLOOR) and not cell.entities:
-            entity.position = dest
-            old_cell.entities.remove(entity.eid)
-            cell.entities.append(entity.eid)
-        elif cell.entities:
-            em = game.world.entity_manager
-            for entity_id in cell.entities:
-                victim = em.get_entity(entity_id)
-                if victim.name == 'player':
+        em = game.world.entity_manager
+        
+        # check if the player is directly adjacent, so that we can skip calculating the FOV for this
+        # monster.
+        adjacent = False
+        for d in Direction.all():
+            pos = entity.position + d
+            if pos == player.position:
+                adjacent = True
+                self.chasing = True
+
+        if not adjacent:
+            # update fov
+            self.fov_map.compute_fov(entity.position.x, entity.position.y,
+                                     radius=self.radius, algorithm=tcod.FOV_DIAMOND)
+            # if the player position is "lit", then we see the player
+            self.chasing = self.fov_map.fov[player.position.y, player.position.x]
+
+        if self.chasing:
+            path = self.astar.get_path(entity.position.x, entity.position.y,
+                                       player.position.x, player.position.y)
+            if len(path) == 1:
+                path_x, path_y = path[0]
+                if path_x == player.position.x and path_y == player.position.y:
+                    # attack
                     game.enemy_fight_player(entity)
+            elif path:
+                new_x, new_y = path[0]
+                old_cell = cur_map.get_at(entity.position)
+                new_cell = cur_map.get_at(new_x, new_y)
+                for entity_id in new_cell.entities:
+                    if entity_id in em.monster_ai_components:
+                        # we can't move, there's another AI in that cell
+                        print "can't move, cell is busy"
+                        return
+                    
+                entity.position.x = new_x
+                entity.position.y = new_y
+                old_cell.entities.remove(entity.eid)
+                new_cell.entities.append(entity.eid)
+            else:
+                print "path is empty!?"
+        else:
+            # do not always move
+            if random.random() < 0.3:
+                return
+            d = random.choice(Direction.all())
+            dest = entity.position + d
+            old_cell = cur_map.get_at(entity.position)
+            cell = cur_map.get_at(dest)
+            if cell.kind in (ROOM, CORRIDOR, FLOOR) and not cell.entities:
+                entity.position = dest
+                old_cell.entities.remove(entity.eid)
+                cell.entities.append(entity.eid)
+            elif cell.entities:
+                em = game.world.entity_manager
+                for entity_id in cell.entities:
+                    if entity_id in em.monster_ai_components:
+                        # there's another AI in that cell
+                        return
 
 
 COMP_MAP = {
