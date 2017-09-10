@@ -68,8 +68,7 @@ def astar(dungeon, start, goal, diagonal=True):
             if neighbor in close_set and tentative_g_score >= gscore.get(neighbor, 0):
                 continue
 
-            if (tentative_g_score < gscore.get(neighbor, 0) or
-                neighbor not in [j[1] for j in oheap.elements]):
+            if tentative_g_score < gscore.get(neighbor, 0) or not oheap.contain(neighbor):
                 came_from[neighbor] = current
                 gscore[neighbor] = tentative_g_score
                 fscore[neighbor] = tentative_g_score + heuristic(neighbor, goal)

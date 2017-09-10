@@ -136,7 +136,7 @@ class MonsterAIComponent(Component):
                 adjacent = True
                 self.chasing = True
 
-        if not adjacent and not self.chasing:
+        if not adjacent:
             # update fov
             self.fov_map.compute_fov(entity.position.x, entity.position.y,
                                      radius=self.radius, algorithm=tcod.FOV_DIAMOND)
@@ -149,7 +149,6 @@ class MonsterAIComponent(Component):
 
         if self.chasing:
             path = astar(cur_map, entity.position, player.position)
-            print path
             if len(path) == 1:
                 new_pos = path[0]
                 if new_pos == player.position:
