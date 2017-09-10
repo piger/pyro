@@ -86,7 +86,7 @@
     },
     {
       "name": "water",
-      "avatar": "~",
+      "avatar": 247,
       "color": [72, 118, 255],
       "description": "fresh water",
       "can": []
