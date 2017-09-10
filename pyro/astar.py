@@ -63,7 +63,7 @@ def astar(dungeon, start, goal, diagonal=True):
             neighbor = current + d
             tentative_g_score = gscore[current] + heuristic(current, neighbor)
             cell = dungeon.get_at(neighbor)
-            if cell is None or cell.kind in (VOID, WALL):
+            if cell is None or not cell.walkable:
                 continue
             if neighbor in close_set and tentative_g_score >= gscore.get(neighbor, 0):
                 continue

@@ -54,6 +54,14 @@ class GameCell(object):
         # a debug value
         self.value = None
 
+    @property
+    def walkable(self):
+        return self.kind in WALKABLE
+
+    @property
+    def blocking(self):
+        return self.kind in BLOCKING
+
     def __repr__(self):
         return "GameCell(kind=%r, entities=%r, room_id=%r, feature=%r)" % (
             self.kind, self.entities, self.room_id, self.feature)
@@ -240,7 +248,7 @@ class GameMap(object):
 
         for y in xrange(1, self.height - 1):
             for x in xrange(1, self.width - 1):
-                if self.cells[x][y].kind not in (ROOM, CORRIDOR, FLOOR):
+                if not self.cells[x][y].walkable:
                     continue
                 # get noise and transform to a value between 1 and 0
                 n = noise.pnoise2(x / fx, y / fy) * 0.5 + 0.5

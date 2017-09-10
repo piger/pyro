@@ -6,7 +6,7 @@ import pkg_resources
 import tcod
 import tcod.path
 import tcod.map
-from pyro.utils import Vector2, Direction
+from pyro.utils import Vector2, Direction, weighted_choice
 from pyro import *
 from pyro.gamedata import gamedata
 from pyro.astar import astar
@@ -128,6 +128,7 @@ class MonsterAIComponent(Component):
 
         self.chasing = False
         self.last_player_pos = None
+        self.cur_direction = None
 
     def config(self, values):
         for i in xrange(0, len(values), 2):
@@ -158,8 +159,8 @@ class MonsterAIComponent(Component):
         if new_cell is None:
             print "move_to: %r is outside of map (caller: %s)" % (new_cell, caller)
             return False
-        elif new_cell.kind in (WALL, VOID):
-            print "move_to: %r is WALL or VOID (caller: %s)" % (new_cell, caller)
+        elif not new_cell.walkable:
+            print "move_to: %r is not walkable (caller: %s)" % (new_cell, caller)
             return False
 
         for entity_id in new_cell.entities:
@@ -178,14 +179,27 @@ class MonsterAIComponent(Component):
         for d in Direction.all():
             dest = entity.position + d
             cell = cur_map.get_at(dest)
-            if cell.kind in (VOID, WALL):
+            if not cell.walkable:
                 continue
             for eid in cell.entities:
                 e = game.world.entity_manager.get_entity(eid)
                 if e in game.world.entity_manager.monster_ai_components:
                     continue
             candidates.append(dest)
-        self.move_to(entity, cur_map, game.world.entity_manager, random.choice(candidates))
+
+        if self.cur_direction is not None and self.cur_direction in candidates:
+            w = []
+            for c in candidates:
+                if c == self.cur_direction:
+                    w.append((2.5, c))
+                else:
+                    w.append((1, c))
+            winner = candidates[weighted_choice([x[0] for x in w])]
+        else:
+            winner = random.choice(candidates)
+
+        if self.move_to(entity, cur_map, game.world.entity_manager, winner):
+            self.cur_direction = winner.copy()
 
     def update(self, entity, game):
         """To be called every turn"""

@@ -155,7 +155,7 @@ class Game(object):
         for y in xrange(self.game_height):
             for x in xrange(self.game_width):
                 cell = cur_map.get_at(x, y)
-                if cell.kind in (FLOOR, ROOM, CORRIDOR):
+                if cell.walkable:
                     fov_map.walkable[y, x] = True
                     fov_map.transparent[y, x] = True
                 # doors will block sight
@@ -240,8 +240,7 @@ class Game(object):
                     char = str(cell.value)
                 else:
                     char = symbol['avatar']
-                    if (cell.kind in (ROOM, FLOOR, CORRIDOR) and
-                        cell.feature in ('dirt', 'grass', 'water')):
+                    if cell.walkable and cell.feature in ('dirt', 'grass', 'water'):
                         feature = gamedata.get_feature(cell.feature)
                         char = feature['avatar']
                         if has_fog_of_war:
@@ -329,7 +328,7 @@ class Game(object):
 
         game_map = self.world.get_current_map()
         dcell = game_map.get_at(dest_vec.x, dest_vec.y)
-        if dcell.kind in (VOID, WALL):
+        if not dcell.walkable:
             return False
 
         if not dcell.entities:
@@ -345,6 +344,9 @@ class Game(object):
                 self.player_fight(entity, cc, em)
                 is_fight = True
                 break
+            ai = em.monster_ai_components.get(entity.eid)
+            if ai is not None:
+                return False
 
         if is_fight:
             return False
