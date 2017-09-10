@@ -44,6 +44,21 @@ def lighten_color(color, amount=0.50):
     return tuple([clamp(int(x), 0, 255) for x in (red, green, blue)])
 
 
+# http://eli.thegreenplace.net/2010/01/22/weighted-random-generation-in-python
+def weighted_choice(weights):
+    totals = []
+    running_total = 0
+
+    for w in weights:
+        running_total += w
+        totals.append(running_total)
+
+    rnd = random.random() * running_total
+    for i, total in enumerate(totals):
+        if rnd < total:
+            return i
+
+
 class Vector2(object):
     def __init__(self, x_or_tuple, maybe_y=None):
         if maybe_y is None and isinstance(x_or_tuple, tuple):
