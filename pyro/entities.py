@@ -84,7 +84,7 @@ class MonsterAIComponent(Component):
         super(MonsterAIComponent, self).__init__()
         self.fov_map = None
         self.astar = None
-        self.radius = 6
+        self.radius = 4
         self.chasing = False
         self.last_player_pos = None
 
