@@ -56,7 +56,8 @@
       "always_visible": true,
       "can": [
         "door"
-      ]
+      ],
+      "description": "a door"
     }
   ],
   "features": [

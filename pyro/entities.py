@@ -209,6 +209,7 @@ class Entity(object):
         self.color = color
         self.position = Vector2(0, 0)
         self.always_visible = False
+        self.description = ''
 
     def set_position(self, x_or_pos, y=None):
         if isinstance(x_or_pos, Vector2) and y is None:
@@ -252,6 +253,7 @@ class EntityManager(object):
         color = entity_data.get('color', DEFAULT_ENTITY_COLOR)
         entity = Entity(eid, name, entity_data['avatar'], color)
         entity.always_visible = entity_data.get('always_visible', False)
+        entity.description = entity_data.get('description', '')
 
         for cap in entity_data.get('can', []):
             name, values = parse_capability(cap)

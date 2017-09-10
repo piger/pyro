@@ -215,7 +215,10 @@ class Game(object):
         if self.is_looking:
             self.panel.draw_str(0, 2, "Eye position: %d/%d" % (self.eye_position.x,
                                                                self.eye_position.y))
-            self.render_look_command()
+            try:
+                self.render_look_command()
+            except tdl.TDLError:
+                pass
 
         for y in xrange(self.game_height):
             for x in range(self.game_width):
@@ -310,6 +313,17 @@ class Game(object):
                 prefix = "You see"
             else:
                 prefix = "You remember seeing"
+
+            if cell.entities:
+                descriptions = []
+                for entity_id in cell.entities:
+                    entity = self.world.entity_manager.get_entity(entity_id)
+                    if entity.description:
+                        descriptions.append(entity.description)
+                if descriptions:
+                    self.status.draw_str(0, 0, "%s %s" % (prefix, ", ".join(descriptions)),
+                                         fg=MESSAGE_COLOR)
+                    return
 
             if cell.feature is not None:
                 feature = gamedata.get_feature(cell.feature)
