@@ -4,7 +4,7 @@
       "name": "player",
       "avatar": "@",
       "can": [
-        "combat:5:15:100",
+        "combat:DAMAGE:5:DEFENSE:15:ACCURACY:100",
         "health:100"
       ]
     },
@@ -12,16 +12,17 @@
       "name": "boar",
       "avatar": "b",
       "can": [
-        "combat:2:6:70",
+        "combat:DAMAGE:2:DEFENSE:6:ACCURACY:70",
         "monster_ai:FOV_RADIUS:5",
         "health:10"
-      ]
+      ],
+      "description": "The wild boar (Sus scrofa), also known as the wild swine or Eurasian wild pig, is a suid native to much of Eurasia, North Africa, and the Greater Sunda Islands."
     },
     {
       "name": "worm",
       "avatar": "w",
       "can": [
-        "combat:5:6:50",
+        "combat:DAMAGE:5:DEFENSE:6:ACCURACY:50",
         "monster_ai:FOV_RADIUS:3:DIAGONAL:0",
         "health:4"
       ],

@@ -60,7 +60,15 @@ class CombatComponent(Component):
         self.accuracy = accuracy
 
     def config(self, values):
-        self.damage, self.defense, self.accuracy = [int(x) for x in values]
+        m = {
+            'DAMAGE': 'damage',
+            'DEFENSE': 'defense',
+            'ACCURACY': 'accuracy',
+        }
+        for i in xrange(0, len(values), 2):
+            name = values[i]
+            value = values[i+1]
+            setattr(self, m[name], int(value))
 
 
 class DoorComponent(Component):
