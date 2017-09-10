@@ -278,7 +278,7 @@ class EntityManager(object):
         self.eid += 1
         return rv
 
-    def create_entity(self, name):
+    def create_entity(self, name, pos=None):
         eid = self.next_eid()
 
         entity_data = gamedata.get_entity(name)
@@ -288,6 +288,8 @@ class EntityManager(object):
         entity = Entity(eid, name, entity_data['avatar'], color)
         entity.always_visible = entity_data.get('always_visible', False)
         entity.description = entity_data.get('description', '')
+        if pos is not None:
+            entity.position = pos
 
         for cap in entity_data.get('can', []):
             name, values = parse_capability(cap)

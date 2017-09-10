@@ -148,8 +148,7 @@ class GameMap(object):
                     cell = self.get_at(pos)
                     if cell.kind not in (ROOM, CORRIDOR) and len(cell.entities) > 0:
                         continue
-                    entity = entity_manager.create_entity(creature_name)
-                    entity.set_position(pos)
+                    entity = entity_manager.create_entity(creature_name, pos)
                     cell.entities.append(entity.eid)
                     break
 
@@ -196,8 +195,7 @@ class GameMap(object):
 
     def _place_stairs(self, pos, kind, entity_manager):
         cell = self.get_at(pos)
-        entity = entity_manager.create_entity(kind)
-        entity.set_position(pos)
+        entity = entity_manager.create_entity(kind, pos)
         cell.entities.append(entity.eid)
 
     def _dig_room(self, room):
@@ -278,7 +276,7 @@ class GameMap(object):
 
     def _maybe_place_door(self, entity_manager, x ,y):
         pos = Vector2(x, y)
-        cell = self.get_at(x, y)
+        cell = self.get_at(pos)
         if cell.kind == CORRIDOR:
             # check adjacent cells for already existing corridors
             for d in Direction.cardinal():
@@ -288,9 +286,7 @@ class GameMap(object):
                     if entity.name == 'door':
                         return
             if random.random() > 0.3:
-                door = entity_manager.create_entity('door')
-                door.position.x = x
-                door.position.y = y
+                door = entity_manager.create_entity('door', pos)
                 cell.entities.append(door.eid)
 
     def get_at(self, x_or_pos, y=None):

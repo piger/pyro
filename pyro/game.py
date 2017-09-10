@@ -152,8 +152,7 @@ class Game(object):
         self.init_fov(cur_map)
 
         # setup player
-        self.player = self.world.entity_manager.create_entity('player')
-        self.player.set_position(cur_map.start_vec.x, cur_map.start_vec.y)
+        self.player = self.world.entity_manager.create_entity('player', cur_map.start_vec)
         self.fov_map.compute_fov(cur_map.start_vec.x, cur_map.start_vec.y, radius=6)
         cell = cur_map.get_at(self.player.position)
         cell.entities.append(self.player.eid)
