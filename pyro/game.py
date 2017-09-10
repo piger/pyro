@@ -105,6 +105,7 @@ class Game(object):
 
         self.console = tdl.Console(self.display_width, self.display_height)
         self.panel = tdl.Console(self.panel_width, self.panel_height)
+        self.panel.set_colors(PANEL_TEXT_COLOR, DARK_BACKGROUND)
 
         self.logpanel = tdl.Console(self.log_width, self.log_height)
         self.logpanel.clear(bg=DARK_BACKGROUND)
@@ -268,6 +269,11 @@ class Game(object):
         # blit everything onto the root console
         self.root.blit(self.console, 0, 0, self.display_width, self.display_height, 0, 0)
 
+        if self.is_looking:
+            self.panel.draw_str(0, 2, "Eye position: %d/%d" % (self.eye_position.x,
+                                                               self.eye_position.y))
+            self.render_look_command()
+
         # info panel is a column on the right side of the screen, half the height of the window
         self.root.blit(self.panel, self.display_width, 0, 0, 0)
         # log panel is a column below info panel occupying the remaining half of the window
@@ -276,18 +282,21 @@ class Game(object):
         # status bar goes at the last line of the screen and it extends until the log panel
         self.root.blit(self.status, 0, self.display_height, 0, 0)
 
-        # popup test
-        if self.is_looking:
-            self.panel.draw_str(0, 2, "Eye position: %d/%d" % (self.eye_position.x,
-                                                               self.eye_position.y))
-            self.render_look_command()
-
         tdl.flush()
 
     def render_look_command(self):
         """Display informations about what the cursor is looking at"""
 
         text = ""
+
+        # render position
+        x = 1
+        y = 1
+
+        # NOTE: right now 'eye_position' is relative to the game world, not the camera world.
+        if self.eye_position.y - self.camera.y <= self.display_height / 2:
+            # render on the second half of the screen and add 3 cells margin
+            y = self.display_height / 2 + 3
 
         game_map = self.world.get_current_map()
         cell = game_map.get_at(self.eye_position.x, self.eye_position.y)
@@ -315,7 +324,7 @@ class Game(object):
 
             if text:
                 self.info_popup.draw(text)
-                self.info_popup.blit(self.root, 1, 1)
+                self.info_popup.blit(self.root, x, y)
 
     def attempt_move(self, dest_vec):
         """Return False to negate passage, True to allow it"""
