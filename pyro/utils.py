@@ -160,6 +160,8 @@ class PopupWindow(object):
     The width of this window is fixed while the height is resized based on the length
     of the message to be displayed.
     """
+
+    # IBM code page 437 symbols (based on a 16x16 grid):
     # 10, 13
     TOP_LEFT = 201
     # 12, 12
@@ -197,11 +199,13 @@ class PopupWindow(object):
 
         c = self.console
         c.clear()
+        # draw the corners
         c.draw_char(0, 0, self.TOP_LEFT)
         c.draw_char(self.width-1, 0, self.TOP_RIGHT)
         c.draw_char(0, self.height-1, self.BOTTOM_LEFT)
         c.draw_char(self.width-1, self.height-1, self.BOTTOM_RIGHT)
 
+        # draw the rest of the frame
         for x in xrange(1, self.width - 1):
             c.draw_char(x, 0, self.HLINE)
             c.draw_char(x, self.height - 1, self.HLINE)
@@ -210,6 +214,7 @@ class PopupWindow(object):
             c.draw_char(0, y, self.VLINE)
             c.draw_char(self.width - 1, y, self.VLINE)
 
+        # draw the message, one line at a time
         y = 2
         x = 2
         for line in lines:
@@ -219,4 +224,6 @@ class PopupWindow(object):
                 break
 
     def blit(self, surface, x, y):
+        """Blit this popup onto another surface"""
+
         surface.blit(self.console, x, y, self.width, self.height, 0, 0)
