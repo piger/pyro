@@ -3,6 +3,7 @@
     {
       "name": "player",
       "avatar": "@",
+      "color": [250, 128, 114],
       "can": [
         "combat:DAMAGE:5:DEFENSE:15:ACCURACY:100",
         "health:100"
@@ -16,6 +17,7 @@
         "monster_ai:FOV_RADIUS:5",
         "health:10"
       ],
+      "color": [250, 128, 114],
       "description": "The wild boar (Sus scrofa), also known as the wild swine or Eurasian wild pig, is a suid native to much of Eurasia, North Africa, and the Greater Sunda Islands."
     },
     {
@@ -72,14 +74,21 @@
     },
     {
       "name": "floor",
-      "avatar": ".",
-      "color": [],
+      "avatar": 250,
+      "color": [79, 79, 79],
       "description": "your standard dungeon stone floor",
       "can": []
     },
     {
+      "name": "corridor",
+      "avatar": 250,
+      "color": [79, 79, 79],
+      "description": "a corridor",
+      "can": []
+    },
+    {
       "name": "dirt",
-      "avatar": ".",
+      "avatar": 250,
       "color": [107, 66, 38],
       "description": "some dirt",
       "can": []
@@ -89,6 +98,27 @@
       "avatar": 247,
       "color": [72, 118, 255],
       "description": "fresh water",
+      "can": []
+    },
+    {
+      "name": "wall",
+      "avatar": 219,
+      "color": [110, 110, 110],
+      "description": "a wall",
+      "can": []
+    },
+    {
+      "name": "void",
+      "avatar": " ",
+      "color": [0, 0, 0],
+      "description": "",
+      "can": []
+    },
+    {
+      "name": "room",
+      "avatar": 250,
+      "color": [79, 79, 79],
+      "description": "the floor of this room",
       "can": []
     }
   ],

@@ -9,34 +9,6 @@ from pyro.gamedata import gamedata
 from pyro.combat import roll_to_hit, chance_to_hit
 
 
-SYMBOLS = {
-    'FLOOR': {
-        'symbol': '.',
-        'color': (79, 79, 79),
-    },
-    'WALL': {
-        'symbol': 219,
-        'color': (110, 110, 110),
-    },
-    'ROOM': {
-        'symbol': '.',
-        'color': (46, 46, 46),
-    },
-    'CORRIDOR': {
-        'symbol': '.',
-        # 'color': (238, 229, 222),
-        'color': (79, 79, 79),
-    },
-    'VOID': {
-        'symbol': ' ',
-        'color': (0, 0, 0),
-    },
-    'PLAYER': {
-        'symbol': '@',
-        'color': (250, 128, 114),
-    },
-}
-
 MESSAGE_COLOR = (224, 224, 224)
 DARK_BACKGROUND = (8, 8, 8)
 PANEL_TEXT_COLOR = (224, 224, 224)
@@ -250,13 +222,13 @@ class Game(object):
 
                 cell = game_map.get_at(x, y)
                 if cell.kind == WALL:
-                    symbol = SYMBOLS['WALL']
+                    symbol = gamedata.get_feature('wall')
                 elif cell.kind == VOID:
-                    symbol = SYMBOLS['VOID']
+                    symbol = gamedata.get_feature('void')
                 elif cell.kind == ROOM or cell.kind == FLOOR:
-                    symbol = SYMBOLS['FLOOR']
+                    symbol = gamedata.get_feature('floor')
                 elif cell.kind == CORRIDOR:
-                    symbol = SYMBOLS['CORRIDOR']
+                    symbol = gamedata.get_feature('corridor')
                 else:
                     print "unknown cell kind %r" % cell
 
@@ -268,7 +240,7 @@ class Game(object):
                 if self.DEBUG and cell.value is not None:
                     char = str(cell.value)
                 else:
-                    char = symbol['symbol']
+                    char = symbol['avatar']
                     if (cell.kind in (ROOM, FLOOR, CORRIDOR) and
                         cell.feature in ('dirt', 'grass', 'water')):
                         feature = gamedata.get_feature(cell.feature)
@@ -289,8 +261,9 @@ class Game(object):
                     if is_visible or entity.always_visible or self.DEBUG:
                         self.console.draw_char(xx, yy, entity.avatar, bg=None, fg=entity.color)
 
+        player_symbol = gamedata.get_entity('player')
         self.console.draw_char(player_pos.x - self.camera.x, player_pos.y - self.camera.y,
-                               SYMBOLS['PLAYER']['symbol'], bg=None, fg=SYMBOLS['PLAYER']['color'])
+                               player_symbol['avatar'], bg=None, fg=player_symbol['color'])
 
         # blit everything onto the root console
         self.root.blit(self.console, 0, 0, self.display_width, self.display_height, 0, 0)
