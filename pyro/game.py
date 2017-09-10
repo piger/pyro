@@ -134,10 +134,9 @@ class Game(object):
         self.init_fov(cur_map)
 
         # setup player
-        self.player = self.world.entity_manager.create_entity('player', cur_map.start_vec)
+        self.player = self.world.entity_manager.create_entity('player')
+        cur_map.move_entity(self.player, cur_map.start_vec)
         self.fov_map.compute_fov(cur_map.start_vec.x, cur_map.start_vec.y, radius=6)
-        cell = cur_map.get_at(self.player.position)
-        cell.entities.append(self.player.eid)
 
         # setup visited cells
         self.init_visited()
@@ -479,11 +478,7 @@ class Game(object):
         can = self.attempt_move(dest_vec)
         if can:
             game_map = self.world.get_current_map()
-            cell = game_map.get_at(dest_vec)
-            old_cell = game_map.get_at(self.player.position)
-            old_cell.entities.remove(self.player.eid)
-            cell.entities.append(self.player.eid)
-            self.player.set_position(dest_vec)
+            game_map.move_entity(self.player, dest_vec)
             self.fov_map.compute_fov(dest_vec.x, dest_vec.y, radius=self.fov_radius,
                                      algorithm=tcod.FOV_DIAMOND)
             self.visited[dest_vec.x][dest_vec.y] = True

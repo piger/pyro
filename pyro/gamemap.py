@@ -148,12 +148,15 @@ class GameMap(object):
                     cell = self.get_at(pos)
                     if cell.kind not in (ROOM, CORRIDOR) and len(cell.entities) > 0:
                         continue
-                    entity = entity_manager.create_entity(creature_name, pos)
-                    cell.entities.append(entity.eid)
+                    entity = entity_manager.create_entity(creature_name)
+                    self.move_entity(entity, pos)
                     break
 
-    def _place_items_in_rooms(self):
-        pass
+    def _place_items_in_rooms(self, entity_manager):
+        pos = self.start_vec.copy()
+        pos.x += 1
+        potion = entity_manager.create_potion('health')
+        self.move_entity(potion, pos)
 
     def _select_start_and_end(self, entity_manager):
         """Place stairs up and stairs down.
@@ -194,9 +197,8 @@ class GameMap(object):
         self._place_stairs(self.end_vec, 'stairs_down', entity_manager)
 
     def _place_stairs(self, pos, kind, entity_manager):
-        cell = self.get_at(pos)
-        entity = entity_manager.create_entity(kind, pos)
-        cell.entities.append(entity.eid)
+        entity = entity_manager.create_entity(kind)
+        self.move_entity(entity, pos)
 
     def _put_wall_for_room(self, x, y, room):
         if self.cells[x][y].kind == VOID:
@@ -283,8 +285,16 @@ class GameMap(object):
                     if entity.name == 'door':
                         return
             if random.random() > 0.3:
-                door = entity_manager.create_entity('door', pos)
-                cell.entities.append(door.eid)
+                door = entity_manager.create_entity('door')
+                self.move_entity(door, pos)
+
+    def move_entity(self, entity, pos):
+        old_cell = self.get_at(entity.position)
+        if entity.eid in old_cell.entities:
+            old_cell.entities.remove(entity.eid)
+        cell = self.get_at(pos)
+        cell.entities.append(entity.eid)
+        entity.set_position(pos)
 
     def get_at(self, x_or_pos, y=None):
         if y is None and isinstance(x_or_pos, Vector2):
@@ -414,6 +424,7 @@ class BspGameMap(GameMap):
         self._place_creatures_in_rooms(level, entity_manager)
         self._place_doors(entity_manager)
         self._add_features()
+        self._place_items_in_rooms(entity_manager)
 
 
 class TunnelingGameMap(GameMap):
@@ -488,6 +499,7 @@ class TunnelingGameMap(GameMap):
         self._place_creatures_in_rooms(level, entity_manager)
         self._place_doors(entity_manager)
         self._add_features()
+        self._place_items_in_rooms(entity_manager)
 
 
 class World(object):

@@ -49,6 +49,37 @@ class HealthComponent(Component):
         self.health = int(values[0])
 
 
+class PotionComponent(Component):
+    """Potions
+
+    - they can be on the map or in the inventory (just delete from cell.entities? and store somewhere?)
+    - the player can drink or throw them
+    - they must have a random mapped color
+    """
+
+    NAME = 'potion'
+
+    def __init__(self):
+        super(PotionComponent, self).__init__()
+        self.kind = 'blank'
+
+    def config(self, values):
+        self.kind = values[0]
+
+
+class InventoryComponent(Component):
+    NAME = 'inventory'
+
+    def __init__(self):
+        super(InventoryComponent, self).__init__()
+        self.items = []
+        self.max_items = 10
+        self.item_map = {}
+
+    def config(self, values):
+        return
+
+
 class CombatComponent(Component):
 
     NAME = 'combat'
@@ -232,6 +263,7 @@ COMP_MAP = {
     'door': DoorComponent,
     'life': HealthComponent,
     'monster_ai': MonsterAIComponent,
+    'potion': PotionComponent,
 }
 
 
@@ -265,12 +297,14 @@ class EntityManager(object):
         self.combat_components = {}
         self.door_components = {}
         self.monster_ai_components = {}
+        self.potion_components = {}
 
         self.comp_db = {
             'health': self.health_components,
             'combat': self.combat_components,
             'door': self.door_components,
             'monster_ai': self.monster_ai_components,
+            'potion': self.potion_components,
         }
 
     def next_eid(self):
@@ -278,18 +312,17 @@ class EntityManager(object):
         self.eid += 1
         return rv
 
-    def create_entity(self, name, pos=None):
+    def create_entity(self, name, entity_data=None):
         eid = self.next_eid()
 
-        entity_data = gamedata.get_entity(name)
+        if entity_data is None:
+            entity_data = gamedata.get_entity(name)
         assert entity_data is not None, "Entity data for %s is None" % name
 
         color = entity_data.get('color', DEFAULT_ENTITY_COLOR)
         entity = Entity(eid, name, entity_data['avatar'], color)
         entity.always_visible = entity_data.get('always_visible', False)
         entity.description = entity_data.get('description', '')
-        if pos is not None:
-            entity.position = pos
 
         for cap in entity_data.get('can', []):
             name, values = parse_capability(cap)
@@ -301,6 +334,12 @@ class EntityManager(object):
 
         self.entities[entity.eid] = entity
         return entity
+
+    def create_potion(self, name):
+        base_data = gamedata.get_base_potion()
+        potion_data = gamedata.get_potion(name)
+        potion_data.update(base_data)
+        return self.create_entity(name, potion_data)
 
     def destroy_entity(self, eid):
         for db in self.comp_db.itervalues():
