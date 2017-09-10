@@ -18,6 +18,7 @@ setup(
     entry_points={
         'console_scripts': [
             'pyro = pyro.main:main',
+            'char-finder = pyro.char_finder:char_finder',
         ]
     }
 )
