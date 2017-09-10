@@ -277,6 +277,9 @@ class Game(object):
                             color = darken_color(feature['color'])
                         else:
                             color = feature['color']
+                if (cell.kind == WALL and self.is_looking and x == self.eye_position.x
+                    and y == self.eye_position.y):
+                    color = (255, 255, 255)
                 self.console.draw_char(xx, yy, char, bg=bg_color, fg=color)
 
                 # do not paint entities if they are not visibles.
