@@ -109,9 +109,9 @@ class MonsterAIComponent(Component):
     def move_to(self, entity, cur_map, entity_manager, pos):
         old_cell = cur_map.get_at(entity.position)
         new_cell = cur_map.get_at(pos)
-        if new_cell is None:
+        if new_cell is None or new_cell.kind in (WALL, VOID):
             print 'caller name:', inspect.stack()[1][3]
-            print "%r is outside of map!" % pos
+            print "%r is outside of map or WALL/VOID" % pos
             return False
         for entity_id in new_cell.entities:
             if entity_id in entity_manager.monster_ai_components:
