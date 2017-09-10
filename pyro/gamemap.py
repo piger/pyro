@@ -135,7 +135,7 @@ class GameMap(object):
 
     def _place_creatures_in_rooms(self, level, entity_manager):
         rooms = [room for room in self.rooms.values() if room.rid != self.start_room_id]
-        creatures = [('boar', level * 20), ('fairy', 3)]
+        creatures = [('boar', level * 20), ('worm', level * 12), ('fairy', 3)]
         for creature_name, amount in creatures:
             for _ in xrange(amount):
                 for j in xrange(5):

@@ -83,13 +83,19 @@ class MonsterAIComponent(Component):
     def __init__(self):
         super(MonsterAIComponent, self).__init__()
         self.fov_map = None
-        self.astar = None
         self.radius = 4
+        self.can_move_diagonal = True
         self.chasing = False
         self.last_player_pos = None
 
     def config(self, values):
-        pass
+        for i in xrange(0, len(values), 2):
+            name = values[i]
+            value = values[i+1]
+            if name == 'FOV_RADIUS':
+                self.radius = int(value)
+            elif name == 'DIAGONAL':
+                self.can_move_diagonal = bool(int(value))
 
     def setup(self, game):
         """Must be called during game initialization, after fov_map is computed"""
@@ -99,7 +105,6 @@ class MonsterAIComponent(Component):
             for x in xrange(game.game_width):
                 self.fov_map.walkable[y,x] = game.fov_map.walkable[y,x]
                 self.fov_map.transparent[y,x] = game.fov_map.transparent[y,x]
-        self.astar = tcod.path.AStar(self.fov_map)
 
     def move_to(self, entity, cur_map, entity_manager, pos):
         old_cell = cur_map.get_at(entity.position)
@@ -148,7 +153,7 @@ class MonsterAIComponent(Component):
             return
 
         if self.chasing:
-            path = astar(cur_map, entity.position, player.position)
+            path = astar(cur_map, entity.position, player.position, self.can_move_diagonal)
             if len(path) == 1:
                 new_pos = path[0]
                 if new_pos == player.position:
@@ -167,7 +172,8 @@ class MonsterAIComponent(Component):
         else:
             if self.last_player_pos is not None:
                 print "remembering the chase"
-                path = astar(cur_map, entity.position, self.last_player_pos)
+                path = astar(cur_map, entity.position, self.last_player_pos,
+                             self.can_move_diagonal)
                 self.move_to(entity, cur_map, em, path[0])
             else:
                 # do not always move
