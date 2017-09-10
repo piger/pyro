@@ -15,7 +15,7 @@ SYMBOLS = {
         'color': (79, 79, 79),
     },
     'WALL': {
-        'symbol': '#',
+        'symbol': 219,
         'color': (110, 110, 110),
     },
     'ROOM': {
