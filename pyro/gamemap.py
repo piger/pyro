@@ -289,9 +289,10 @@ class GameMap(object):
                 self.move_entity(door, pos)
 
     def move_entity(self, entity, pos):
-        old_cell = self.get_at(entity.position)
-        if entity.eid in old_cell.entities:
-            old_cell.entities.remove(entity.eid)
+        if entity.position is not None:
+            old_cell = self.get_at(entity.position)
+            if entity.eid in old_cell.entities:
+                old_cell.entities.remove(entity.eid)
         cell = self.get_at(pos)
         cell.entities.append(entity.eid)
         entity.set_position(pos)

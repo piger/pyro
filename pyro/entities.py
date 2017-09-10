@@ -152,7 +152,6 @@ class MonsterAIComponent(Component):
     def move_to(self, entity, cur_map, entity_manager, pos):
         """Move the entity to a pos, if possible"""
 
-        old_cell = cur_map.get_at(entity.position)
         new_cell = cur_map.get_at(pos)
         caller = inspect.stack()[1][3]
 
@@ -168,10 +167,7 @@ class MonsterAIComponent(Component):
                 # we can't move, there's another AI in that cell
                 return False
 
-        entity.position.x = pos.x
-        entity.position.y = pos.y
-        old_cell.entities.remove(entity.eid)
-        new_cell.entities.append(entity.eid)
+        cur_map.move_entity(entity, pos)
         return True
 
     def wander(self, entity, game):
