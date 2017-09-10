@@ -43,9 +43,12 @@ def lighten_color(color, amount=0.50):
 
 
 class Vector2(object):
-    def __init__(self, x_, y_):
-        self.x = x_
-        self.y = y_
+    def __init__(self, x_or_tuple, maybe_y=None):
+        if maybe_y is None and isinstance(x_or_tuple, tuple):
+            self.x, self.y = x_or_tuple
+        else:
+            self.x = x_or_tuple
+            self.y = maybe_y
 
     def copy(self):
         return Vector2(self.x, self.y)

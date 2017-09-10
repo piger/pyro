@@ -295,15 +295,22 @@ class GameMap(object):
 
     def get_at(self, x_or_pos, y=None):
         if y is None and isinstance(x_or_pos, Vector2):
-            return self.cells[x_or_pos.x][x_or_pos.y]
-        return self.cells[x_or_pos][y]
+            if 0 <= x_or_pos.x < self.width and 0 <= x_or_pos.y < self.height:
+                return self.cells[x_or_pos.x][x_or_pos.y]
+            return None
+        if 0 <= x_or_pos < self.width and 0 <= y < self.height:
+            return self.cells[x_or_pos][y]
+        return None
 
     def get_cells_around(self, x, y):
         """Get cells around x, y, EXCEPT x,y!"""
 
         cells = []
-        for pos in Direction.all():
-            cells.append(self.get_at(x + pos.x, y + pos.y))
+        center = Vector2(x, y)
+        for d in Direction.all():
+            dest = center + d
+            if 0 <= dest.x < self.width and 0 <= dest.y < self.height:
+                cells.append(self.get_at(dest))
         return cells
 
     def get_room(self, room_id):

@@ -1,13 +1,15 @@
-import copy
+import inspect
 import random
 import re
 import json
 import pkg_resources
 import tcod
 import tcod.path
+import tcod.map
 from pyro.utils import Vector2, Direction
 from pyro import *
 from pyro.gamedata import gamedata
+from pyro.astar import astar
 
 
 # https://web.njit.edu/~kevin/rgb.txt.html
@@ -84,6 +86,7 @@ class MonsterAIComponent(Component):
         self.astar = None
         self.radius = 6
         self.chasing = False
+        self.last_player_pos = None
 
     def config(self, values):
         pass
@@ -91,14 +94,39 @@ class MonsterAIComponent(Component):
     def setup(self, game):
         """Must be called during game initialization, after fov_map is computed"""
 
-        self.fov_map = copy.deepcopy(game.fov_map)
+        self.fov_map = tcod.map.Map(width=game.game_width, height=game.game_height)
+        for y in xrange(game.game_height):
+            for x in xrange(game.game_width):
+                self.fov_map.walkable[y,x] = game.fov_map.walkable[y,x]
+                self.fov_map.transparent[y,x] = game.fov_map.transparent[y,x]
         self.astar = tcod.path.AStar(self.fov_map)
+
+    def move_to(self, entity, cur_map, entity_manager, pos):
+        old_cell = cur_map.get_at(entity.position)
+        new_cell = cur_map.get_at(pos)
+        if new_cell is None:
+            print 'caller name:', inspect.stack()[1][3]
+            print "%r is outside of map!" % pos
+            return False
+        for entity_id in new_cell.entities:
+            if entity_id in entity_manager.monster_ai_components:
+                # we can't move, there's another AI in that cell
+                return False
+
+        entity.position.x = pos.x
+        entity.position.y = pos.y
+        old_cell.entities.remove(entity.eid)
+        new_cell.entities.append(entity.eid)
+        return True
 
     def update(self, entity, game):
         player = game.player
         cur_map = game.world.get_current_map()
         em = game.world.entity_manager
-        
+
+        if self.last_player_pos is not None and entity.position == self.last_player_pos:
+            self.last_player_pos = None
+
         # check if the player is directly adjacent, so that we can skip calculating the FOV for this
         # monster.
         adjacent = False
@@ -108,55 +136,47 @@ class MonsterAIComponent(Component):
                 adjacent = True
                 self.chasing = True
 
-        if not adjacent:
+        if not adjacent and not self.chasing:
             # update fov
             self.fov_map.compute_fov(entity.position.x, entity.position.y,
                                      radius=self.radius, algorithm=tcod.FOV_DIAMOND)
             # if the player position is "lit", then we see the player
             self.chasing = self.fov_map.fov[player.position.y, player.position.x]
+        elif adjacent:
+            print "attacking"
+            game.enemy_fight_player(entity)
+            return
 
         if self.chasing:
-            path = self.astar.get_path(entity.position.x, entity.position.y,
-                                       player.position.x, player.position.y)
+            path = astar(cur_map, entity.position, player.position)
+            print path
             if len(path) == 1:
-                path_x, path_y = path[0]
-                if path_x == player.position.x and path_y == player.position.y:
+                new_pos = path[0]
+                if new_pos == player.position:
                     # attack
+                    print "attacking"
                     game.enemy_fight_player(entity)
             elif path:
-                new_x, new_y = path[0]
-                old_cell = cur_map.get_at(entity.position)
-                new_cell = cur_map.get_at(new_x, new_y)
-                for entity_id in new_cell.entities:
-                    if entity_id in em.monster_ai_components:
-                        # we can't move, there's another AI in that cell
-                        print "can't move, cell is busy"
-                        return
-                    
-                entity.position.x = new_x
-                entity.position.y = new_y
-                old_cell.entities.remove(entity.eid)
-                new_cell.entities.append(entity.eid)
+                print "chasing"
+                self.last_player_pos = path[-1]
+
+                new_pos = path[0]
+                if not self.move_to(entity, cur_map, em, new_pos):
+                    print "can't move, cell is busy"
             else:
                 print "path is empty!?"
         else:
-            # do not always move
-            if random.random() < 0.3:
-                return
-            d = random.choice(Direction.all())
-            dest = entity.position + d
-            old_cell = cur_map.get_at(entity.position)
-            cell = cur_map.get_at(dest)
-            if cell.kind in (ROOM, CORRIDOR, FLOOR) and not cell.entities:
-                entity.position = dest
-                old_cell.entities.remove(entity.eid)
-                cell.entities.append(entity.eid)
-            elif cell.entities:
-                em = game.world.entity_manager
-                for entity_id in cell.entities:
-                    if entity_id in em.monster_ai_components:
-                        # there's another AI in that cell
-                        return
+            if self.last_player_pos is not None:
+                print "remembering the chase"
+                path = astar(cur_map, entity.position, self.last_player_pos)
+                self.move_to(entity, cur_map, em, path[0])
+            else:
+                # do not always move
+                if random.random() < 0.3:
+                    return
+                d = random.choice(Direction.all())
+                dest = entity.position + d
+                self.move_to(entity, cur_map, em, dest)
 
 
 COMP_MAP = {
