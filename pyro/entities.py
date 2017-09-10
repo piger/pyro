@@ -119,12 +119,19 @@ class MonsterAIComponent(Component):
                 self.fov_map.transparent[y,x] = game.fov_map.transparent[y,x]
 
     def move_to(self, entity, cur_map, entity_manager, pos):
+        """Move the entity to a pos, if possible"""
+
         old_cell = cur_map.get_at(entity.position)
         new_cell = cur_map.get_at(pos)
-        if new_cell is None or new_cell.kind in (WALL, VOID):
-            print 'caller name:', inspect.stack()[1][3]
-            print "%r is outside of map or WALL/VOID" % pos
+        caller = inspect.stack()[1][3]
+
+        if new_cell is None:
+            print "move_to: %r is outside of map (caller: %s)" % (new_cell, caller)
             return False
+        elif new_cell.kind in (WALL, VOID):
+            print "move_to: %r is WALL or VOID (caller: %s)" % (new_cell, caller)
+            return False
+
         for entity_id in new_cell.entities:
             if entity_id in entity_manager.monster_ai_components:
                 # we can't move, there's another AI in that cell
@@ -136,8 +143,30 @@ class MonsterAIComponent(Component):
         new_cell.entities.append(entity.eid)
         return True
 
+    def wander(self, entity, game):
+        """Wander around randomly"""
+
+        candidates = []
+        cur_map = game.world.get_current_map()
+        for d in Direction.all():
+            dest = entity.position + d
+            cell = cur_map.get_at(dest)
+            if cell.kind in (VOID, WALL):
+                continue
+            for eid in cell.entities:
+                e = game.world.entity_manager.get_entity(eid)
+                if e in game.world.entity_manager.monster_ai_components:
+                    continue
+            candidates.append(dest)
+        self.move_to(entity, cur_map, game.world.entity_manager, random.choice(candidates))
+
     def update(self, entity, game):
+        """To be called every turn"""
+
         if not self.aggressive:
+            if random.random() < 0.3:
+                return
+            self.wander(entity, game)
             return
 
         player = game.player
@@ -191,12 +220,10 @@ class MonsterAIComponent(Component):
                              self.can_move_diagonal)
                 self.move_to(entity, cur_map, em, path[0])
             else:
-                # do not always move
+                # move randomly, but not all the times
                 if random.random() < 0.3:
                     return
-                d = random.choice(Direction.all())
-                dest = entity.position + d
-                self.move_to(entity, cur_map, em, dest)
+                self.wander(entity, game)
 
 
 COMP_MAP = {
