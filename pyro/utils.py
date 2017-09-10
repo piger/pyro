@@ -1,3 +1,5 @@
+import textwrap
+import tdl
 import random
 from tcod.random import Random
 
@@ -150,3 +152,57 @@ class Rect(object):
 
     def __repr__(self):
         return 'Rect(x=%d, y=%d, width=%d, height=%d)' % (self.x, self.y, self.width, self.height)
+
+
+class PopupWindow(object):
+    # 10, 13
+    TOP_LEFT = 201
+    # 12, 12
+    TOP_RIGHT = 187
+    # 9, 13
+    BOTTOM_LEFT = 200
+    # 13, 12
+    BOTTOM_RIGHT = 188
+    # 14, 13
+    HLINE = 205
+    # 11, 12
+    VLINE = 186
+
+    def __init__(self, width, height, max_width, max_height, fg, bg):
+        self.console = tdl.Console(max_width, max_height)
+        self.console.set_colors(fg=fg, bg=bg)
+        self.width = width
+        self.height = height
+
+    @property
+    def max_text_width(self):
+        # 1 for each side + 1 padding
+        return self.width - 4
+
+    def draw(self, message):
+        lines = textwrap.wrap(message, width=self.max_text_width)
+        self.height = len(lines) + 4
+
+        c = self.console
+        c.clear()
+        c.draw_char(0, 0, self.TOP_LEFT)
+        c.draw_char(self.width-1, 0, self.TOP_RIGHT)
+        c.draw_char(0, self.height-1, self.BOTTOM_LEFT)
+        c.draw_char(self.width-1, self.height-1, self.BOTTOM_RIGHT)
+
+        for x in xrange(1, self.width - 1):
+            c.draw_char(x, 0, self.HLINE)
+            c.draw_char(x, self.height - 1, self.HLINE)
+
+        for y in xrange(1, self.height - 1):
+            c.draw_char(0, y, self.VLINE)
+            c.draw_char(self.width - 1, y, self.VLINE)
+
+        y = 2
+        x = 2
+        for line in lines:
+            c.draw_str(x, y, line)
+            y += 1
+
+    def blit(self, surface, x, y):
+        surface.blit(self.console, x, y, self.width, self.height, 0, 0)

@@ -4,7 +4,7 @@ import tdl
 import tcod.map
 import tcod.path
 from pyro.gamemap import WALL, ROOM, CORRIDOR, VOID, FLOOR, World
-from pyro.utils import tcod_random, darken_color, clamp, Direction
+from pyro.utils import tcod_random, darken_color, clamp, Direction, PopupWindow
 from pyro.gamedata import gamedata
 from pyro.combat import roll_to_hit, chance_to_hit
 
@@ -40,6 +40,8 @@ SYMBOLS = {
 MESSAGE_COLOR = (224, 224, 224)
 DARK_BACKGROUND = (8, 8, 8)
 PANEL_TEXT_COLOR = (224, 224, 224)
+POPUP_BACKGROUND = (23, 23, 23)
+POPUP_SIZE = (43, 17)
 
 
 class Camera(object):
@@ -97,6 +99,7 @@ class Game(object):
         self.visited = None
         self.enemies_turn = False
         self.player_is_dead = False
+        self.info_popup = None
 
         self.is_looking = False
         self.eye_position = None
@@ -136,6 +139,12 @@ class Game(object):
         self.logpanel.set_colors(fg=MESSAGE_COLOR, bg=DARK_BACKGROUND)
 
         self.status = tdl.Console(self.status_width, self.status_height)
+
+        # the popup must grow and shrink so the size of the console will be the same size as
+        # the display (i.e. where we show the map); we'll render the popup based on the size
+        # stored in self.info_popup_size.
+        self.info_popup = PopupWindow(POPUP_SIZE[0], POPUP_SIZE[1], self.display_width, self.display_height,
+                                      PANEL_TEXT_COLOR, POPUP_BACKGROUND)
 
         # load game data
         gamedata.load()
@@ -209,15 +218,6 @@ class Game(object):
         self.panel.draw_str(0, 0, "You, the rogue.", fg=PANEL_TEXT_COLOR)
         self.panel.draw_str(0, 1, "Player position: %d/%d" % (player_pos.x, player_pos.y),
                             fg=PANEL_TEXT_COLOR)
-
-        # display informations from the 'look' command now
-        if self.is_looking:
-            self.panel.draw_str(0, 2, "Eye position: %d/%d" % (self.eye_position.x,
-                                                               self.eye_position.y))
-            try:
-                self.render_look_command()
-            except tdl.TDLError:
-                pass
 
         for y in xrange(self.game_height):
             for x in range(self.game_width):
@@ -300,10 +300,18 @@ class Game(object):
         # status bar goes at the last line of the screen and it extends until the log panel
         self.root.blit(self.status, 0, self.display_height, 0, 0)
 
+        # popup test
+        if self.is_looking:
+            self.panel.draw_str(0, 2, "Eye position: %d/%d" % (self.eye_position.x,
+                                                               self.eye_position.y))
+            self.render_look_command()
+
         tdl.flush()
 
     def render_look_command(self):
         """Display informations about what the cursor is looking at"""
+
+        text = ""
 
         game_map = self.world.get_current_map()
         cell = game_map.get_at(self.eye_position.x, self.eye_position.y)
@@ -320,15 +328,18 @@ class Game(object):
                     if entity.description:
                         descriptions.append(entity.description)
                 if descriptions:
-                    self.status.draw_str(0, 0, "%s %s" % (prefix, ", ".join(descriptions)),
-                                         fg=MESSAGE_COLOR)
-                    return
+                    text += ", ".join(descriptions)
 
             if cell.feature is not None:
                 feature = gamedata.get_feature(cell.feature)
                 if feature is not None and len(feature['description']):
-                    self.status.draw_str(0, 0, "%s %s" % (prefix, feature['description']),
-                                         fg=MESSAGE_COLOR)
+                    if text != "":
+                        text += "; "
+                    text += "%s %s" % (prefix, feature['description'])
+
+            if text:
+                self.info_popup.draw(text)
+                self.info_popup.blit(self.root, 1, 1)
 
     def attempt_move(self, dest_vec):
         """Return False to negate passage, True to allow it"""
