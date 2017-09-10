@@ -155,6 +155,11 @@ class Rect(object):
 
 
 class PopupWindow(object):
+    """A popup window to display variable length text.
+
+    The width of this window is fixed while the height is resized based on the length
+    of the message to be displayed.
+    """
     # 10, 13
     TOP_LEFT = 201
     # 12, 12
@@ -169,19 +174,26 @@ class PopupWindow(object):
     VLINE = 186
 
     def __init__(self, width, height, max_width, max_height, fg, bg):
-        self.console = tdl.Console(max_width, max_height)
-        self.console.set_colors(fg=fg, bg=bg)
         self.width = width
         self.height = height
+        self.max_width = max_width
+        self.max_height = max_height
+        self.console = tdl.Console(self.max_width, self.max_height)
+        self.console.set_colors(fg=fg, bg=bg)
 
     @property
     def max_text_width(self):
-        # 1 for each side + 1 padding
+        # 1 for the frame on each side + 1 padding
         return self.width - 4
+
+    @property
+    def max_text_height(self):
+        # 1 for the frame on each side + 1 padding
+        return self.height - 4
 
     def draw(self, message):
         lines = textwrap.wrap(message, width=self.max_text_width)
-        self.height = len(lines) + 4
+        self.height = clamp(len(lines) + 4, 0, self.max_height)
 
         c = self.console
         c.clear()
@@ -203,6 +215,8 @@ class PopupWindow(object):
         for line in lines:
             c.draw_str(x, y, line)
             y += 1
+            if y >= self.max_text_height:
+                break
 
     def blit(self, surface, x, y):
         surface.blit(self.console, x, y, self.width, self.height, 0, 0)
