@@ -108,8 +108,8 @@ class Game(object):
         self.panel.set_colors(PANEL_TEXT_COLOR, DARK_BACKGROUND)
 
         self.logpanel = tdl.Console(self.log_width, self.log_height)
-        self.logpanel.clear(bg=DARK_BACKGROUND)
         self.logpanel.set_colors(fg=MESSAGE_COLOR, bg=DARK_BACKGROUND)
+        self.logpanel.clear()
 
         self.status = tdl.Console(self.status_width, self.status_height)
 
@@ -188,9 +188,8 @@ class Game(object):
         self.camera.center_on(player_pos.x, player_pos.y)
 
         # Print some stuff into the info panel
-        self.panel.draw_str(0, 0, "You, the rogue.", fg=PANEL_TEXT_COLOR)
-        self.panel.draw_str(0, 1, "Player position: %d/%d" % (player_pos.x, player_pos.y),
-                            fg=PANEL_TEXT_COLOR)
+        self.panel.draw_str(0, 0, "You, the rogue.")
+        self.panel.draw_str(0, 1, "Player position: %d/%d" % (player_pos.x, player_pos.y))
 
         for y in xrange(self.game_height):
             for x in range(self.game_width):
