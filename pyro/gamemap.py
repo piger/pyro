@@ -198,24 +198,21 @@ class GameMap(object):
         entity = entity_manager.create_entity(kind, pos)
         cell.entities.append(entity.eid)
 
+    def _put_wall_for_room(self, x, y, room):
+        if self.cells[x][y].kind == VOID:
+            self.cells[x][y].kind = WALL
+        self.cells[x][y].room_id = room.rid
+
     def _dig_room(self, room):
         # room outer walls (y) - do not overwrite existing tunnel tho!
         for y in xrange(room.y, room.endY):
-            if self.cells[room.x][y].kind == VOID:
-                self.cells[room.x][y].kind = WALL
-            self.cells[room.x][y].room_id = room.rid
-            if self.cells[room.endX-1][y].kind == VOID:
-                self.cells[room.endX-1][y].kind = WALL
-            self.cells[room.endX-1][y].room_id = room.rid
+            self._put_wall_for_room(room.x, y, room)
+            self._put_wall_for_room(room.endX-1, y, room)
 
         # room outer walls (x)
         for x in xrange(room.x, room.endX):
-            if self.cells[x][room.y].kind == VOID:
-                self.cells[x][room.y].kind = WALL
-            self.cells[x][room.y].room_id = room.rid
-            if self.cells[x][room.endY-1].kind == VOID:
-                self.cells[x][room.endY-1].kind = WALL
-            self.cells[x][room.endY-1].room_id = room.rid
+            self._put_wall_for_room(x, room.y, room)
+            self._put_wall_for_room(x, room.endY-1, room)
 
         # room interior
         for y in xrange(room.y+1, room.endY-1):
