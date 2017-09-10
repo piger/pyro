@@ -93,6 +93,8 @@ class MonsterAIComponent(Component):
         self.fov_map = None
         self.radius = 4
         self.can_move_diagonal = True
+        self.aggressive = True
+
         self.chasing = False
         self.last_player_pos = None
 
@@ -104,6 +106,8 @@ class MonsterAIComponent(Component):
                 self.radius = int(value)
             elif name == 'DIAGONAL':
                 self.can_move_diagonal = bool(int(value))
+            elif name == 'AGGRESSIVE':
+                self.aggressive = bool(int(value))
 
     def setup(self, game):
         """Must be called during game initialization, after fov_map is computed"""
@@ -133,6 +137,9 @@ class MonsterAIComponent(Component):
         return True
 
     def update(self, entity, game):
+        if not self.aggressive:
+            return
+
         player = game.player
         cur_map = game.world.get_current_map()
         em = game.world.entity_manager

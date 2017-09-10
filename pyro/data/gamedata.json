@@ -37,7 +37,7 @@
         60, 179, 113
       ],
       "can": [
-        "monster_ai:DIAGONAL:0"
+        "monster_ai:DIAGONAL:0:AGGRESSIVE:0"
       ]
     },
     {
