@@ -48,11 +48,20 @@ class GameCell(object):
 
     def __init__(self):
         self.kind = VOID
-        self.entities = []
+        self.entities = set()
         self.room_id = None
         self.feature = None
         # a debug value
         self.value = None
+
+    def add_entity(self, entity):
+        self.entities.add(entity.eid)
+
+    def remove_entity(self, entity):
+        self.entities.remove(entity.eid)
+
+    def remove_entity_by_id(self, entity_id):
+        self.entities.remove(entity_id)
 
     @property
     def walkable(self):
@@ -90,17 +99,17 @@ class GameMap(object):
     def _connect_rooms(self, room1, room2):
         """Connects two rooms with a corridor"""
 
-        sx, sy = room1.center
-        dx, dy = room2.center
+        start = room1.center
+        end = room2.center
 
         v = self.tunnel_id
         self.tunnel_id = chr(ord(self.tunnel_id) + 1)
         if random.random() < 0.5:
-            self._create_horizontal_tunnel(sx, dx, sy, v)
-            self._create_vertical_tunnel(sy, dy, dx, v)
+            self._create_horizontal_tunnel(start.x, end.x, start.y, v)
+            self._create_vertical_tunnel(start.y, end.y, end.x, v)
         else:
-            self._create_vertical_tunnel(sy, dy, sx, v)
-            self._create_horizontal_tunnel(sx, dx, dy, v)
+            self._create_vertical_tunnel(start.y, end.y, start.x, v)
+            self._create_horizontal_tunnel(start.x, end.x, end.y, v)
 
     def _create_horizontal_tunnel(self, x1, x2, y, v=None):
         for x in xrange(min(x1, x2), max(x1, x2) + 1):
@@ -181,13 +190,7 @@ class GameMap(object):
         rooms.remove(start_room)
 
         # for each remaining room calculate the distance from the starting room
-        distances = []
-        for room in rooms:
-            scx, scy = start_room.center
-            ocx, ocy = room.center
-
-            distance = math.sqrt((ocx - scx) ** 2 + (ocy - scy) ** 2)
-            distances.append((distance, room))
+        distances = [(start_room.center.distance(room.center), room) for room in rooms]
 
         # pick a random rom between the 3 more far from the starting room
         distances.sort(key=lambda x: x[0])
@@ -196,12 +199,10 @@ class GameMap(object):
         self.start_room_id = start_room.rid
         self.end_room_id = end_room.rid
 
-        start_x, start_y = start_room.center
-        self.start_vec = Vector2(start_x, start_y)
+        self.start_vec = start_room.center
         self._place_stairs(self.start_vec, 'stairs_up', entity_manager)
 
-        end_x, end_y = end_room.center
-        self.end_vec = Vector2(end_x, end_y)
+        self.end_vec = end_room.center
         self._place_stairs(self.end_vec, 'stairs_down', entity_manager)
 
     def _place_stairs(self, pos, kind, entity_manager):
@@ -300,9 +301,9 @@ class GameMap(object):
         if entity.position is not None:
             old_cell = self.get_at(entity.position)
             if entity.eid in old_cell.entities:
-                old_cell.entities.remove(entity.eid)
+                old_cell.remove_entity(entity)
         cell = self.get_at(pos)
-        cell.entities.append(entity.eid)
+        cell.add_entity(entity)
         entity.set_position(pos)
 
     def get_at(self, x_or_pos, y=None):
@@ -532,12 +533,12 @@ class World(object):
         return self.maps[self.current_map]
 
     def destroy_entity(self, eid):
+        cur_map = self.get_current_map()
         entity = self.entity_manager.get_entity(eid)
-        pos = entity.get_position()
-        cell = self.maps[self.current_map].get_at(pos.x, pos.y)
+        cell = cur_map.get_at(entity.get_position())
         if eid not in cell.entities:
-            print "BUGGONE"
+            print "Entity %r not in cell %r" % (entity, cell)
         else:
-            cell.entities.remove(eid)
+            cell.remove_entity(entity)
 
         self.entity_manager.destroy_entity(eid)

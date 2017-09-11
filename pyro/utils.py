@@ -1,3 +1,4 @@
+import math
 import textwrap
 import tdl
 import random
@@ -70,6 +71,9 @@ class Vector2(object):
     def copy(self):
         return Vector2(self.x, self.y)
 
+    def distance(self, other):
+        return math.sqrt((other.x - self.x) ** 2 + (other.y - self.y) ** 2)
+
     @classmethod
     def random(cls, min_x, max_x, min_y, max_y):
         return cls(random.randint(min_x, max_x),
@@ -141,7 +145,7 @@ class Rect(object):
     def center(self):
         center_x = int((self.x + self.endX) / 2)
         center_y = int((self.y + self.endY) / 2)
-        return (center_x, center_y)
+        return Vector2(center_x, center_y)
 
     def intersect(self, other):
         return (self.x <= other.endX and self.endX >= other.x and
