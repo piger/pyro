@@ -207,11 +207,6 @@ class PopupWindow(object):
         # 1 for the frame on each side + 1 padding
         return self.width - 4
 
-    @property
-    def max_text_height(self):
-        # 1 for the frame on each side + 1 padding
-        return self.height - 4
-
     def draw(self, message):
         lines = textwrap.wrap(message, width=self.max_text_width)
         self.height = clamp(len(lines) + 4, 0, self.max_height)
@@ -239,7 +234,7 @@ class PopupWindow(object):
         for line in lines:
             c.draw_str(x, y, line)
             y += 1
-            if y >= self.max_text_height:
+            if y >= self.height - 2:
                 break
 
     def blit(self, surface, x, y):
