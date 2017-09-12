@@ -42,6 +42,17 @@
       ]
     },
     {
+      "name": "goblin",
+      "display_name": "Goblin",
+      "avatar": "g",
+      "color": [ 0, 139, 0 ],
+      "can": [
+        "combat:DAMAGE:6:DEFENSE:10:ACCURACY:70",
+        "monster_ai:FOV_RADIUS:7",
+        "health:15"
+      ]
+    },
+    {
       "name": "fairy",
       "display_name": "Fairy",
       "avatar": "F",
