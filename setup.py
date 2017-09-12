@@ -10,6 +10,7 @@ setup(
         'tdl==4.1.0',
         'noise==1.2.2',
         'click==6.7',
+        'enum34==1.1.6',
         'better_exceptions',
     ],
     packages=find_packages(),

@@ -10,6 +10,7 @@ from pyro.utils import Vector2, Direction, weighted_choice
 from pyro import *
 from pyro.gamedata import gamedata
 from pyro.astar import astar
+from pyro.potions import POTION_AVATAR, POTION_COLOR
 
 
 # https://web.njit.edu/~kevin/rgb.txt.html
@@ -28,6 +29,7 @@ def parse_capability(line):
 class Component(object):
 
     NAME = 'component'
+    kind = ComponentType.DUMB
 
     def config(self, values):
         raise NotImplementedError
@@ -40,6 +42,7 @@ class Component(object):
 class HealthComponent(Component):
 
     NAME = 'health'
+    kind = ComponentType.HEALTH
 
     def __init__(self):
         super(HealthComponent, self).__init__()
@@ -58,17 +61,19 @@ class PotionComponent(Component):
     """
 
     NAME = 'potion'
+    kind = ComponentType.POTION
 
-    def __init__(self):
+    def __init__(self, potion_type):
         super(PotionComponent, self).__init__()
-        self.kind = 'blank'
+        self.potion_type = potion_type
 
     def config(self, values):
-        self.kind = values[0]
+        return
 
 
 class InventoryComponent(Component):
     NAME = 'inventory'
+    kind = ComponentType.INVENTORY
 
     def __init__(self):
         super(InventoryComponent, self).__init__()
@@ -83,6 +88,7 @@ class InventoryComponent(Component):
 class CombatComponent(Component):
 
     NAME = 'combat'
+    kind = ComponentType.COMBAT
 
     def __init__(self, damage=0, defense=0, accuracy=0):
         super(CombatComponent, self).__init__()
@@ -105,6 +111,7 @@ class CombatComponent(Component):
 class DoorComponent(Component):
 
     NAME = 'door'
+    kind = ComponentType.DOOR
 
     def __init__(self, initial_state=True):
         super(DoorComponent, self).__init__()
@@ -118,6 +125,7 @@ class MonsterAIComponent(Component):
     """AI for monsters."""
 
     NAME = 'monster_ai'
+    kind = ComponentType.MONSTER_AI
 
     def __init__(self):
         super(MonsterAIComponent, self).__init__()
@@ -187,6 +195,8 @@ class MonsterAIComponent(Component):
                     continue
             candidates.append(dest)
 
+        # chose a new random direction, with a preference on following the current direction, just to make it look
+        # slightly less random.
         if self.cur_direction is not None and self.cur_direction in candidates:
             w = []
             for c in candidates:
@@ -271,21 +281,32 @@ COMP_MAP = {
     'health': HealthComponent,
     'combat': CombatComponent,
     'door': DoorComponent,
-    'life': HealthComponent,
     'monster_ai': MonsterAIComponent,
     'potion': PotionComponent,
 }
 
 
 class Entity(object):
-    def __init__(self, eid, name, avatar, color):
+    def __init__(self, eid, name, avatar, color, layer=LAYER_CREATURES):
         self.eid = eid
         self.name = name
+        self.display_name = None
         self.avatar = avatar
         self.color = color
+        self.layer = layer
         self.position = Vector2(0, 0)
         self.always_visible = False
         self.description = ''
+        self.components = {}
+
+    def get_component(self, name):
+        return self.components[name]
+
+    def has_component(self, name):
+        return name in self.components
+
+    def add_component(self, component):
+        self.components[component.kind.name] = component
 
     def set_position(self, x_or_pos, y=None):
         if isinstance(x_or_pos, Vector2) and y is None:
@@ -297,6 +318,16 @@ class Entity(object):
 
     def get_position(self):
         return self.position
+
+    def is_monster(self):
+        return any([c.kind == ComponentType.MONSTER_AI for c in self.components.values()])
+
+    def is_potion(self):
+        return any([c.kind == ComponentType.POTION for c in self.components.values()])
+
+    def __repr__(self):
+        return "<Entity(eid=%d, name=%s, display_name=%s, position=%r, components=%r)>" % (
+            self.eid, self.name, self.display_name, self.position, self.components)
 
 
 class EntityManager(object):
@@ -333,6 +364,7 @@ class EntityManager(object):
         entity = Entity(eid, name, entity_data['avatar'], color)
         entity.always_visible = entity_data.get('always_visible', False)
         entity.description = entity_data.get('description', '')
+        entity.display_name = entity_data.get('display_name', '')
 
         for cap in entity_data.get('can', []):
             name, values = parse_capability(cap)
@@ -341,15 +373,17 @@ class EntityManager(object):
             comp.config(values)
             db = self.comp_db[name]
             db[entity.eid] = comp
+            entity.add_component(comp)
 
         self.entities[entity.eid] = entity
         return entity
 
-    def create_potion(self, name):
-        base_data = gamedata.get_base_potion()
-        potion_data = gamedata.get_potion(name)
-        potion_data.update(base_data)
-        return self.create_entity(name, potion_data)
+    def create_potion(self, potion_type):
+        eid = self.next_eid()
+        entity = Entity(eid, 'potion', POTION_AVATAR, POTION_COLOR, layer=LAYER_ITEMS)
+        entity.add_component(PotionComponent(potion_type))
+        self.entities[entity.eid] = entity
+        return entity
 
     def destroy_entity(self, eid):
         for db in self.comp_db.itervalues():

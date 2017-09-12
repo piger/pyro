@@ -172,7 +172,7 @@ class GameMap(object):
     def _place_items_in_rooms(self, entity_manager):
         pos = self.start_vec.copy()
         pos.x += 1
-        potion = entity_manager.create_potion('health')
+        potion = entity_manager.create_potion(PotionType.HEALTH)
         self.move_entity(potion, pos)
 
     def _select_start_and_end(self, entity_manager):

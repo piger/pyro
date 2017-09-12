@@ -7,6 +7,7 @@ from pyro.gamemap import WALL, ROOM, CORRIDOR, VOID, FLOOR, World
 from pyro.utils import tcod_random, darken_color, clamp, Direction, PopupWindow
 from pyro.gamedata import gamedata
 from pyro.combat import roll_to_hit, chance_to_hit
+from pyro.potions import PotionSystem
 
 
 MESSAGE_COLOR = (224, 224, 224)
@@ -72,6 +73,7 @@ class Game(object):
         self.enemies_turn = False
         self.player_is_dead = False
         self.info_popup = None
+        self.potion_system = PotionSystem()
 
         self.is_looking = False
         self.eye_position = None
@@ -121,6 +123,9 @@ class Game(object):
 
         # load game data
         gamedata.load()
+
+        # initialize the potion system
+        self.potion_system.setup()
 
         # Initialize world and current dungeon
         self.world = World()
@@ -254,8 +259,12 @@ class Game(object):
 
                 # do not paint entities if they are not visibles.
                 # TODO: we must still paint items! or at least stairs!
+                entities = []
                 for eid in cell.entities:
                     entity = self.world.entity_manager.get_entity(eid)
+                    entities.append(entity)
+                entities.sort(key=lambda x: x.layer)
+                for entity in entities:
                     if is_visible or entity.always_visible or self.DEBUG:
                         self.console.draw_char(xx, yy, entity.avatar, bg=None, fg=entity.color)
 
@@ -307,7 +316,11 @@ class Game(object):
                 descriptions = []
                 for entity_id in cell.entities:
                     entity = self.world.entity_manager.get_entity(entity_id)
-                    if entity.description:
+                    if entity.is_potion():
+                        name = self.potion_system.get_name_for_potion(entity)
+                        d = "a %s potion" % name
+                        descriptions.append(d)
+                    elif entity.description:
                         descriptions.append(entity.description)
                 if descriptions:
                     text += ", ".join(descriptions)

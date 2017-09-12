@@ -21,14 +21,6 @@ class Gamedata(object):
         for entity in self._data['entities']:
             self.entities[entity['name']] = entity
 
-        for entity in self._data['potions']['types']:
-            self.potions[entity['name']] = entity
-
-        self.potion['avatar'] = self._data['potions']['avatar']
-        self.potion['color'] = self._data['potions']['color']
-        self.potion['description'] = self._data['potions']['description']
-        self.potion['colors'] = self._data['potions']['colors']
-
         for entity in self._data['weapons']:
             self.weapons[entity['name']] = entity
 
@@ -43,12 +35,6 @@ class Gamedata(object):
 
     def get_entity(self, name):
         return self.entities[name]
-
-    def get_potion(self, name):
-        return self.potions[name]
-
-    def get_base_potion(self):
-        return self.potion
 
     def get_weapon(self, name):
         return self.weapons[name]
