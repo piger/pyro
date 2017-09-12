@@ -7,7 +7,8 @@
       "color": [ 238, 233, 233 ],
       "can": [
         "combat:DAMAGE:5:DEFENSE:15:ACCURACY:100",
-        "health:100"
+        "health:100",
+        "inventory:10"
       ]
     },
     {

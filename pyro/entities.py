@@ -77,12 +77,18 @@ class InventoryComponent(Component):
 
     def __init__(self):
         super(InventoryComponent, self).__init__()
-        self.items = []
         self.max_items = 10
-        self.item_map = {}
+        self.items = []
 
     def config(self, values):
-        return
+        self.max_items = int(values[0])
+
+    def take_item(self, entity):
+        self.items.append(entity.eid)
+
+    def use_item(self, slot):
+        item = self.items[slot]
+        print item
 
 
 class CombatComponent(Component):
@@ -283,6 +289,7 @@ COMP_MAP = {
     'door': DoorComponent,
     'monster_ai': MonsterAIComponent,
     'potion': PotionComponent,
+    'inventory': InventoryComponent,
 }
 
 
@@ -339,6 +346,7 @@ class EntityManager(object):
         self.door_components = {}
         self.monster_ai_components = {}
         self.potion_components = {}
+        self.inventory_components = {}
 
         self.comp_db = {
             'health': self.health_components,
@@ -346,6 +354,7 @@ class EntityManager(object):
             'door': self.door_components,
             'monster_ai': self.monster_ai_components,
             'potion': self.potion_components,
+            'inventory': self.inventory_components,
         }
 
     def next_eid(self):
@@ -381,7 +390,9 @@ class EntityManager(object):
     def create_potion(self, potion_type):
         eid = self.next_eid()
         entity = Entity(eid, 'potion', POTION_AVATAR, POTION_COLOR, layer=LAYER_ITEMS)
-        entity.add_component(PotionComponent(potion_type))
+        pc = PotionComponent(potion_type)
+        entity.add_component(pc)
+        self.potion_components[entity.eid] = pc
         self.entities[entity.eid] = entity
         return entity
 

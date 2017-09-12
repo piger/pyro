@@ -9,6 +9,7 @@ from pyro.utils import tcod_random, darken_color, clamp, Direction, PopupWindow
 from pyro.gamedata import gamedata
 from pyro.combat import roll_to_hit, chance_to_hit
 from pyro.potions import PotionSystem
+from pyro import ComponentType
 
 
 MESSAGE_COLOR = (224, 224, 224)
@@ -479,6 +480,9 @@ class Game(object):
             direction = Direction.SOUTH_WEST
         elif user_input.char == 'n':
             direction = Direction.SOUTH_EAST
+        elif user_input.char == ';' or user_input.char == 'g':
+            self.player_take_item()
+            return
         elif user_input.key == 'SPACE' or user_input.char == 'z':
             self.enemies_turn = True
             return
@@ -506,6 +510,30 @@ class Game(object):
         dest_vec.y = clamp(dest_vec.y, 0, self.game_height - 1)
         self.eye_position.x = dest_vec.x
         self.eye_position.y = dest_vec.y
+
+    def player_take_item(self):
+        cur_map = self.world.get_current_map()
+        em = self.world.entity_manager
+        ic = self.player.get_component(ComponentType.INVENTORY.name)
+        cell = cur_map.get_at(self.player.get_position())
+        if not cell.entities:
+            return False
+
+        to_remove = []
+        for entity_id in cell.entities:
+            entity = em.get_entity(entity_id)
+            if entity.is_potion():
+                ic.take_item(entity)
+                to_remove.append(entity.eid)
+                name = self.potion_system.get_name_for_potion(entity)
+                self.post_message("You took a %s potion" % name)
+
+        if not to_remove:
+            return False
+        for entity_id in to_remove:
+            cell.entities.remove(entity_id)
+        self.enemies_turn = True
+        return True
 
     def post_message(self, message):
         lines = textwrap.wrap(message, width=self.log_width)
