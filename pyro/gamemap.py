@@ -1,8 +1,7 @@
-import math
 import random
+from collections import OrderedDict
 import tcod.bsp
 import noise
-from collections import OrderedDict
 from pyro.entities import EntityManager
 from pyro.utils import Rect, Vector2, tcod_random, Direction
 from pyro.rooms import room_1
@@ -62,6 +61,9 @@ class GameCell(object):
 
     def remove_entity_by_id(self, entity_id):
         self.entities.remove(entity_id)
+
+    def has_entities(self):
+        return bool(len(self.entities))
 
     @property
     def walkable(self):
@@ -152,7 +154,7 @@ class GameMap(object):
 
     def _place_creatures_in_rooms(self, level, entity_manager):
         rooms = [room for room in self.rooms.values() if room.rid != self.start_room_id]
-        creatures = [('boar', level * 20), ('worm', level * 12), ('fairy', 3)]
+        creatures = [('boar', level * 20), ('worm', level * 12), ('goblin', 9), ('fairy', 3)]
         for creature_name, amount in creatures:
             for _ in xrange(amount):
                 for j in xrange(5):
@@ -163,7 +165,7 @@ class GameMap(object):
                     pos = Vector2.random(room.x + 1, room.endX - 2,
                                          room.y + 1, room.endY - 2)
                     cell = self.get_at(pos)
-                    if cell.kind not in (ROOM, CORRIDOR) and len(cell.entities) > 0:
+                    if not cell.walkable or cell.has_entities():
                         continue
                     entity = entity_manager.create_entity(creature_name)
                     self.move_entity(entity, pos)
