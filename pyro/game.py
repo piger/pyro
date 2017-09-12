@@ -1,3 +1,4 @@
+import textwrap
 import math
 import random
 import tdl
@@ -506,16 +507,10 @@ class Game(object):
         self.eye_position.x = dest_vec.x
         self.eye_position.y = dest_vec.y
 
-        # debug
-        # game_map = self.world.get_current_map()
-        # print "Looking at cell: %r" % game_map.get_at(dest_vec.x, dest_vec.y)
-
     def post_message(self, message):
-        n_lines = int(math.ceil(float(len(message)) / float(self.log_width)))
-        if n_lines < 1:
-            n_lines = 1
-        self.logpanel.scroll(0, n_lines)
-        self.logpanel.draw_str(0, 0, message)
+        lines = textwrap.wrap(message, width=self.log_width)
+        self.logpanel.scroll(0, len(lines) * -1)
+        self.logpanel.draw_str(0, self.log_height - len(lines), message)
 
     def is_visible(self, x, y):
         return self.fov_map.fov[y, x]
