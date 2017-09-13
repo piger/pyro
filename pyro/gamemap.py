@@ -160,7 +160,9 @@ class GameMap(object):
                 for j in xrange(5):
                     # retries 5 times
                     room = random.choice(rooms)
+                    # if more than 4 enemies in the room, skip it and remove it from the pool
                     if len(self.get_entities_in_room(room.rid)) > 4:
+                        rooms.remove(room)
                         continue
                     pos = Vector2.random(room.x + 1, room.endX - 2,
                                          room.y + 1, room.endY - 2)
