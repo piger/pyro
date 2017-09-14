@@ -60,6 +60,12 @@ def weighted_choice(weights):
             return i
 
 
+def center_text(text, width):
+    t = math.ceil(len(text) / 2.0)
+    w = math.ceil(width / 2.0)
+    return w - t
+
+
 class Vector2(object):
     def __init__(self, x_or_tuple, maybe_y=None):
         if maybe_y is None and isinstance(x_or_tuple, tuple):

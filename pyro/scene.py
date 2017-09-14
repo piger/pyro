@@ -1,6 +1,6 @@
 import tdl
-from enum import Enum
-from pyro import SceneId
+from pyro import DARK_BACKGROUND, PANEL_TEXT_COLOR
+from pyro.utils import center_text
 
 
 class Scene(object):
@@ -21,16 +21,29 @@ class StartScreen(Scene):
     def __init__(self):
         super(StartScreen, self).__init__()
         self.window = None
+        self.do_render = True
 
     def setup(self, game):
         self.window = tdl.Console(game.screen_width, game.screen_height)
+        self.window.set_colors(PANEL_TEXT_COLOR, DARK_BACKGROUND)
 
     def keydown_event(self, event, game):
         game.next_scene = 'dungeon'
 
     def update(self, game):
-        self.window.draw_str(0, 0, "pyro!", fg=(255, 255, 255))
-        game.root.blit(self.window, 0, 0, game.screen_width, game.screen_height, 0, 0)
+        if self.do_render:
+            self.do_render = False
+
+            x = center_text("pyro!", game.screen_width)
+            y = game.screen_height / 2
+            self.window.draw_str(x, y, "pyro!")
+
+            text = "Press any key to start"
+            x = center_text(text, game.screen_width)
+            y += 1
+            self.window.draw_str(x, y, text)
+
+            game.root.blit(self.window, 0, 0, game.screen_width, game.screen_height, 0, 0)
         tdl.flush()
 
 
