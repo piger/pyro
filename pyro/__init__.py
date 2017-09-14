@@ -1,6 +1,13 @@
 from enum import Enum
 
 
+MESSAGE_COLOR = (224, 224, 224)
+DARK_BACKGROUND = (8, 8, 8)
+PANEL_TEXT_COLOR = (224, 224, 224)
+POPUP_BACKGROUND = (23, 23, 23)
+POPUP_SIZE = (43, 17)
+
+
 LAYER_FLOOR = 0
 LAYER_ITEMS = 1
 LAYER_CREATURES = 2
@@ -42,3 +49,10 @@ class EntityType(Enum):
     TRAP = 5
     DOOR = 6
     NPC = 7
+
+
+class SceneId(Enum):
+    START = 0
+    ABOUT = 1
+    GAME = 2
+    QUIT = 3

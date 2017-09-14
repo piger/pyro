@@ -241,3 +241,18 @@ class PopupWindow(object):
         """Blit this popup onto another surface"""
 
         surface.blit(self.console, x, y, self.width, self.height, 0, 0)
+
+
+class Camera(object):
+    def __init__(self, width, height):
+        self.x = 0
+        self.y = 0
+        self.width = width
+        self.height = height
+
+    def center_on(self, x, y):
+        self.x = x - (self.width / 2)
+        self.y = y - (self.height / 2)
+
+    def __repr__(self):
+        return "Camera(x=%d, y=%d, w=%d, h=%d)" % (self.x, self.y, self.width, self.height)
