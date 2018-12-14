@@ -68,7 +68,7 @@ class DungeonScene(Scene):
 
         # size of info panel
         self.panel_width = 30
-        self.panel_height = game.screen_height / 2
+        self.panel_height = game.screen_height // 2
 
         # size of map area console
         self.display_width = game.screen_width - self.panel_width
@@ -282,9 +282,9 @@ class DungeonScene(Scene):
         y = 1
 
         # NOTE: right now 'eye_position' is relative to the game world, not the camera world.
-        if self.eye_position.y - self.camera.y <= self.display_height / 2:
+        if self.eye_position.y - self.camera.y <= self.display_height // 2:
             # render on the second half of the screen and add 3 cells margin
-            y = self.display_height / 2 + 3
+            y = self.display_height // 2 + 3
 
         game_map = self.world.get_current_map()
         cell = game_map.get_at(self.eye_position.x, self.eye_position.y)
