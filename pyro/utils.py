@@ -2,6 +2,7 @@ import math
 import textwrap
 import tdl
 import random
+from functools import total_ordering
 from tcod.random import Random
 
 class TcodRandom(object):
@@ -66,6 +67,7 @@ def center_text(text, width):
     return w - t
 
 
+@total_ordering
 class Vector2(object):
     def __init__(self, x_or_tuple, maybe_y=None):
         if maybe_y is None and isinstance(x_or_tuple, tuple):
@@ -104,6 +106,12 @@ class Vector2(object):
             return False
         else:
             raise NotImplementedError("eq not impelemented for type %s" % type(other))
+
+    def __le__(self, other):
+        if not isinstance(other, Vector2):
+            raise NotImplementedError("__le__ not implementged for type %s" % type(other))
+
+        return self.x <= other.x and self.y <= other.y
 
     def __hash__(self):
         return hash((self.x, self.y))
