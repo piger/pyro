@@ -249,7 +249,7 @@ class PopupWindow(object):
         surface.blit(self.console, x, y, self.width, self.height, 0, 0)
 
 
-class Camera(object):
+class Camera(Rect):
     def __init__(self, width, height):
         self.x = 0
         self.y = 0
@@ -257,8 +257,13 @@ class Camera(object):
         self.height = height
 
     def center_on(self, x, y):
-        self.x = x - (self.width / 2)
-        self.y = y - (self.height / 2)
+        d = math.sqrt((self.x - x) ** 2 + (self.y - y) ** 2)
+        print d
+        print "x=%r, y=%r; xx=%r, yy=%r; self.x=%r, self.y=%r" % (
+            x, y, x + self.x, y + self.y, self.x, self.y)
+        if d >= 50:
+            self.x = x - (self.width / 2)
+            self.y = y - (self.height / 2)
 
     def __repr__(self):
         return "Camera(x=%d, y=%d, w=%d, h=%d)" % (self.x, self.y, self.width, self.height)
