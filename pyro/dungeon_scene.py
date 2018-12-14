@@ -130,7 +130,7 @@ class DungeonScene(Scene):
         self.init_visited()
 
         # init AI
-        for ai in self.world.entity_manager.monster_ai_components.values():
+        for ai in list(self.world.entity_manager.monster_ai_components.values()):
             ai.setup(self)
 
     def init_fov(self, cur_map):
@@ -140,8 +140,8 @@ class DungeonScene(Scene):
         """
 
         fov_map = tcod.map.Map(width=self.game_width, height=self.game_height)
-        for y in xrange(self.game_height):
-            for x in xrange(self.game_width):
+        for y in range(self.game_height):
+            for x in range(self.game_width):
                 cell = cur_map.get_at(x, y)
                 if cell.walkable:
                     fov_map.walkable[y, x] = True
@@ -154,14 +154,14 @@ class DungeonScene(Scene):
 
     def init_visited(self):
         cur_map = self.world.get_current_map()
-        self.visited = [[False for y in xrange(self.game_height)] for x in xrange(self.game_width)]
+        self.visited = [[False for y in range(self.game_height)] for x in range(self.game_width)]
 
         # the starting room is always entirely visited.
         start_cell = cur_map.get_at(cur_map.start_vec.x, cur_map.start_vec.y)
         start_room = cur_map.get_room(start_cell.room_id)
 
-        for y in xrange(start_room.y, start_room.y + start_room.height):
-            for x in xrange(start_room.x, start_room.x + start_room.width):
+        for y in range(start_room.y, start_room.y + start_room.height):
+            for x in range(start_room.x, start_room.x + start_room.width):
                 self.visited[x][y] = True
 
     def render_all(self, game):
@@ -178,7 +178,7 @@ class DungeonScene(Scene):
         self.panel.draw_str(0, 0, "You, the rogue.")
         self.panel.draw_str(0, 1, "Player position: %d/%d" % (player_pos.x, player_pos.y))
 
-        for y in xrange(self.game_height):
+        for y in range(self.game_height):
             for x in range(self.game_width):
                 # from camera coordinates to game world coordinates
                 xx = x - self.camera.x
@@ -217,7 +217,7 @@ class DungeonScene(Scene):
                 elif cell.kind == CORRIDOR:
                     symbol = gamedata.get_feature('corridor')
                 else:
-                    print "unknown cell kind %r" % cell
+                    print("unknown cell kind %r" % cell)
 
                 if has_fog_of_war:
                     color = darken_color(symbol['color'])
@@ -352,9 +352,9 @@ class DungeonScene(Scene):
         player_cc = em.combat_components.get(self.player.eid)
         enemy_hc = em.health_components.get(entity.eid)
 
-        print "fight between player (%d/%d/%d) and %r (%d/%d/%d)" % (
+        print("fight between player (%d/%d/%d) and %r (%d/%d/%d)" % (
             player_cc.damage, player_cc.accuracy, player_cc.defense,
-            entity.name, entity_cc.damage, entity_cc.accuracy, entity_cc.defense)
+            entity.name, entity_cc.damage, entity_cc.accuracy, entity_cc.defense))
 
         if roll_to_hit(player_cc.accuracy, entity_cc.defense):
             enemy_hc.health -= player_cc.damage
@@ -396,7 +396,7 @@ class DungeonScene(Scene):
     def move_enemies(self):
         self.do_render = True
         em = self.world.entity_manager
-        for entity_id, ai_cc in em.monster_ai_components.iteritems():
+        for entity_id, ai_cc in em.monster_ai_components.items():
             entity = em.get_entity(entity_id)
             ai_cc.update(entity, self)
 

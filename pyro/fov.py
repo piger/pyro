@@ -30,11 +30,11 @@ class Fov(object):
         self.width = len(mapdata.cells)
         self.height = len(mapdata.cells[0])
 
-        self.mapdata = [[False for y in xrange(self.height)] for x in xrange(self.width)]
-        self.fovmap = [[False for y in xrange(self.height)] for x in xrange(self.width)]
+        self.mapdata = [[False for y in range(self.height)] for x in range(self.width)]
+        self.fovmap = [[False for y in range(self.height)] for x in range(self.width)]
 
-        for x in xrange(self.width):
-            for y in xrange(self.height):
+        for x in range(self.width):
+            for y in range(self.height):
                 cell = mapdata.get_at(x, y)
                 if not cell.blocking:
                     self.mapdata[x][y] = True
@@ -45,7 +45,7 @@ class Fov(object):
         row = 1
         start = 1.0
         end = 0.0
-        for octant in xrange(8):
+        for octant in range(8):
             self._cast_light(x, y, row, start, end, multipliers[0][octant], multipliers[1][octant],
                             multipliers[2][octant], multipliers[3][octant])
         return self.los_cache
@@ -59,7 +59,7 @@ class Fov(object):
 
         # j is distance
         # dx and dy are deltas
-        for j in xrange(row, self.radius + 1):
+        for j in range(row, self.radius + 1):
             dx, dy = -j-1, -j
             blocked = False
 
@@ -99,8 +99,8 @@ class Fov(object):
         return self.mapdata[x][y] is False
 
     def _reset_fovmap(self):
-        for x in xrange(self.width):
-            for y in xrange(self.height):
+        for x in range(self.width):
+            for y in range(self.height):
                 self.fovmap[x][y] = False
 
     def _light_cell(self, x, y):

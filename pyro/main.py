@@ -6,7 +6,7 @@ import better_exceptions
 
 def validate_size(ctx, param, value):
     try:
-        w, h = map(int, value.split('x', 1))
+        w, h = list(map(int, value.split('x', 1)))
         return (w, h)
     except ValueError:
         raise click.BadParameter("Size must be in format WxH (e.g. 100x40)")

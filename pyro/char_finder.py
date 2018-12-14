@@ -45,8 +45,8 @@ def char_finder():
         info.clear()
 
         c = 0
-        for y in xrange(0, 16):
-            for x in xrange(0, 16):
+        for y in range(0, 16):
+            for x in range(0, 16):
                 color = FG
                 if highlight == (x, y):
                     color = HIGHLIGHT
@@ -58,7 +58,7 @@ def char_finder():
                 running = False
                 break
             elif event.type == 'MOUSEDOWN':
-                print event.cell
+                print(event.cell)
                 highlight = event.cell
 
         info.draw_str(0, 0, "cell: %dx%d" % highlight)

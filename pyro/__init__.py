@@ -35,9 +35,8 @@ class ComponentType(Enum):
     HEALTH = 2
     POTION = 3
     INVENTORY = 4
-    COMBAT = 5
-    DOOR = 6
-    MONSTER_AI = 7
+    DOOR = 5
+    MONSTER_AI = 6
 
 
 class EntityType(Enum):

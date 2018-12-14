@@ -25,7 +25,7 @@ class Game(object):
         self.init_random()
 
     def init_random(self):
-        print "SEED = %r" % self.seed
+        print("SEED = %r" % self.seed)
         random.seed(self.seed)
         tcod_random.init(self.seed)
 

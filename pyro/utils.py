@@ -226,11 +226,11 @@ class PopupWindow(object):
         c.draw_char(self.width-1, self.height-1, self.BOTTOM_RIGHT)
 
         # draw the rest of the frame
-        for x in xrange(1, self.width - 1):
+        for x in range(1, self.width - 1):
             c.draw_char(x, 0, self.HLINE)
             c.draw_char(x, self.height - 1, self.HLINE)
 
-        for y in xrange(1, self.height - 1):
+        for y in range(1, self.height - 1):
             c.draw_char(0, y, self.VLINE)
             c.draw_char(self.width - 1, y, self.VLINE)
 
@@ -258,9 +258,9 @@ class Camera(Rect):
 
     def center_on(self, x, y):
         d = math.sqrt((self.x - x) ** 2 + (self.y - y) ** 2)
-        print d
-        print "x=%r, y=%r; xx=%r, yy=%r; self.x=%r, self.y=%r" % (
-            x, y, x + self.x, y + self.y, self.x, self.y)
+        print(d)
+        print("x=%r, y=%r; xx=%r, yy=%r; self.x=%r, self.y=%r" % (
+            x, y, x + self.x, y + self.y, self.x, self.y))
         if d >= 50:
             self.x = x - (self.width / 2)
             self.y = y - (self.height / 2)
