@@ -82,7 +82,7 @@ cffi = ">=1.8.1,<2"
 numpy = ">=1.10,<2"
 
 [metadata]
-content-hash = "7d6a53d27734103bb88ac2c20756fc22296e229318ba3954fb023c04ae0807b1"
+content-hash = "6299c6a96c255f531a20168115622b07bb10a5d510cd79cf02d3930319f5ed34"
 python-versions = "^3.7"
 
 [metadata.hashes]
