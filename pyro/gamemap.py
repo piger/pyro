@@ -240,8 +240,8 @@ class GameMap(object):
 
     def _add_features(self):
         frequency = 8.0
-        fx = float(self.width) / frequency
-        fy = float(self.height) / frequency
+        fx = self.width / frequency
+        fy = self.height / frequency
 
         # thresholds
         # t1 = 0.2
