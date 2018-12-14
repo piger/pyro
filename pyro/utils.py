@@ -105,6 +105,9 @@ class Vector2(object):
         else:
             raise NotImplementedError("eq not impelemented for type %s" % type(other))
 
+    def __hash__(self):
+        return hash((self.x, self.y))
+
     def __repr__(self):
         return 'Vector2(%d, %d)' % (self.x, self.y)
 
@@ -262,8 +265,8 @@ class Camera(Rect):
         print("x=%r, y=%r; xx=%r, yy=%r; self.x=%r, self.y=%r" % (
             x, y, x + self.x, y + self.y, self.x, self.y))
         if d >= 50:
-            self.x = x - (self.width / 2)
-            self.y = y - (self.height / 2)
+            self.x = x - (self.width // 2)
+            self.y = y - (self.height // 2)
 
     def __repr__(self):
         return "Camera(x=%d, y=%d, w=%d, h=%d)" % (self.x, self.y, self.width, self.height)
