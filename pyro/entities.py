@@ -88,7 +88,7 @@ class InventoryComponent(Component):
 
     def use_item(self, slot):
         item = self.items[slot]
-        print item
+        print(item)
 
 
 class CombatComponent(Component):
@@ -108,7 +108,7 @@ class CombatComponent(Component):
             'DEFENSE': 'defense',
             'ACCURACY': 'accuracy',
         }
-        for i in xrange(0, len(values), 2):
+        for i in range(0, len(values), 2):
             name = values[i]
             value = values[i+1]
             setattr(self, m[name], int(value))
@@ -145,7 +145,7 @@ class MonsterAIComponent(Component):
         self.cur_direction = None
 
     def config(self, values):
-        for i in xrange(0, len(values), 2):
+        for i in range(0, len(values), 2):
             name = values[i]
             value = values[i+1]
             if name == 'FOV_RADIUS':
@@ -159,8 +159,8 @@ class MonsterAIComponent(Component):
         """Must be called during game initialization, after fov_map is computed"""
 
         self.fov_map = tcod.map.Map(width=game.game_width, height=game.game_height)
-        for y in xrange(game.game_height):
-            for x in xrange(game.game_width):
+        for y in range(game.game_height):
+            for x in range(game.game_width):
                 self.fov_map.walkable[y,x] = game.fov_map.walkable[y,x]
                 self.fov_map.transparent[y,x] = game.fov_map.transparent[y,x]
 
@@ -171,10 +171,10 @@ class MonsterAIComponent(Component):
         caller = inspect.stack()[1][3]
 
         if new_cell is None:
-            print "move_to: %r is outside of map (caller: %s)" % (new_cell, caller)
+            print("move_to: %r is outside of map (caller: %s)" % (new_cell, caller))
             return False
         elif not new_cell.walkable:
-            print "move_to: %r is not walkable (caller: %s)" % (new_cell, caller)
+            print("move_to: %r is not walkable (caller: %s)" % (new_cell, caller))
             return False
 
         for entity_id in new_cell.entities:
@@ -249,7 +249,7 @@ class MonsterAIComponent(Component):
             # if the player position is "lit", then we see the player
             self.chasing = self.fov_map.fov[player.position.y, player.position.x]
         elif adjacent:
-            print "attacking"
+            print("attacking")
             game.enemy_fight_player(entity)
             return
 
@@ -259,20 +259,20 @@ class MonsterAIComponent(Component):
                 new_pos = path[0]
                 if new_pos == player.position:
                     # attack
-                    print "attacking"
+                    print("attacking")
                     game.enemy_fight_player(entity)
             elif path:
-                print "chasing"
+                print("chasing")
                 self.last_player_pos = path[-1]
 
                 new_pos = path[0]
                 if not self.move_to(entity, cur_map, em, new_pos):
-                    print "can't move, cell is busy"
+                    print("can't move, cell is busy")
             else:
-                print "path is empty!?"
+                print("path is empty!?")
         else:
             if self.last_player_pos is not None:
-                print "remembering the chase"
+                print("remembering the chase")
                 path = astar(cur_map, entity.position, self.last_player_pos,
                              self.can_move_diagonal)
                 self.move_to(entity, cur_map, em, path[0])
@@ -327,10 +327,10 @@ class Entity(object):
         return self.position
 
     def is_monster(self):
-        return any([c.kind == ComponentType.MONSTER_AI for c in self.components.values()])
+        return any([c.kind == ComponentType.MONSTER_AI for c in list(self.components.values())])
 
     def is_potion(self):
-        return any([c.kind == ComponentType.POTION for c in self.components.values()])
+        return any([c.kind == ComponentType.POTION for c in list(self.components.values())])
 
     def __repr__(self):
         return "<Entity(eid=%d, name=%s, display_name=%s, position=%r, components=%r)>" % (
@@ -397,7 +397,7 @@ class EntityManager(object):
         return entity
 
     def destroy_entity(self, eid):
-        for db in self.comp_db.itervalues():
+        for db in self.comp_db.values():
             if eid in db:
                 del db[eid]
 

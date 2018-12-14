@@ -87,7 +87,7 @@ class GameMap(object):
         self.min_room_width = min_room_width
         self.min_room_height = min_room_height
 
-        self.cells = [[GameCell() for y in xrange(self.height)] for x in xrange(self.width)]
+        self.cells = [[GameCell() for y in range(self.height)] for x in range(self.width)]
         self.rooms = OrderedDict()
         self.start_vec = None
         self.end_vec = None
@@ -114,11 +114,11 @@ class GameMap(object):
             self._create_horizontal_tunnel(start.x, end.x, end.y, v)
 
     def _create_horizontal_tunnel(self, x1, x2, y, v=None):
-        for x in xrange(min(x1, x2), max(x1, x2) + 1):
+        for x in range(min(x1, x2), max(x1, x2) + 1):
             self._create_tunnel(x, y, v)
 
     def _create_vertical_tunnel(self, y1, y2, x, v=None):
-        for y in xrange(min(y1, y2), max(y1, y2) + 1):
+        for y in range(min(y1, y2), max(y1, y2) + 1):
             self._create_tunnel(x, y, v)
 
     def _create_tunnel(self, x, y, value=None):
@@ -146,18 +146,18 @@ class GameMap(object):
         To avoid deleting pieces of other rooms or corridors don't delete
         the outer walls of this room."""
 
-        for y in xrange(room.y + 1, room.endY - 1):
-            for x in xrange(room.x + 1, room.endX - 1):
+        for y in range(room.y + 1, room.endY - 1):
+            for x in range(room.x + 1, room.endX - 1):
                 self.cells[x][y].kind = VOID
                 self.cells[x][y].room_id = None
         del self.rooms[room.rid]
 
     def _place_creatures_in_rooms(self, level, entity_manager):
-        rooms = [room for room in self.rooms.values() if room.rid != self.start_room_id]
+        rooms = [room for room in list(self.rooms.values()) if room.rid != self.start_room_id]
         creatures = [('boar', level * 20), ('worm', level * 12), ('goblin', 9), ('fairy', 3)]
         for creature_name, amount in creatures:
-            for _ in xrange(amount):
-                for j in xrange(5):
+            for _ in range(amount):
+                for j in range(5):
                     # retries 5 times
                     room = random.choice(rooms)
                     # if more than 4 enemies in the room, skip it and remove it from the pool
@@ -186,7 +186,7 @@ class GameMap(object):
         most distance from the start room.
         """
 
-        rooms = self.rooms.values()
+        rooms = list(self.rooms.values())
         if self.start_room_id is None:
             start_room = random.choice(rooms)
         else:
@@ -220,18 +220,18 @@ class GameMap(object):
 
     def _dig_room(self, room):
         # room outer walls (y) - do not overwrite existing tunnel tho!
-        for y in xrange(room.y, room.endY):
+        for y in range(room.y, room.endY):
             self._put_wall_for_room(room.x, y, room)
             self._put_wall_for_room(room.endX-1, y, room)
 
         # room outer walls (x)
-        for x in xrange(room.x, room.endX):
+        for x in range(room.x, room.endX):
             self._put_wall_for_room(x, room.y, room)
             self._put_wall_for_room(x, room.endY-1, room)
 
         # room interior
-        for y in xrange(room.y+1, room.endY-1):
-            for x in xrange(room.x+1, room.endX-1):
+        for y in range(room.y+1, room.endY-1):
+            for x in range(room.x+1, room.endX-1):
                 # detect when a room is digged over an existing corridor.
                 if self.cells[x][y].kind == CORRIDOR:
                     room.connected = True
@@ -251,8 +251,8 @@ class GameMap(object):
         t2 = t1 + random.uniform(0.1, 0.2)
         t3 = t2 + 0.1
 
-        for y in xrange(1, self.height - 1):
-            for x in xrange(1, self.width - 1):
+        for y in range(1, self.height - 1):
+            for x in range(1, self.width - 1):
                 if not self.cells[x][y].walkable:
                     continue
                 # get noise and transform to a value between 1 and 0
@@ -267,11 +267,11 @@ class GameMap(object):
                     self.cells[x][y].feature = "floor"
 
     def _place_doors(self, entity_manager):
-        for room in self.rooms.values():
+        for room in list(self.rooms.values()):
             # openings = []
 
             # inspect room sides, except corners
-            for y in xrange(room.y + 1, room.endY - 1):
+            for y in range(room.y + 1, room.endY - 1):
                 for i in (room.x, room.endX - 1):
                     pos = Vector2(i, y)
                     # a room can only be placed between two walls
@@ -279,7 +279,7 @@ class GameMap(object):
                         self.get_at(pos + Direction.SOUTH).kind == WALL):
                         self._maybe_place_door(entity_manager, i, y)
 
-            for x in xrange(room.x + 1, room.endX - 1):
+            for x in range(room.x + 1, room.endX - 1):
                 for i in (room.y, room.endY - 1):
                     pos = Vector2(x, i)
                     if (self.get_at(pos + Direction.EAST).kind == WALL and
@@ -338,8 +338,8 @@ class GameMap(object):
 
         room = self.get_room(room_id)
         result = []
-        for x in xrange(room.x, room.endX):
-            for y in xrange(room.y, room.endY):
+        for x in range(room.x, room.endX):
+            for y in range(room.y, room.endY):
                 cell = self.get_at(x, y)
                 result.extend(cell.entities)
         return result
@@ -372,27 +372,27 @@ class BspGameMap(GameMap):
         n1 = Rect(node1.x, node1.y, node1.width, node1.height)
         n2 = Rect(node2.x, node2.y, node2.width, node2.height)
 
-        for room in self.rooms.values():
+        for room in list(self.rooms.values()):
             if room.intersect(n1):
                 room_a = room
                 break
 
-        for room in self.rooms.values():
+        for room in list(self.rooms.values()):
             if room.intersect(n2) and room != room_a:
                 room_b = room
                 break
 
         if room_a is None and room_b is None:
-            print "both room_a and room_b are None"
+            print("both room_a and room_b are None")
             return
         elif room_a is None and room_b:
-            print "room_a is None, room_b is OK"
+            print("room_a is None, room_b is OK")
             return
         elif room_a and room_b is None:
-            print "room_a is OK, room_b is None"
+            print("room_a is OK, room_b is None")
             return
         elif node1.level != node2.level:
-            print "node1 and node2 are different levels!"
+            print("node1 and node2 are different levels!")
             return
 
         self._connect_rooms(room_a, room_b)
@@ -404,11 +404,11 @@ class BspGameMap(GameMap):
     # and then we use Rect.intersect() to find the matching room.
     def generate(self, level, entity_manager):
         # place outer walls
-        for x in xrange(self.width):
+        for x in range(self.width):
             self.cells[x][0].kind = WALL
             self.cells[x][self.height-1].kind = WALL
 
-        for y in xrange(self.height):
+        for y in range(self.height):
             self.cells[0][y].kind = WALL
             self.cells[self.width-1][y].kind = WALL
 
@@ -422,15 +422,15 @@ class BspGameMap(GameMap):
         self._traverse(bsp)
 
         # we're lazy and we just delete unconnected rooms
-        unconnected_rooms = [room for room in self.rooms.values() if not room.connected]
-        print "%d unconnected rooms" % len(unconnected_rooms)
+        unconnected_rooms = [room for room in list(self.rooms.values()) if not room.connected]
+        print("%d unconnected rooms" % len(unconnected_rooms))
         for room in unconnected_rooms:
             self._cancel_room(room)
 
         # Convert 'tunnel' blocks inside rooms into room blocks
-        for room in self.rooms.values():
-            for y in xrange(room.y+1, room.endY-1):
-                for x in xrange(room.x+1, room.endX-1):
+        for room in list(self.rooms.values()):
+            for y in range(room.y+1, room.endY-1):
+                for x in range(room.x+1, room.endX-1):
                     self.cells[x][y].kind = ROOM
 
         # select starting and ending rooms
@@ -452,15 +452,15 @@ class TunnelingGameMap(GameMap):
         is_weird = False
 
         # place outer walls
-        for x in xrange(self.width):
+        for x in range(self.width):
             self.cells[x][0].kind = WALL
             self.cells[x][self.height-1].kind = WALL
 
-        for y in xrange(self.height):
+        for y in range(self.height):
             self.cells[0][y].kind = WALL
             self.cells[self.width-1][y].kind = WALL
 
-        for _ in xrange(max_rooms):
+        for _ in range(max_rooms):
             lines = []
             if random.random() > 0.8 and not weird_done:
                 template = room_1.strip()
@@ -478,7 +478,7 @@ class TunnelingGameMap(GameMap):
             room = Room(x, y, width, height)
 
             failed = False
-            for other_room in self.rooms.values():
+            for other_room in list(self.rooms.values()):
                 if room.intersect(other_room):
                     failed = True
                     break
@@ -498,15 +498,15 @@ class TunnelingGameMap(GameMap):
                 is_weird = False
 
             if len(self.rooms) > 1:
-                last_room = self.rooms.values()[-2]
+                last_room = list(self.rooms.values())[-2]
                 self._connect_rooms(room, last_room)
             else:
                 self.start_room_id = room.rid
 
         # Convert 'tunnel' blocks inside rooms into room blocks
-        for room in self.rooms.values():
-            for y in xrange(room.y+1, room.endY-1):
-                for x in xrange(room.x+1, room.endX-1):
+        for room in list(self.rooms.values()):
+            for y in range(room.y+1, room.endY-1):
+                for x in range(room.x+1, room.endX-1):
                     self.cells[x][y].kind = ROOM
 
         self._select_start_and_end(entity_manager)
@@ -541,7 +541,7 @@ class World(object):
         entity = self.entity_manager.get_entity(eid)
         cell = cur_map.get_at(entity.get_position())
         if eid not in cell.entities:
-            print "Entity %r not in cell %r" % (entity, cell)
+            print("Entity %r not in cell %r" % (entity, cell))
         else:
             cell.remove_entity(entity)
 
