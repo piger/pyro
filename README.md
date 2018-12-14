@@ -14,3 +14,11 @@ python setup.py install
 ```
 
 Then run `pyro`.
+
+### pyenv
+
+to avoid reinstalling python3:
+
+``` shell
+ln -fs /usr/local/opt/python/libexec ~/.pyenv/versions/3.7.1
+```
