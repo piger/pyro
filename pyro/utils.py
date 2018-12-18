@@ -270,11 +270,19 @@ class Camera(Rect):
         self.height = height
 
     def center_on(self, x, y):
-        d = math.sqrt((self.x - x) ** 2 + (self.y - y) ** 2)
-        # print(d)
-        # print("x=%r, y=%r; xx=%r, yy=%r; self.x=%r, self.y=%r" % (
-        #     x, y, x + self.x, y + self.y, self.x, self.y))
-        if d >= 50:
+        # get our center coordinates
+        center_x = self.x + self.width // 2
+        center_y = self.y + self.height // 2
+
+        # distance between two points (pythagorean theorem)
+        d = math.sqrt((center_x - x) ** 2 + (center_y - y) ** 2)
+        print("Distance between center of camera and target: %f" %d )
+
+        # would be nice to use linear interpolation here
+        # https://math.stackexchange.com/questions/1918743/how-to-interpolate-points-between-2-points
+
+        # only center the camera when the distance is more than "X"
+        if d >= 18:
             self.x = x - (self.width // 2)
             self.y = y - (self.height // 2)
 
