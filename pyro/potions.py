@@ -1,6 +1,5 @@
 import random
 from . import PotionType
-from .components import ComponentType
 
 
 POTION_AVATAR = 173
@@ -33,17 +32,17 @@ class PotionSystem(object):
             self.discovered_potions[potion_type] = False
 
     def get_name_for_potion(self, potion):
-        pc = potion.get_component(ComponentType.POTION.name)
+        pc = potion.get_component('potion')
         if self.discovered_potions[pc.potion_type]:
             return pc.display_name
         return self.potions_colors[pc.potion_type]
 
     def set_discovered(self, potion):
-        pc = potion.get_component(ComponentType.POTION.name)
+        pc = potion.get_component('potion')
         self.discovered_potions[pc.potion_type] = True
 
     def is_discovered(self, potion):
-        pc = potion.get_component(ComponentType.POTION.name)
+        pc = potion.get_component('potion')
         return self.discovered_potions[pc.potion_type]
 
 

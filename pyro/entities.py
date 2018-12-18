@@ -11,7 +11,7 @@ from . import LAYER_CREATURES, LAYER_ITEMS
 from .gamedata import gamedata
 from .astar import astar
 from .potions import POTION_AVATAR, POTION_COLOR
-from .components import COMPONENT_CLASS, HealthComponent, PotionComponent, ComponentType
+from .components import COMPONENT_CLASS, HealthComponent, PotionComponent
 
 
 # https://web.njit.edu/~kevin/rgb.txt.html
@@ -71,10 +71,10 @@ class Entity(object):
         return self.position
 
     def is_monster(self):
-        return any([c.kind == ComponentType.MONSTER_AI for c in list(self.components.values())])
+        return any([c.name == 'monster_ai' for c in list(self.components.values())])
 
     def is_potion(self):
-        return any([c.kind == ComponentType.POTION for c in list(self.components.values())])
+        return any([c.name == 'potion' for c in list(self.components.values())])
 
     def __repr__(self):
         return "<Entity(eid=%d, name=%s, display_name=%s, position=%r, components=%r)>" % (

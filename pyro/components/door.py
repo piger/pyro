@@ -1,11 +1,7 @@
-from . import Component, ComponentType
+from . import Component
 
 
 class DoorComponent(Component):
-
-    NAME = 'door'
-    kind = ComponentType.DOOR
-
     def __init__(self, initial_state=True):
         super(DoorComponent, self).__init__()
         self.state = initial_state

@@ -1,10 +1,7 @@
-from . import Component, ComponentType
+from . import Component
 
 
 class CombatComponent(Component):
-
-    NAME = 'combat'
-
     def __init__(self, damage=0, defense=0, accuracy=0):
         super(CombatComponent, self).__init__()
         self.damage = damage

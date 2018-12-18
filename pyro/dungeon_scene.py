@@ -9,7 +9,6 @@ from .utils import darken_color, clamp, Direction, PopupWindow
 from .utils import Camera
 from .gamedata import gamedata
 from . import MESSAGE_COLOR, DARK_BACKGROUND, PANEL_TEXT_COLOR, POPUP_BACKGROUND, POPUP_SIZE
-from .components import ComponentType
 
 
 class DungeonScene(Scene):
@@ -432,7 +431,7 @@ class DungeonScene(Scene):
     def player_take_item(self):
         cur_map = self.world.get_current_map()
         em = self.world.entity_manager
-        ic = self.player.get_component(ComponentType.INVENTORY.name)
+        ic = self.player.get_component('inventory')
         cell = cur_map.get_at(self.player.get_position())
         if not cell.entities:
             return False

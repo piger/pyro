@@ -1,4 +1,4 @@
-from .base import Component, ComponentType
+from .base import Component
 from .combat import CombatComponent
 from .door import DoorComponent
 from .health import HealthComponent

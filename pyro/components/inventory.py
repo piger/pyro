@@ -1,10 +1,7 @@
-from . import Component, ComponentType
+from . import Component
 
 
 class InventoryComponent(Component):
-    NAME = 'inventory'
-    kind = ComponentType.INVENTORY
-
     def __init__(self):
         super(InventoryComponent, self).__init__()
         self.max_items = 10

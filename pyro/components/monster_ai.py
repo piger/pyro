@@ -1,16 +1,13 @@
 import random
 import inspect
 import tcod
-from . import Component, ComponentType
+from . import Component
 from ..astar import astar
 from ..utils import Direction, weighted_choice
 
 
 class MonsterAiComponent(Component):
     """AI for monsters."""
-
-    NAME = 'monster_ai'
-    kind = ComponentType.MONSTER_AI
 
     def __init__(self):
         super(MonsterAiComponent, self).__init__()

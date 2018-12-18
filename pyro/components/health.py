@@ -1,11 +1,7 @@
-from . import Component, ComponentType
+from . import Component
 
 
 class HealthComponent(Component):
-
-    NAME = 'health'
-    kind = ComponentType.HEALTH
-
     def __init__(self):
         super(HealthComponent, self).__init__()
         self.health = 0
