@@ -19,6 +19,16 @@ DEFAULT_ENTITY_COLOR = (255, 127, 36)  # chocolate1
 
 
 def parse_capability(line):
+    """
+    Parse a capability string.
+
+    The format for a capability string is:
+
+    <name>:[<ATTRIBUTE:VALUE>, ":", <ATTRIBUTE:VALUE>...]
+
+    For example the string "combat:DAMAGE:2:ACCURACY:70" configure the 'combat' capability
+    with values "2" for "DAMAGE" and "70" for "ACCURACY".
+    """
     if ':' not in line:
         return (line, [])
     name, line = line.split(':', 1)
@@ -73,7 +83,10 @@ class Entity(object):
 
 class EntityManager(object):
     def __init__(self):
-        self.eid = 0
+        # used to track the first free entity ID that can be assigned
+        self._eid = 0
+
+        # entity/component tables
         self.entities = {}
         self.health_components = {}
         self.combat_components = {}
@@ -82,21 +95,30 @@ class EntityManager(object):
         self.potion_components = {}
         self.inventory_components = {}
 
-        self.comp_db = {
-            'health': self.health_components,
-            'combat': self.combat_components,
-            'door': self.door_components,
-            'monster_ai': self.monster_ai_components,
-            'potion': self.potion_components,
-            'inventory': self.inventory_components,
-        }
+        # dictionary of dictionaries storing a map Entity ID -> Component instance
+        # keys will be Component's names (e.g. "health").
+        self.components = {}
 
     def next_eid(self):
-        rv = self.eid
-        self.eid += 1
+        """Allocate and return new Entity ID"""
+
+        rv = self._eid
+        self._eid += 1
         return rv
 
+    def register_component(self, entity, component):
+        name = component.name()
+        self.components.setdefault(name, {})
+        self.components[name][entity.eid] = component
+
     def create_entity(self, name, entity_data=None):
+        """
+        Create a new Entity from game data.
+
+        `entity_data` is either a dictionary containing the configuration for the entity
+        or `None` when the EntityManager should do the lookup by itself.
+
+        """
         eid = self.next_eid()
 
         if entity_data is None:
@@ -109,13 +131,15 @@ class EntityManager(object):
         entity.description = entity_data.get('description', '')
         entity.display_name = entity_data.get('display_name', '')
 
+        # configure all the entity's capabilities.
         for cap in entity_data.get('can', []):
             name, values = parse_capability(cap)
-            CompClass = COMPONENT_CLASS[name]
-            comp = CompClass()
+            comp = COMPONENT_CLASS[name]()
             comp.config(values)
-            db = self.comp_db[name]
-            db[entity.eid] = comp
+
+            # store the capability for this Entity in the db
+            self.register_component(entity, comp)
+
             entity.add_component(comp)
 
         self.entities[entity.eid] = entity
@@ -131,9 +155,11 @@ class EntityManager(object):
         return entity
 
     def destroy_entity(self, eid):
-        for db in self.comp_db.values():
-            if eid in db:
-                del db[eid]
+        """Destroy and entity and unregister all its components"""
+
+        for component_db in self.components.values():
+            if eid in component_db:
+                del component_db[eid]
 
         del self.entities[eid]
 

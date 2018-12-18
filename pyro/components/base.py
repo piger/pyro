@@ -1,3 +1,4 @@
+import re
 from enum import Enum
 
 
@@ -18,6 +19,11 @@ class Component:
     def config(self, values):
         raise NotImplementedError
 
-    @property
-    def name(self):
-        return self.NAME
+    @classmethod
+    def name(cls):
+        words = re.findall(r'[A-Z][^A-Z]*', cls.__name__)
+        return "_".join([word.lower() for word in words])
+
+    @classmethod
+    def class_name(cls):
+        return cls.__name__
