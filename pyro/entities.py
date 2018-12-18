@@ -125,8 +125,8 @@ class EntityManager(object):
         color = entity_data.get('color', DEFAULT_ENTITY_COLOR)
         entity = Entity(eid, name, entity_data['avatar'], color)
         entity.always_visible = entity_data.get('always_visible', False)
-        entity.description = entity_data.get('description', '')
-        entity.display_name = entity_data.get('display_name', '')
+        entity.description = entity_data.get('description', '<MISSING DESCRIPTION>')
+        entity.display_name = entity_data.get('display_name', '<MISSING DISPLAY_NAME>')
 
         # configure all the entity's capabilities.
         for cap in entity_data.get('can', []):
