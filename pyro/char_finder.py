@@ -67,7 +67,3 @@ def char_finder():
         root.blit(display, 0, 0, 16, 16, 0, 0)
         root.blit(info, w_display + margin, 0, w_info, h_info, 0, 0)
         tdl.flush()
-
-
-if __name__ == '__main__':
-    main()

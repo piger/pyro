@@ -1,5 +1,6 @@
 import random
-from pyro import PotionType, ComponentType
+from . import PotionType
+from .components import ComponentType
 
 
 POTION_AVATAR = 173

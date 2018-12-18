@@ -1,15 +1,15 @@
 import textwrap
 import tcod
 import tdl
-from pyro.scene import Scene
-from pyro.combat import roll_to_hit, chance_to_hit
-from pyro.potions import PotionSystem
-from pyro.gamemap import WALL, ROOM, CORRIDOR, VOID, FLOOR, World
-from pyro.utils import darken_color, clamp, Direction, PopupWindow
-from pyro.utils import Camera
-from pyro.gamedata import gamedata
-from pyro import MESSAGE_COLOR, DARK_BACKGROUND, PANEL_TEXT_COLOR, POPUP_BACKGROUND, POPUP_SIZE, \
-    ComponentType
+from .scene import Scene
+from .combat import roll_to_hit, chance_to_hit
+from .potions import PotionSystem
+from .gamemap import WALL, ROOM, CORRIDOR, VOID, FLOOR, World
+from .utils import darken_color, clamp, Direction, PopupWindow
+from .utils import Camera
+from .gamedata import gamedata
+from . import MESSAGE_COLOR, DARK_BACKGROUND, PANEL_TEXT_COLOR, POPUP_BACKGROUND, POPUP_SIZE
+from .components import ComponentType
 
 
 class DungeonScene(Scene):

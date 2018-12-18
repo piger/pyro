@@ -29,16 +29,6 @@ class PotionType(Enum):
     CONFUSION = 2
 
 
-class ComponentType(Enum):
-    DUMB = 0
-    COMBAT = 1
-    HEALTH = 2
-    POTION = 3
-    INVENTORY = 4
-    DOOR = 5
-    MONSTER_AI = 6
-
-
 class EntityType(Enum):
     PLAYER = 0
     MONSTER = 1

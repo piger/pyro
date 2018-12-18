@@ -276,7 +276,7 @@ class Camera(Rect):
 
         # distance between two points (pythagorean theorem)
         d = math.sqrt((center_x - x) ** 2 + (center_y - y) ** 2)
-        print("Distance between center of camera and target: %f" %d )
+        print("Distance between center of camera and target: %f" % d)
 
         # would be nice to use linear interpolation here
         # https://math.stackexchange.com/questions/1918743/how-to-interpolate-points-between-2-points
