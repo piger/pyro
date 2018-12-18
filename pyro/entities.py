@@ -57,7 +57,7 @@ class Entity(object):
         return name in self.components
 
     def add_component(self, component):
-        self.components[component.kind.name] = component
+        self.components[component.name] = component
 
     def set_position(self, x_or_pos, y=None):
         if isinstance(x_or_pos, Vector2) and y is None:
@@ -88,12 +88,6 @@ class EntityManager(object):
 
         # entity/component tables
         self.entities = {}
-        self.health_components = {}
-        self.combat_components = {}
-        self.door_components = {}
-        self.monster_ai_components = {}
-        self.potion_components = {}
-        self.inventory_components = {}
 
         # dictionary of dictionaries storing a map Entity ID -> Component instance
         # keys will be Component's names (e.g. "health").
@@ -107,9 +101,12 @@ class EntityManager(object):
         return rv
 
     def register_component(self, entity, component):
-        name = component.name()
-        self.components.setdefault(name, {})
-        self.components[name][entity.eid] = component
+        # print("registering %s for %s" % (component.name, entity))
+        self.components.setdefault(component.name, {})
+        self.components[component.name][entity.eid] = component
+
+    def get_component_by_eid(self, eid, component_name):
+        return self.components[component_name].get(eid)
 
     def create_entity(self, name, entity_data=None):
         """
@@ -140,6 +137,7 @@ class EntityManager(object):
             # store the capability for this Entity in the db
             self.register_component(entity, comp)
 
+            # print("Adding %r to %r" % (comp, entity))
             entity.add_component(comp)
 
         self.entities[entity.eid] = entity
@@ -150,7 +148,7 @@ class EntityManager(object):
         entity = Entity(eid, 'potion', POTION_AVATAR, POTION_COLOR, layer=LAYER_ITEMS)
         pc = PotionComponent(potion_type)
         entity.add_component(pc)
-        self.potion_components[entity.eid] = pc
+        self.register_component(entity, pc)
         self.entities[entity.eid] = entity
         return entity
 

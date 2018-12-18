@@ -6,14 +6,14 @@ from ..astar import astar
 from ..utils import Direction, weighted_choice
 
 
-class MonsterAIComponent(Component):
+class MonsterAiComponent(Component):
     """AI for monsters."""
 
     NAME = 'monster_ai'
     kind = ComponentType.MONSTER_AI
 
     def __init__(self):
-        super(MonsterAIComponent, self).__init__()
+        super(MonsterAiComponent, self).__init__()
         self.fov_map = None
         self.radius = 4
         self.can_move_diagonal = True
@@ -57,7 +57,7 @@ class MonsterAIComponent(Component):
             return False
 
         for entity_id in new_cell.entities:
-            if entity_id in entity_manager.monster_ai_components:
+            if entity_id in entity_manager.components['monster_ai']:
                 # we can't move, there's another AI in that cell
                 return False
 
@@ -76,7 +76,7 @@ class MonsterAIComponent(Component):
                 continue
             for eid in cell.entities:
                 e = game.world.entity_manager.get_entity(eid)
-                if e in game.world.entity_manager.monster_ai_components:
+                if e in game.world.entity_manager.components['monster_ai']:
                     continue
             candidates.append(dest)
 

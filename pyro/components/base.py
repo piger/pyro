@@ -13,17 +13,18 @@ class ComponentType(Enum):
 
 
 class Component:
-    NAME = 'component'
-    kind = ComponentType.DUMB
-
     def config(self, values):
         raise NotImplementedError
 
-    @classmethod
-    def name(cls):
-        words = re.findall(r'[A-Z][^A-Z]*', cls.__name__)
-        return "_".join([word.lower() for word in words])
+    @property
+    def name(self):
+        words = re.findall(r'[A-Z][^A-Z]*', self.__class__.__name__)
+        return "_".join([word.lower() for word in words if word != "Component"])
 
-    @classmethod
-    def class_name(cls):
-        return cls.__name__
+    @property
+    def class_name(self):
+        return re.sub(r'Component$', '', self.__class__.__name__)
+
+    def __repr__(self):
+        return "Component(name: %s, class_name: %s)" % (
+            self.name, self.class_name)

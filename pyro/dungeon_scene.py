@@ -133,7 +133,7 @@ class DungeonScene(Scene):
         self.init_visited()
 
         # init AI
-        for ai in list(self.world.entity_manager.monster_ai_components.values()):
+        for ai in list(self.world.entity_manager.components['monster_ai'].values()):
             ai.setup(self)
 
     def init_fov(self, cur_map):
@@ -151,7 +151,8 @@ class DungeonScene(Scene):
                     fov_map.transparent[y, x] = True
                 # doors will block sight
                 for entity_id in cell.entities:
-                    if entity_id in self.world.entity_manager.door_components:
+                    door_components_db = self.world.entity_manager.components['door']
+                    if entity_id in door_components_db:
                         fov_map.transparent[y, x] = False
         self.fov_map = fov_map
 
@@ -341,12 +342,12 @@ class DungeonScene(Scene):
 
         is_fight = False
         for entity in entities:
-            cc = em.combat_components.get(entity.eid)
+            cc = em.get_component_by_eid(entity.eid, 'combat')
             if cc is not None:
                 self.player_fight(entity, cc, em)
                 is_fight = True
                 break
-            ai = em.monster_ai_components.get(entity.eid)
+            ai = em.get_component_by_eid(entity.eid, 'monster_ai')
             if ai is not None:
                 return False
 
@@ -356,8 +357,8 @@ class DungeonScene(Scene):
         return True
 
     def player_fight(self, entity, entity_cc, em):
-        player_cc = em.combat_components.get(self.player.eid)
-        enemy_hc = em.health_components.get(entity.eid)
+        player_cc = em.get_component_by_eid(self.player.eid, 'combat')
+        enemy_hc = em.get_component_by_eid(entity.eid, 'health')
 
         print("fight between player (%d/%d/%d) and %r (%d/%d/%d)" % (
             player_cc.damage, player_cc.accuracy, player_cc.defense,
@@ -378,9 +379,9 @@ class DungeonScene(Scene):
 
     def enemy_fight_player(self, entity):
         em = self.world.entity_manager
-        entity_cc = em.combat_components.get(entity.eid)
-        player_cc = em.combat_components.get(self.player.eid)
-        player_hc = em.health_components.get(self.player.eid)
+        entity_cc = em.get_component_by_eid(entity.eid, 'combat')
+        player_cc = em.get_component_by_eid(self.player.eid, 'combat')
+        player_hc = em.get_component_by_eid(self.player.eid, 'health')
         self.enemy_fight(entity, entity_cc, self.player, player_cc, player_hc)
 
     def enemy_fight(self, entity, entity_cc, other, other_cc, other_hc):
@@ -404,7 +405,7 @@ class DungeonScene(Scene):
     def move_enemies(self):
         self.do_render = True
         em = self.world.entity_manager
-        for entity_id, ai_cc in em.monster_ai_components.items():
+        for entity_id, ai_cc in em.components['monster_ai'].items():
             entity = em.get_entity(entity_id)
             ai_cc.update(entity, self)
 

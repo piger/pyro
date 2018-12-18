@@ -4,7 +4,6 @@ from . import Component, ComponentType
 class CombatComponent(Component):
 
     NAME = 'combat'
-    kind = ComponentType.COMBAT
 
     def __init__(self, damage=0, defense=0, accuracy=0):
         super(CombatComponent, self).__init__()
