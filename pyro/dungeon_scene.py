@@ -72,7 +72,7 @@ class DungeonScene(Scene):
 
         # size of map area console
         self.display_width = game.screen_width - self.panel_width
-        self.display_height = game.screen_height - 1 # -1 for status bar
+        self.display_height = game.screen_height - 1  # -1 for status bar
 
         # size of message log console
         self.log_width = self.panel_width
@@ -104,8 +104,11 @@ class DungeonScene(Scene):
         # the popup must grow and shrink so the size of the console will be the same size as
         # the display (i.e. where we show the map); we'll render the popup based on the size
         # stored in self.info_popup_size.
-        self.info_popup = PopupWindow(POPUP_SIZE[0], POPUP_SIZE[1], self.display_width, self.display_height,
-                                      PANEL_TEXT_COLOR, POPUP_BACKGROUND)
+        self.info_popup = PopupWindow(
+            POPUP_SIZE[0], POPUP_SIZE[1], self.display_width,
+            self.display_height, PANEL_TEXT_COLOR,
+            POPUP_BACKGROUND
+        )
 
         # initialize the potion system
         self.potion_system.setup()
@@ -235,9 +238,13 @@ class DungeonScene(Scene):
                             color = darken_color(feature['color'])
                         else:
                             color = feature['color']
-                if (cell.kind == WALL and self.is_looking and x == self.eye_position.x
-                    and y == self.eye_position.y):
+
+                if (
+                        cell.kind == WALL and self.is_looking and x == self.eye_position.x
+                        and y == self.eye_position.y
+                ):
                     color = (255, 255, 255)
+
                 self.console.draw_char(xx, yy, char, bg=bg_color, fg=color)
 
                 # do not paint entities if they are not visibles.
@@ -381,7 +388,8 @@ class DungeonScene(Scene):
         if other.name == 'player':
             victim = "you"
         if roll_to_hit(entity_cc.accuracy, other_cc.defense):
-            self.post_message("the %s hits %s for %d damage" % (entity.name, victim, entity_cc.damage))
+            self.post_message("the %s hits %s for %d damage" % (
+                entity.name, victim, entity_cc.damage))
             other_hc.health -= entity_cc.damage
         else:
             self.post_message("the %s miss %s" % (entity.name, victim))

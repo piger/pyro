@@ -49,17 +49,22 @@ class PotionSystem(object):
 def quaff_health():
     pass
 
+
 def throw_health():
     pass
+
 
 def quaff_poison():
     pass
 
+
 def throw_poison():
     pass
 
+
 def quaff_confusion():
     pass
+
 
 def throw_confusion():
     pass

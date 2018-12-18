@@ -8,5 +8,6 @@ def roll_to_hit(accuracy, defense):
         return True
     return False
 
+
 def chance_to_hit(accuracy, defense):
     return clamp(accuracy * pow(0.987, defense), 0, 100)

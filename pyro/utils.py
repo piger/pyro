@@ -5,6 +5,7 @@ import random
 from functools import total_ordering
 from tcod.random import Random
 
+
 class TcodRandom(object):
     """Helper class to be able to use a tcod.random.Random generator globally"""
 
@@ -21,6 +22,7 @@ class TcodRandom(object):
         if self._rng is None:
             self._rng = Random(1, self.seed)
         return self._rng.random_c
+
 
 tcod_random = TcodRandom()
 
@@ -269,9 +271,9 @@ class Camera(Rect):
 
     def center_on(self, x, y):
         d = math.sqrt((self.x - x) ** 2 + (self.y - y) ** 2)
-        print(d)
-        print("x=%r, y=%r; xx=%r, yy=%r; self.x=%r, self.y=%r" % (
-            x, y, x + self.x, y + self.y, self.x, self.y))
+        # print(d)
+        # print("x=%r, y=%r; xx=%r, yy=%r; self.x=%r, self.y=%r" % (
+        #     x, y, x + self.x, y + self.y, self.x, self.y))
         if d >= 50:
             self.x = x - (self.width // 2)
             self.y = y - (self.height // 2)

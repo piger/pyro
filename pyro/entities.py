@@ -14,7 +14,7 @@ from pyro.potions import POTION_AVATAR, POTION_COLOR
 
 
 # https://web.njit.edu/~kevin/rgb.txt.html
-DEFAULT_ENTITY_COLOR = (255, 127, 36) # chocolate1
+DEFAULT_ENTITY_COLOR = (255, 127, 36)  # chocolate1
 
 
 def parse_capability(line):
@@ -55,7 +55,8 @@ class HealthComponent(Component):
 class PotionComponent(Component):
     """Potions
 
-    - they can be on the map or in the inventory (just delete from cell.entities? and store somewhere?)
+    - they can be on the map or in the inventory (just delete from cell.entities? and store
+      somewhere?)
     - the player can drink or throw them
     - they must have a random mapped color
     """
@@ -161,8 +162,8 @@ class MonsterAIComponent(Component):
         self.fov_map = tcod.map.Map(width=game.game_width, height=game.game_height)
         for y in range(game.game_height):
             for x in range(game.game_width):
-                self.fov_map.walkable[y,x] = game.fov_map.walkable[y,x]
-                self.fov_map.transparent[y,x] = game.fov_map.transparent[y,x]
+                self.fov_map.walkable[y, x] = game.fov_map.walkable[y, x]
+                self.fov_map.transparent[y, x] = game.fov_map.transparent[y, x]
 
     def move_to(self, entity, cur_map, entity_manager, pos):
         """Move the entity to a pos, if possible"""
@@ -201,8 +202,8 @@ class MonsterAIComponent(Component):
                     continue
             candidates.append(dest)
 
-        # chose a new random direction, with a preference on following the current direction, just to make it look
-        # slightly less random.
+        # chose a new random direction, with a preference on following the current direction, just
+        # to make it look slightly less random.
         if self.cur_direction is not None and self.cur_direction in candidates:
             w = []
             for c in candidates:

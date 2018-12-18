@@ -74,5 +74,3 @@ def astar(dungeon, start, goal, diagonal=True):
                 fscore[neighbor] = tentative_g_score + heuristic(neighbor, goal)
                 oheap.put(neighbor, fscore[neighbor])
     return []
-
-            

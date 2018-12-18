@@ -93,7 +93,7 @@ class GameMap(object):
         self.end_vec = None
         self.start_room_id = None
         self.end_room_id = None
-        self.tunnel_id = '0' # note: it's a str!
+        self.tunnel_id = '0'  # note: it's a str!
 
     def generate(self, level, entity_manager):
         raise NotImplementedError
@@ -275,18 +275,22 @@ class GameMap(object):
                 for i in (room.x, room.endX - 1):
                     pos = Vector2(i, y)
                     # a room can only be placed between two walls
-                    if (self.get_at(pos + Direction.NORTH).kind == WALL and
-                        self.get_at(pos + Direction.SOUTH).kind == WALL):
+                    if (
+                            self.get_at(pos + Direction.NORTH).kind == WALL and
+                            self.get_at(pos + Direction.SOUTH).kind == WALL
+                    ):
                         self._maybe_place_door(entity_manager, i, y)
 
             for x in range(room.x + 1, room.endX - 1):
                 for i in (room.y, room.endY - 1):
                     pos = Vector2(x, i)
-                    if (self.get_at(pos + Direction.EAST).kind == WALL and
-                        self.get_at(pos + Direction.WEST).kind == WALL):
+                    if (
+                            self.get_at(pos + Direction.EAST).kind == WALL and
+                            self.get_at(pos + Direction.WEST).kind == WALL
+                    ):
                         self._maybe_place_door(entity_manager, x, i)
 
-    def _maybe_place_door(self, entity_manager, x ,y):
+    def _maybe_place_door(self, entity_manager, x, y):
         pos = Vector2(x, y)
         cell = self.get_at(pos)
         if cell.kind == CORRIDOR:
@@ -400,8 +404,8 @@ class BspGameMap(GameMap):
         self.rooms[room_b.rid].connected = True
 
     # NOTES:
-    # if we store a rect for each room and then in connect_nodes() we create a new Rect for both rooms
-    # and then we use Rect.intersect() to find the matching room.
+    # if we store a rect for each room and then in connect_nodes() we create a new Rect for both
+    # rooms and then we use Rect.intersect() to find the matching room.
     def generate(self, level, entity_manager):
         # place outer walls
         for x in range(self.width):
