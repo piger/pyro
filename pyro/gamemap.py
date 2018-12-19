@@ -98,6 +98,20 @@ class GameMap(object):
     def generate(self, level, entity_manager):
         raise NotImplementedError
 
+    def describe(self):
+        """Describe a Game Map"""
+
+        print("Map dimension: %dx%d" % (self.width, self.height))
+        print("Rooms count: %d" % len(self.rooms))
+        room_width = 0
+        room_height = 0
+        biggest_room = None
+        for room in self.rooms.values():
+            if room.width > room_width and room.height > room_height:
+                biggest_room = room
+
+        print("The biggest room is %dx%d" % (biggest_room.width, biggest_room.height))
+
     def _connect_rooms(self, room1, room2):
         """Connects two rooms with a corridor"""
 
@@ -534,6 +548,7 @@ class World(object):
 
         game_map = MapClass(width, height)
         game_map.generate(level, self.entity_manager)
+        game_map.describe()
 
         self.maps.append(game_map)
 

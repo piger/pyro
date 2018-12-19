@@ -1,9 +1,13 @@
 import math
 import textwrap
-import tdl
 import random
+import logging
+import tdl
 from functools import total_ordering
 from tcod.random import Random
+
+
+logger = logging.getLogger(__name__)
 
 
 class TcodRandom(object):
@@ -276,7 +280,7 @@ class Camera(Rect):
 
         # distance between two points (pythagorean theorem)
         d = math.sqrt((center_x - x) ** 2 + (center_y - y) ** 2)
-        print("Distance between center of camera and target: %f" % d)
+        logger.debug("Distance between center of camera and target: %f", d)
 
         # would be nice to use linear interpolation here
         # https://math.stackexchange.com/questions/1918743/how-to-interpolate-points-between-2-points

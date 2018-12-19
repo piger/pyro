@@ -1,7 +1,11 @@
-import click
 import time
+import logging
+import click
 from pyro.game import Game
 import better_exceptions
+
+
+logger = logging.getLogger()
 
 
 def validate_size(ctx, param, value):
@@ -33,7 +37,13 @@ def main(seed, size, window, debug, font, algo):
     game.dungeon_algorithm = algo
     game.init_game()
 
+    logging.basicConfig(
+        format="[%(levelname)s] %(asctime)s (%(module)s.%(funcName)s:%(lineno)d) %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S")
+    logger.setLevel(logging.INFO)
+
     if debug:
         game.DEBUG = True
+        logger.setLevel(logging.DEBUG)
 
     game.game_loop()
