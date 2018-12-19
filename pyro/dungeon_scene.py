@@ -7,7 +7,7 @@ from .combat import roll_to_hit, chance_to_hit
 from .potions import PotionSystem
 from .gamemap import WALL, ROOM, CORRIDOR, VOID, FLOOR, World
 from .utils import darken_color, clamp, Direction, PopupWindow
-from .utils import Camera
+from .camera import Camera
 from .gamedata import gamedata
 from . import MESSAGE_COLOR, DARK_BACKGROUND, PANEL_TEXT_COLOR, POPUP_BACKGROUND, POPUP_SIZE
 
