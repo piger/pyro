@@ -166,7 +166,10 @@ class Rect(object):
 
     @property
     def center(self):
-        """Returns the coordinates of the central point"""
+        """Returns the coordinates of the central point
+
+        This is relative to its position!
+        """
 
         center_x = ((self.x + self.endX) // 2)
         center_y = ((self.y + self.endY) // 2)
@@ -273,21 +276,27 @@ class Camera(Rect):
         super(Camera, self).__init__(0, 0, width, height)
 
     def center_on(self, x, y):
+        """Center the camera on a coordinate
+
+        Center the camera on the given coordinate when the distance between the center of the camera
+        (which is the center of the game "map" screen) and the target coordinate is more than
+        roughly half the size of the camera.
+        """
         # get our *absolute* center coordinates
         center_x = self.x + self.width // 2
         center_y = self.y + self.height // 2
+        max_distance = min([self.width // 2, self.height // 2])
 
         logger.debug("Center = %f/%f, center = %r", center_x, center_y, self.center)
 
         # distance between two points (pythagorean theorem)
-        d = math.sqrt((center_x - x) ** 2 + (center_y - y) ** 2)
-        logger.debug("Distance between center of camera and target: %f", d)
+        distance = math.sqrt((center_x - x) ** 2 + (center_y - y) ** 2)
+        logger.debug("Distance between center of camera and target: %f", distance)
 
         # would be nice to use linear interpolation here
         # https://math.stackexchange.com/questions/1918743/how-to-interpolate-points-between-2-points
 
-        # only center the camera when the distance is more than "X"
-        if d >= 18:
+        if distance >= max_distance:
             self.x = x - (self.width // 2)
             self.y = y - (self.height // 2)
 

@@ -123,6 +123,7 @@ class DungeonScene(Scene):
         cur_map = self.world.get_current_map()
 
         self.camera = Camera(self.display_width, self.display_height)
+        logger.debug("Camera = %r" % self.camera)
 
         # setup FOV
         self.init_fov(cur_map)
