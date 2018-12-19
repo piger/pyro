@@ -1,7 +1,11 @@
+import logging
 import tcod.bsp
 from ..gamemap import GameMap, create_room_inside
 from ..utils import Rect, tcod_random
 from .. import ROOM, WALL
+
+
+logger = logging.getLogger()
 
 
 class BspGameMap(GameMap):
@@ -42,16 +46,16 @@ class BspGameMap(GameMap):
                 break
 
         if room_a is None and room_b is None:
-            print("both room_a and room_b are None")
+            logger.warning("both room_a and room_b are None")
             return
         elif room_a is None and room_b:
-            print("room_a is None, room_b is OK")
+            logger.warning("room_a is None, room_b is OK")
             return
         elif room_a and room_b is None:
-            print("room_a is OK, room_b is None")
+            logger.warning("room_a is OK, room_b is None")
             return
         elif node1.level != node2.level:
-            print("node1 and node2 are different levels!")
+            logger.warning("node1 and node2 are different levels!")
             return
 
         self._connect_rooms(room_a, room_b)
@@ -82,7 +86,7 @@ class BspGameMap(GameMap):
 
         # we're lazy and we just delete unconnected rooms
         unconnected_rooms = [room for room in list(self.rooms.values()) if not room.connected]
-        print("%d unconnected rooms" % len(unconnected_rooms))
+        logger.debug("BSP map: Deleting %d unconnected rooms" % len(unconnected_rooms))
         for room in unconnected_rooms:
             self._cancel_room(room)
 

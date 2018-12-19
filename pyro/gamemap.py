@@ -79,7 +79,7 @@ class GameCell:
         return self.kind in BLOCKING
 
     def __repr__(self):
-        return "GameCell(kind=%r, entities=%r, room_id=%r, feature=%r)" % (
+        return "<GameCell(kind=%r, entities=%r, room_id=%r, feature=%r)>" % (
             self.kind, self.entities, self.room_id, self.feature)
 
 
@@ -106,8 +106,9 @@ class GameMap:
     def describe(self):
         """Describe a Game Map"""
 
-        print("Map dimension: %dx%d" % (self.width, self.height))
-        print("Rooms count: %d" % len(self.rooms))
+        logger.info("Map dimension: %dx%d", self.width, self.height)
+        logger.info("Rooms count: %d", len(self.rooms))
+
         room_width = 0
         room_height = 0
         biggest_room = None
@@ -115,7 +116,7 @@ class GameMap:
             if room.width > room_width and room.height > room_height:
                 biggest_room = room
 
-        print("The biggest room is %dx%d" % (biggest_room.width, biggest_room.height))
+        logger.info("The biggest room is %dx%d" % (biggest_room.width, biggest_room.height))
 
     def _connect_rooms(self, room1, room2):
         """Connects two rooms with a corridor"""
