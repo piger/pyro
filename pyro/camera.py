@@ -23,11 +23,9 @@ class Camera(Rect):
         center_y = self.y + self.height // 2
         max_distance = min([self.width // 2, self.height // 2])
 
-        logger.debug("Center = %f/%f, center = %r", center_x, center_y, self.center)
-
         # distance between two points (pythagorean theorem)
         distance = math.sqrt((center_x - x) ** 2 + (center_y - y) ** 2)
-        logger.debug("Distance between center of camera and target: %f", distance)
+        # logger.debug("Distance between center of camera and target: %f", distance)
 
         # would be nice to use linear interpolation here
         # https://math.stackexchange.com/questions/1918743/how-to-interpolate-points-between-2-points
