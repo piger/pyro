@@ -5,7 +5,7 @@ import tdl
 from . import Scene
 from ..combat import roll_to_hit, chance_to_hit
 from ..potions import PotionSystem
-from ..gamemap import World
+from ..world import World
 from ..utils import darken_color, clamp, Direction, PopupWindow
 from ..camera import Camera
 from ..gamedata import gamedata
