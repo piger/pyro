@@ -166,8 +166,10 @@ class Rect(object):
 
     @property
     def center(self):
-        center_x = int((self.x + self.endX) / 2)
-        center_y = int((self.y + self.endY) / 2)
+        """Returns the coordinates of the central point"""
+
+        center_x = ((self.x + self.endX) // 2)
+        center_y = ((self.y + self.endY) // 2)
         return Vector2(center_x, center_y)
 
     def intersect(self, other):
@@ -268,15 +270,14 @@ class PopupWindow(object):
 
 class Camera(Rect):
     def __init__(self, width, height):
-        self.x = 0
-        self.y = 0
-        self.width = width
-        self.height = height
+        super(Camera, self).__init__(0, 0, width, height)
 
     def center_on(self, x, y):
-        # get our center coordinates
+        # get our *absolute* center coordinates
         center_x = self.x + self.width // 2
         center_y = self.y + self.height // 2
+
+        logger.debug("Center = %f/%f, center = %r", center_x, center_y, self.center)
 
         # distance between two points (pythagorean theorem)
         d = math.sqrt((center_x - x) ** 2 + (center_y - y) ** 2)

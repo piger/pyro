@@ -25,9 +25,10 @@ def validate_size(ctx, param, value):
 @click.option('--debug', '-D', is_flag=True, help="Enable DEBUG features")
 @click.option('--font', '-f', default='mononoki_16-19.png', help="Specify a custom font",
               show_default=True)
+@click.option('--log-level', 'log_level', default='INFO')
 @click.option('--algo', '-a', type=click.Choice(['bsp', 'tunneling']), default='bsp',
               help="Specify the dungeon generation algorithm", show_default=True)
-def main(seed, size, window, debug, font, algo):
+def main(seed, size, window, debug, font, log_level, algo):
     if seed is None:
         seed = int(time.time())
 
@@ -40,7 +41,11 @@ def main(seed, size, window, debug, font, algo):
     logging.basicConfig(
         format="[%(levelname)s] %(asctime)s (%(module)s.%(funcName)s:%(lineno)d) %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S")
-    logger.setLevel(logging.INFO)
+
+    if log_level == 'INFO':
+        logger.setLevel(logging.INFO)
+    elif log_level == 'DEBUG':
+        logger.setLevel(logging.DEBUG)
 
     if debug:
         game.DEBUG = True

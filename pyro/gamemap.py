@@ -1,3 +1,4 @@
+import logging
 import random
 from collections import OrderedDict
 import tcod.bsp
@@ -6,6 +7,9 @@ from pyro.entities import EntityManager
 from pyro.utils import Rect, Vector2, tcod_random, Direction
 from pyro.rooms import room_1
 from pyro import *
+
+
+logger = logging.getLogger(__name__)
 
 
 def create_room_inside(x, y, min_width, min_height, max_width, max_height):
@@ -41,8 +45,12 @@ class Room(Rect):
         cls.LAST_ID += 1
         return rv
 
+    def __repr__(self):
+        return (f"<Room(x={self.x}, y={self.y}, width={self.width}, height={self.height}, "
+                f"id={self.rid}, connected={self.connected})>")
 
-class GameCell(object):
+
+class GameCell:
     """A single dungeon cell"""
 
     def __init__(self):
@@ -213,6 +221,9 @@ class GameMap(object):
         # pick a random rom between the 3 more far from the starting room
         distances.sort(key=lambda x: x[0])
         end_room = random.choice([x[1] for x in distances[-3:]])
+
+        logger.debug("Start room: %r", start_room)
+        logger.debug("End room: %r", end_room)
 
         self.start_room_id = start_room.rid
         self.end_room_id = end_room.rid

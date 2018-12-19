@@ -1,4 +1,5 @@
 import textwrap
+import logging
 import tcod
 import tdl
 from .scene import Scene
@@ -9,6 +10,9 @@ from .utils import darken_color, clamp, Direction, PopupWindow
 from .utils import Camera
 from .gamedata import gamedata
 from . import MESSAGE_COLOR, DARK_BACKGROUND, PANEL_TEXT_COLOR, POPUP_BACKGROUND, POPUP_SIZE
+
+
+logger = logging.getLogger(__name__)
 
 
 class DungeonScene(Scene):
@@ -161,7 +165,10 @@ class DungeonScene(Scene):
 
         # the starting room is always entirely visited.
         start_cell = cur_map.get_at(cur_map.start_vec.x, cur_map.start_vec.y)
+        logger.debug("Start cell: %r at %dx%d", start_cell, cur_map.start_vec.x,
+                     cur_map.start_vec.y)
         start_room = cur_map.get_room(start_cell.room_id)
+        logger.debug("Start room: %r", start_room)
 
         for y in range(start_room.y, start_room.y + start_room.height):
             for x in range(start_room.x, start_room.x + start_room.width):
