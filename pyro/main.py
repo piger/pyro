@@ -1,8 +1,7 @@
 import time
 import logging
 import click
-from pyro.game import Game
-import better_exceptions
+from .game import Game
 
 
 logger = logging.getLogger()

@@ -2,8 +2,8 @@
 http://code.activestate.com/recipes/578919-python-a-pathfinding-with-binary-heap/
 """
 import heapq
-from pyro.utils import Direction
-from pyro import WALL, VOID
+from .utils import Direction
+from . import WALL, VOID
 
 
 class PriorityQueue(object):

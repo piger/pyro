@@ -1,5 +1,5 @@
 import random
-from pyro.utils import clamp
+from .utils import clamp
 
 
 def roll_to_hit(accuracy, defense):
