@@ -1,9 +1,9 @@
 import random
 import tdl
-from pyro.utils import tcod_random
-from pyro.gamedata import gamedata
-from pyro.dungeon_scene import DungeonScene
-from pyro.scene import StartScreen
+from .utils import tcod_random
+from .gamedata import gamedata
+from .scenes.misc import StartScreen
+from .scenes.dungeon import DungeonScene
 
 
 class Game(object):

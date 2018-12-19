@@ -3,10 +3,10 @@ import random
 from collections import OrderedDict
 import tcod.bsp
 import noise
-from pyro.entities import EntityManager
-from pyro.utils import Rect, Vector2, tcod_random, Direction
-from pyro.rooms import room_1
-from pyro import *
+from .entities import EntityManager
+from .utils import Rect, Vector2, tcod_random, Direction
+from .rooms import room_1
+from . import CORRIDOR, VOID, WALKABLE, BLOCKING, WALL, ROOM, PotionType
 
 
 logger = logging.getLogger(__name__)
@@ -86,7 +86,7 @@ class GameCell:
             self.kind, self.entities, self.room_id, self.feature)
 
 
-class GameMap(object):
+class GameMap:
     """The dungeon"""
 
     def __init__(self, width, height, min_room_width=6, min_room_height=6):
@@ -545,7 +545,7 @@ class TunnelingGameMap(GameMap):
         self._place_items_in_rooms(entity_manager)
 
 
-class World(object):
+class World:
     def __init__(self):
         self.maps = []
         self.current_map = 0

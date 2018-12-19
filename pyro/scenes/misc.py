@@ -1,20 +1,7 @@
 import tdl
-from pyro import DARK_BACKGROUND, PANEL_TEXT_COLOR
-from pyro.utils import center_text
-
-
-class Scene(object):
-    def __init__(self):
-        self.DEBUG = False
-
-    def setup(self, game):
-        pass
-
-    def update(self, game):
-        pass
-
-    def keydown_event(self, event, game):
-        pass
+from . import Scene
+from .. import DARK_BACKGROUND, PANEL_TEXT_COLOR
+from ..utils import center_text
 
 
 class StartScreen(Scene):
