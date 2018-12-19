@@ -98,7 +98,8 @@ class GameMap:
         self.end_vec = None
         self.start_room_id = None
         self.end_room_id = None
-        self.tunnel_id = '0'  # note: it's a str!
+        # tunnel_id is just used to debug corridors
+        self._tunnel_id = 0
 
     def generate(self, level, entity_manager):
         raise NotImplementedError
@@ -116,7 +117,7 @@ class GameMap:
             if room.width > room_width and room.height > room_height:
                 biggest_room = room
 
-        logger.info("The biggest room is %dx%d" % (biggest_room.width, biggest_room.height))
+        logger.info("The biggest room is %dx%d", biggest_room.width, biggest_room.height)
 
     def _connect_rooms(self, room1, room2):
         """Connects two rooms with a corridor"""
@@ -124,8 +125,10 @@ class GameMap:
         start = room1.center
         end = room2.center
 
-        v = self.tunnel_id
-        self.tunnel_id = chr(ord(self.tunnel_id) + 1)
+        # assign and increment the tunnel ID
+        v = self._tunnel_id
+        self._tunnel_id += 1
+
         if random.random() < 0.5:
             self._create_horizontal_tunnel(start.x, end.x, start.y, v)
             self._create_vertical_tunnel(start.y, end.y, end.x, v)
@@ -151,9 +154,9 @@ class GameMap:
 
         self.cells[x][y].kind = CORRIDOR
 
-        # set up DEBUG value
+        # set up DEBUG value (the string representation of the tunnel ID)
         if value is not None:
-            self.cells[x][y].value = value
+            self.cells[x][y].value = str(value)
 
         # fill cells around this corridor cell if they are void
         for c in self.get_cells_around(x, y):
