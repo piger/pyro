@@ -1,7 +1,7 @@
 import random
 import logging
 import tcod.bsp
-from ..gamemap import GameMap, create_room_inside, Room
+from ..gamemap import GameMap, Room
 from ..utils import Rect, tcod_random
 from .. import ROOM, WALL
 

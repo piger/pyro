@@ -407,16 +407,17 @@ class DungeonScene(Scene):
         if roll_to_hit(player_cc.accuracy, entity_cc.defense):
             enemy_hc.health -= player_cc.damage
             self.post_message(
-                "You hit the %s for %d damage (%d left)"
-                % (entity.name, player_cc.damage, enemy_hc.health)
+                "You hit {name} for {damage} ({health} left)".format(
+                    name=entity.name, damage=player_cc.damage, health=enemy_hc.health
+                )
             )
         else:
             # show some details about the chance to hit
             chance = chance_to_hit(player_cc.accuracy, entity_cc.defense)
-            self.post_message("You miss the %s (%d%%)" % (entity.name, chance))
+            self.post_message(f"You miss the {entity.name} ({chance}%%)")
 
         if enemy_hc.health <= 0:
-            self.post_message("%s is dead" % entity.name)
+            self.post_message(f"{entity.name} is dead")
             self.world.destroy_entity(entity.eid)
 
     def enemy_fight_player(self, entity):

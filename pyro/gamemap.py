@@ -305,27 +305,31 @@ class GameMap:
 
     def _place_doors(self, entity_manager):
         for room in self.rooms.values():
-            # openings = []
-
-            # inspect room sides, except corners
+            # inspect room sides, except corners, and try to place a door, but only
+            # between two walls.
             for y in range(room.y + 1, room.endY - 1):
                 for i in (room.x, room.endX - 1):
                     pos = Vector2(i, y)
-                    # a room can only be placed between two walls
-                    if (
-                        self.get_at(pos + Direction.NORTH).kind == WALL
-                        and self.get_at(pos + Direction.SOUTH).kind == WALL
-                    ):
-                        self._maybe_place_door(entity_manager, i, y)
+                    cell = self.get_at(pos)
+                    if cell.kind != CORRIDOR:
+                        continue
+
+                    cell_north = self.get_at(pos + Direction.NORTH)
+                    cell_south = self.get_at(pos + Direction.SOUTH)
+                    if cell_north.kind == WALL and cell_south.kind == WALL:
+                        self._maybe_place_door(entity_manager, pos)
 
             for x in range(room.x + 1, room.endX - 1):
                 for i in (room.y, room.endY - 1):
                     pos = Vector2(x, i)
-                    if (
-                        self.get_at(pos + Direction.EAST).kind == WALL
-                        and self.get_at(pos + Direction.WEST).kind == WALL
-                    ):
-                        self._maybe_place_door(entity_manager, x, i)
+                    cell = self.get_at(pos)
+                    if cell.kind != CORRIDOR:
+                        continue
+
+                    cell_east = self.get_at(pos + Direction.EAST)
+                    cell_west = self.get_at(pos + Direction.WEST)
+                    if cell_east.kind == WALL and cell_west.kind == WALL:
+                        self._maybe_place_door(entity_manager, pos)
 
     def _place_outer_walls(self):
         for x in range(self.width):
@@ -336,20 +340,18 @@ class GameMap:
             self.cells[0][y].kind = WALL
             self.cells[self.width - 1][y].kind = WALL
 
-    def _maybe_place_door(self, entity_manager, x, y):
-        pos = Vector2(x, y)
-        cell = self.get_at(pos)
-        if cell.kind == CORRIDOR:
-            # check adjacent cells for already existing corridors
-            for d in Direction.cardinal():
-                a_cell = self.get_at(pos + d)
-                for entity_id in a_cell.entities:
-                    entity = entity_manager.get_entity(entity_id)
-                    if entity.name == "door":
-                        return
-            if random.random() > 0.3:
-                door = entity_manager.create_entity("door")
-                self.move_entity(door, pos)
+    def _maybe_place_door(self, entity_manager, pos):
+        # check adjacent cells for already existing corridors
+        for d in Direction.cardinal():
+            a_cell = self.get_at(pos + d)
+            for entity_id in a_cell.entities:
+                entity = entity_manager.get_entity(entity_id)
+                if entity.name == "door":
+                    return
+
+        if random.random() > 0.3:
+            door = entity_manager.create_entity("door")
+            self.move_entity(door, pos)
 
     def move_entity(self, entity, pos):
         if entity.position is not None:
