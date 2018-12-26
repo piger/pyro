@@ -1,11 +1,18 @@
+import random
 import logging
 import tcod.bsp
-from ..gamemap import GameMap, create_room_inside
+from ..gamemap import GameMap, create_room_inside, Room
 from ..utils import Rect, tcod_random
 from .. import ROOM, WALL
 
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
+
+
+def pad_room_inside_node(node, width, height):
+    x = node.x + random.randint(0, (node.width - width))
+    y = node.y + random.randint(0, (node.height - height))
+    return Room(x, y, width, height)
 
 
 class BspGameMap(GameMap):
@@ -22,11 +29,19 @@ class BspGameMap(GameMap):
         if node.children:
             self._connect_nodes(node)
         else:
-            room = create_room_inside(
-                node.x, node.y, self.min_room_width, self.min_room_height, node.width, node.height
-            )
-            self.rooms[room.rid] = room
-            self._dig_room(room)
+            self._place_room_in_node(node)
+
+    def _place_room_in_node(self, node):
+        assert node.width >= self.min_room_width
+        assert node.height >= self.min_room_height
+
+        # fit the new room inside the node
+        width = random.randint(self.min_room_width, node.width)
+        height = random.randint(self.min_room_height, node.height)
+
+        room = pad_room_inside_node(node, width, height)
+        self.rooms[room.rid] = room
+        self._dig_room(room)
 
     def _connect_nodes(self, node):
         """Creates two Rooms from two BSP nodes and connect them with a corridor"""
@@ -92,7 +107,6 @@ class BspGameMap(GameMap):
 
         self._tag_rooms()
         self._select_start_and_end(entity_manager)
-        self._place_special_rooms()
         self._place_creatures_in_rooms(level, entity_manager)
         self._place_doors(entity_manager)
         self._add_features()

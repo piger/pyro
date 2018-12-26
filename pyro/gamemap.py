@@ -9,23 +9,6 @@ from . import CORRIDOR, VOID, WALKABLE, BLOCKING, WALL, ROOM, PotionType
 logger = logging.getLogger(__name__)
 
 
-def create_room_inside(x, y, min_width, min_height, max_width, max_height):
-    """Place a Rect inside another Rect, with random padding"""
-
-    width = random.randint(min_width, max_width)
-    height = random.randint(min_height, max_height)
-    pad_x = max_width - width
-    pad_y = max_height - height
-
-    if pad_x > 0:
-        x += random.randint(0, pad_x)
-
-    if pad_y > 0:
-        y += random.randint(0, pad_y)
-
-    return Room(x, y, width, height)
-
-
 class Room(Rect):
     """Holds coordinates for a Room"""
 
@@ -47,6 +30,20 @@ class Room(Rect):
             f"<Room(x={self.x}, y={self.y}, width={self.width}, height={self.height}, "
             f"id={self.rid}, connected={self.connected})>"
         )
+
+
+class SpecialRoom:
+    def __init__(self, source):
+        lines = source.split("\n")
+        self.width = max([len(line) for line in lines]) + 1
+        self.height = len(lines) + 1
+        self.cells = [[False for _ in range(self.height)] for _ in range(self.width)]
+
+        for y, line in enumerate(lines):
+            for x, char in enumerate(list(line)):
+                if 0 in [x, y] or char == "#":
+                    # outer wall
+                    self.cells[x][y] = True
 
 
 class GameCell:
@@ -275,7 +272,8 @@ class GameMap:
         for room in self.rooms.values():
             for y in range(room.y + 1, room.endY - 1):
                 for x in range(room.x + 1, room.endX - 1):
-                    self.cells[x][y].kind = ROOM
+                    if self.cells[x][y].kind not in (ROOM, WALL):
+                        self.cells[x][y].kind = ROOM
 
     def _add_features(self):
         frequency = 8.0
