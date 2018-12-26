@@ -90,8 +90,7 @@ class Vector2(object):
 
     @classmethod
     def random(cls, min_x, max_x, min_y, max_y):
-        return cls(random.randint(min_x, max_x),
-                   random.randint(min_y, max_y))
+        return cls(random.randint(min_x, max_x), random.randint(min_y, max_y))
 
     def __sub__(self, other):
         return Vector2(self.x - other.x, self.y - other.y)
@@ -123,7 +122,7 @@ class Vector2(object):
         return hash((self.x, self.y))
 
     def __repr__(self):
-        return 'Vector2(%d, %d)' % (self.x, self.y)
+        return "Vector2(%d, %d)" % (self.x, self.y)
 
 
 class Direction(object):
@@ -138,9 +137,16 @@ class Direction(object):
 
     @classmethod
     def all(cls):
-        return (cls.NORTH_WEST, cls.NORTH, cls.NORTH_EAST,
-                cls.WEST, cls.EAST,
-                cls.SOUTH_WEST, cls.SOUTH, cls.SOUTH_EAST)
+        return (
+            cls.NORTH_WEST,
+            cls.NORTH,
+            cls.NORTH_EAST,
+            cls.WEST,
+            cls.EAST,
+            cls.SOUTH_WEST,
+            cls.SOUTH,
+            cls.SOUTH_EAST,
+        )
 
     @classmethod
     def cardinal(cls):
@@ -161,8 +167,12 @@ class Rect(object):
         self.endY = self.y + self.height
 
     def __eq__(self, other):
-        return (self.x == other.x and self.y == other.y and self.width == other.width and
-                self.height == other.height)
+        return (
+            self.x == other.x
+            and self.y == other.y
+            and self.width == other.width
+            and self.height == other.height
+        )
 
     @property
     def center(self):
@@ -171,13 +181,17 @@ class Rect(object):
         This is relative to its position!
         """
 
-        center_x = ((self.x + self.endX) // 2)
-        center_y = ((self.y + self.endY) // 2)
+        center_x = (self.x + self.endX) // 2
+        center_y = (self.y + self.endY) // 2
         return Vector2(center_x, center_y)
 
     def intersect(self, other):
-        return (self.x <= other.endX and self.endX >= other.x and
-                self.y <= other.endY and self.endY >= other.y)
+        return (
+            self.x <= other.endX
+            and self.endX >= other.x
+            and self.y <= other.endY
+            and self.endY >= other.y
+        )
 
     def contains(self, other):
         if other.x < self.x:
@@ -191,14 +205,18 @@ class Rect(object):
         return True
 
     def inflate(self, distance):
-        return Rect(self.x - distance, self.y - distance,
-                    self.width + (distance * 2), self.height + (distance * 2))
+        return Rect(
+            self.x - distance,
+            self.y - distance,
+            self.width + (distance * 2),
+            self.height + (distance * 2),
+        )
 
     def collidepoint(self, x, y):
         return x >= self.x and x <= self.endX and y >= self.y and y <= self.endY
 
     def __repr__(self):
-        return 'Rect(x=%d, y=%d, width=%d, height=%d)' % (self.x, self.y, self.width, self.height)
+        return "Rect(x=%d, y=%d, width=%d, height=%d)" % (self.x, self.y, self.width, self.height)
 
 
 class PopupWindow(object):
@@ -243,9 +261,9 @@ class PopupWindow(object):
         c.clear()
         # draw the corners
         c.draw_char(0, 0, self.TOP_LEFT)
-        c.draw_char(self.width-1, 0, self.TOP_RIGHT)
-        c.draw_char(0, self.height-1, self.BOTTOM_LEFT)
-        c.draw_char(self.width-1, self.height-1, self.BOTTOM_RIGHT)
+        c.draw_char(self.width - 1, 0, self.TOP_RIGHT)
+        c.draw_char(0, self.height - 1, self.BOTTOM_LEFT)
+        c.draw_char(self.width - 1, self.height - 1, self.BOTTOM_RIGHT)
 
         # draw the rest of the frame
         for x in range(1, self.width - 1):

@@ -13,19 +13,19 @@ class Gamedata(object):
         self.potion = {}
 
     def load(self):
-        self._data = json.load(pkg_resources.resource_stream('pyro', 'data/gamedata.json'))
+        self._data = json.load(pkg_resources.resource_stream("pyro", "data/gamedata.json"))
 
-        for feature in self._data['features']:
-            self.features[feature['name']] = feature
+        for feature in self._data["features"]:
+            self.features[feature["name"]] = feature
 
-        for entity in self._data['entities']:
-            self.entities[entity['name']] = entity
+        for entity in self._data["entities"]:
+            self.entities[entity["name"]] = entity
 
-        for entity in self._data['weapons']:
-            self.weapons[entity['name']] = entity
+        for entity in self._data["weapons"]:
+            self.weapons[entity["name"]] = entity
 
-        for entity in self._data['scrolls']:
-            self.scrolls[entity['name']] = entity
+        for entity in self._data["scrolls"]:
+            self.scrolls[entity["name"]] = entity
 
     def get(self, name):
         return self._data[name]

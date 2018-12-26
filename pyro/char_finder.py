@@ -54,10 +54,10 @@ def char_finder():
                 c += 1
 
         for event in tdl.event.get():
-            if event.type == 'KEYDOWN':
+            if event.type == "KEYDOWN":
                 running = False
                 break
-            elif event.type == 'MOUSEDOWN':
+            elif event.type == "MOUSEDOWN":
                 print(event.cell)
                 highlight = event.cell
 

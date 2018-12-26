@@ -47,8 +47,16 @@ class Fov(object):
         end = 0.0
         for octant in range(8):
             self._cast_light(
-                x, y, row, start, end, multipliers[0][octant], multipliers[1][octant],
-                multipliers[2][octant], multipliers[3][octant])
+                x,
+                y,
+                row,
+                start,
+                end,
+                multipliers[0][octant],
+                multipliers[1][octant],
+                multipliers[2][octant],
+                multipliers[3][octant],
+            )
         return self.los_cache
 
     def _cast_light(self, start_x, start_y, row, start, end, xx, xy, yx, yy):
@@ -61,7 +69,7 @@ class Fov(object):
         # j is distance
         # dx and dy are deltas
         for j in range(row, self.radius + 1):
-            dx, dy = -j-1, -j
+            dx, dy = -j - 1, -j
             blocked = False
 
             while dx <= 0:
@@ -91,8 +99,9 @@ class Fov(object):
                     else:
                         if self._is_blocked(x, y) and j < self.radius:
                             blocked = True
-                            self._cast_light(start_x, start_y, j + 1, start, l_slope,
-                                             xx, xy, yx, yy)
+                            self._cast_light(
+                                start_x, start_y, j + 1, start, l_slope, xx, xy, yx, yy
+                            )
                             new_start = r_slope
             if blocked:
                 break

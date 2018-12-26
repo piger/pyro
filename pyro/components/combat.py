@@ -9,12 +9,8 @@ class CombatComponent(Component):
         self.accuracy = accuracy
 
     def config(self, values):
-        m = {
-            'DAMAGE': 'damage',
-            'DEFENSE': 'defense',
-            'ACCURACY': 'accuracy',
-        }
+        m = {"DAMAGE": "damage", "DEFENSE": "defense", "ACCURACY": "accuracy"}
         for i in range(0, len(values), 2):
             name = values[i]
-            value = values[i+1]
+            value = values[i + 1]
             setattr(self, m[name], int(value))

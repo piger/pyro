@@ -29,11 +29,11 @@ def parse_capability(line):
     For example the string "combat:DAMAGE:2:ACCURACY:70" configure the 'combat' capability
     with values "2" for "DAMAGE" and "70" for "ACCURACY".
     """
-    if ':' not in line:
+    if ":" not in line:
         return (line, [])
-    name, line = line.split(':', 1)
-    results = re.split(r'(?<!\\):', line)
-    results = [x.replace('\\\\', '\\') for x in results]
+    name, line = line.split(":", 1)
+    results = re.split(r"(?<!\\):", line)
+    results = [x.replace("\\\\", "\\") for x in results]
     return (name, results)
 
 
@@ -47,7 +47,7 @@ class Entity(object):
         self.layer = layer
         self.position = Vector2(0, 0)
         self.always_visible = False
-        self.description = ''
+        self.description = ""
         self.components = {}
 
     def get_component(self, name):
@@ -71,14 +71,19 @@ class Entity(object):
         return self.position
 
     def is_monster(self):
-        return any([c.name == 'monster_ai' for c in list(self.components.values())])
+        return any([c.name == "monster_ai" for c in list(self.components.values())])
 
     def is_potion(self):
-        return any([c.name == 'potion' for c in list(self.components.values())])
+        return any([c.name == "potion" for c in list(self.components.values())])
 
     def __repr__(self):
         return "<Entity(eid=%d, name=%s, display_name=%s, position=%r, components=%r)>" % (
-            self.eid, self.name, self.display_name, self.position, self.components)
+            self.eid,
+            self.name,
+            self.display_name,
+            self.position,
+            self.components,
+        )
 
 
 class EntityManager(object):
@@ -122,14 +127,14 @@ class EntityManager(object):
             entity_data = gamedata.get_entity(name)
         assert entity_data is not None, "Entity data for %s is None" % name
 
-        color = entity_data.get('color', DEFAULT_ENTITY_COLOR)
-        entity = Entity(eid, name, entity_data['avatar'], color)
-        entity.always_visible = entity_data.get('always_visible', False)
-        entity.description = entity_data.get('description', '<MISSING DESCRIPTION>')
-        entity.display_name = entity_data.get('display_name', '<MISSING DISPLAY_NAME>')
+        color = entity_data.get("color", DEFAULT_ENTITY_COLOR)
+        entity = Entity(eid, name, entity_data["avatar"], color)
+        entity.always_visible = entity_data.get("always_visible", False)
+        entity.description = entity_data.get("description", "<MISSING DESCRIPTION>")
+        entity.display_name = entity_data.get("display_name", "<MISSING DISPLAY_NAME>")
 
         # configure all the entity's capabilities.
-        for cap in entity_data.get('can', []):
+        for cap in entity_data.get("can", []):
             name, values = parse_capability(cap)
             comp = COMPONENT_CLASS[name]()
             comp.config(values)
@@ -145,7 +150,7 @@ class EntityManager(object):
 
     def create_potion(self, potion_type):
         eid = self.next_eid()
-        entity = Entity(eid, 'potion', POTION_AVATAR, POTION_COLOR, layer=LAYER_ITEMS)
+        entity = Entity(eid, "potion", POTION_AVATAR, POTION_COLOR, layer=LAYER_ITEMS)
         pc = PotionComponent(potion_type)
         entity.add_component(pc)
         self.register_component(entity, pc)

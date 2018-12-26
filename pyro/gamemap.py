@@ -43,8 +43,10 @@ class Room(Rect):
         return rv
 
     def __repr__(self):
-        return (f"<Room(x={self.x}, y={self.y}, width={self.width}, height={self.height}, "
-                f"id={self.rid}, connected={self.connected})>")
+        return (
+            f"<Room(x={self.x}, y={self.y}, width={self.width}, height={self.height}, "
+            f"id={self.rid}, connected={self.connected})>"
+        )
 
 
 class GameCell:
@@ -80,7 +82,11 @@ class GameCell:
 
     def __repr__(self):
         return "<GameCell(kind=%r, entities=%r, room_id=%r, feature=%r)>" % (
-            self.kind, self.entities, self.room_id, self.feature)
+            self.kind,
+            self.entities,
+            self.room_id,
+            self.feature,
+        )
 
 
 class GameMap:
@@ -177,7 +183,7 @@ class GameMap:
 
     def _place_creatures_in_rooms(self, level, entity_manager):
         rooms = [room for room in list(self.rooms.values()) if room.rid != self.start_room_id]
-        creatures = [('boar', level * 20), ('worm', level * 12), ('goblin', 9), ('fairy', 3)]
+        creatures = [("boar", level * 20), ("worm", level * 12), ("goblin", 9), ("fairy", 3)]
         for creature_name, amount in creatures:
             for _ in range(amount):
                 for j in range(5):
@@ -187,8 +193,7 @@ class GameMap:
                     if len(self.get_entities_in_room(room.rid)) > 4:
                         rooms.remove(room)
                         continue
-                    pos = Vector2.random(room.x + 1, room.endX - 2,
-                                         room.y + 1, room.endY - 2)
+                    pos = Vector2.random(room.x + 1, room.endX - 2, room.y + 1, room.endY - 2)
                     cell = self.get_at(pos)
                     if not cell.walkable or cell.has_entities():
                         continue
@@ -230,10 +235,10 @@ class GameMap:
         self.end_room_id = end_room.rid
 
         self.start_vec = start_room.center
-        self._place_stairs(self.start_vec, 'stairs_up', entity_manager)
+        self._place_stairs(self.start_vec, "stairs_up", entity_manager)
 
         self.end_vec = end_room.center
-        self._place_stairs(self.end_vec, 'stairs_down', entity_manager)
+        self._place_stairs(self.end_vec, "stairs_down", entity_manager)
 
     def _place_stairs(self, pos, kind, entity_manager):
         entity = entity_manager.create_entity(kind)
@@ -248,16 +253,16 @@ class GameMap:
         # room outer walls (y) - do not overwrite existing tunnel tho!
         for y in range(room.y, room.endY):
             self._put_wall_for_room(room.x, y, room)
-            self._put_wall_for_room(room.endX-1, y, room)
+            self._put_wall_for_room(room.endX - 1, y, room)
 
         # room outer walls (x)
         for x in range(room.x, room.endX):
             self._put_wall_for_room(x, room.y, room)
-            self._put_wall_for_room(x, room.endY-1, room)
+            self._put_wall_for_room(x, room.endY - 1, room)
 
         # room interior
-        for y in range(room.y+1, room.endY-1):
-            for x in range(room.x+1, room.endX-1):
+        for y in range(room.y + 1, room.endY - 1):
+            for x in range(room.x + 1, room.endX - 1):
                 # detect when a room is digged over an existing corridor.
                 if self.cells[x][y].kind == CORRIDOR:
                     room.connected = True
@@ -268,8 +273,8 @@ class GameMap:
         """Set the kind of each room cell to ROOM"""
 
         for room in list(self.rooms.values()):
-            for y in range(room.y+1, room.endY-1):
-                for x in range(room.x+1, room.endX-1):
+            for y in range(room.y + 1, room.endY - 1):
+                for x in range(room.x + 1, room.endX - 1):
                     self.cells[x][y].kind = ROOM
 
     def _add_features(self):
@@ -310,8 +315,8 @@ class GameMap:
                     pos = Vector2(i, y)
                     # a room can only be placed between two walls
                     if (
-                            self.get_at(pos + Direction.NORTH).kind == WALL and
-                            self.get_at(pos + Direction.SOUTH).kind == WALL
+                        self.get_at(pos + Direction.NORTH).kind == WALL
+                        and self.get_at(pos + Direction.SOUTH).kind == WALL
                     ):
                         self._maybe_place_door(entity_manager, i, y)
 
@@ -319,19 +324,19 @@ class GameMap:
                 for i in (room.y, room.endY - 1):
                     pos = Vector2(x, i)
                     if (
-                            self.get_at(pos + Direction.EAST).kind == WALL and
-                            self.get_at(pos + Direction.WEST).kind == WALL
+                        self.get_at(pos + Direction.EAST).kind == WALL
+                        and self.get_at(pos + Direction.WEST).kind == WALL
                     ):
                         self._maybe_place_door(entity_manager, x, i)
 
     def _place_outer_walls(self):
         for x in range(self.width):
             self.cells[x][0].kind = WALL
-            self.cells[x][self.height-1].kind = WALL
+            self.cells[x][self.height - 1].kind = WALL
 
         for y in range(self.height):
             self.cells[0][y].kind = WALL
-            self.cells[self.width-1][y].kind = WALL
+            self.cells[self.width - 1][y].kind = WALL
 
     def _maybe_place_door(self, entity_manager, x, y):
         pos = Vector2(x, y)
@@ -342,10 +347,10 @@ class GameMap:
                 a_cell = self.get_at(pos + d)
                 for entity_id in a_cell.entities:
                     entity = entity_manager.get_entity(entity_id)
-                    if entity.name == 'door':
+                    if entity.name == "door":
                         return
             if random.random() > 0.3:
-                door = entity_manager.create_entity('door')
+                door = entity_manager.create_entity("door")
                 self.move_entity(door, pos)
 
     def move_entity(self, entity, pos):

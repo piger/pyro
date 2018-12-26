@@ -15,7 +15,7 @@ class StartScreen(Scene):
         self.window.set_colors(PANEL_TEXT_COLOR, DARK_BACKGROUND)
 
     def keydown_event(self, event, game):
-        game.next_scene = 'dungeon'
+        game.next_scene = "dungeon"
 
     def update(self, game):
         if self.do_render:
@@ -40,6 +40,7 @@ class Fizzlefade(Scene):
 
     Stolen from http://fabiensanglard.net/fizzlefade/index.php
     """
+
     def __init__(self):
         super(Fizzlefade, self).__init__()
         self.window = None
@@ -65,7 +66,7 @@ class Fizzlefade(Scene):
             if lsb != 0:
                 rndval ^= 0x00012000
             if x < game.screen_width and y < game.screen_height:
-                self.window.draw_char(x, y, ' ', fg=(205, 38, 38), bg=(205, 38, 38))
+                self.window.draw_char(x, y, " ", fg=(205, 38, 38), bg=(205, 38, 38))
                 i += 1
                 if i >= 100:
                     i = 0

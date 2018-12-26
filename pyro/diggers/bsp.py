@@ -10,6 +10,7 @@ logger = logging.getLogger()
 
 class BspGameMap(GameMap):
     """Pretty standard BSP based dungeon generation"""
+
     def __init__(self, *args, **kwargs):
         super(BspGameMap, self).__init__(*args, **kwargs)
         self.depth = 7
@@ -21,8 +22,9 @@ class BspGameMap(GameMap):
         if node.children:
             self._connect_nodes(node)
         else:
-            room = create_room_inside(node.x, node.y, self.min_room_width, self.min_room_height,
-                                      node.width, node.height)
+            room = create_room_inside(
+                node.x, node.y, self.min_room_width, self.min_room_height, node.width, node.height
+            )
             self.rooms[room.rid] = room
             self._dig_room(room)
 
@@ -69,10 +71,15 @@ class BspGameMap(GameMap):
         self._place_outer_walls()
 
         # split game map with BSP
-        bsp = tcod.bsp.BSP(x=1, y=1, width=self.width-2, height=self.height-2)
-        bsp.split_recursive(depth=self.depth, min_width=self.min_room_width + 1,
-                            min_height=self.min_room_height + 1, max_horizontal_ratio=1.5,
-                            max_vertical_ratio=1.5, seed=tcod_random.rng)
+        bsp = tcod.bsp.BSP(x=1, y=1, width=self.width - 2, height=self.height - 2)
+        bsp.split_recursive(
+            depth=self.depth,
+            min_width=self.min_room_width + 1,
+            min_height=self.min_room_height + 1,
+            max_horizontal_ratio=1.5,
+            max_vertical_ratio=1.5,
+            seed=tcod_random.rng,
+        )
 
         # traverse all the nodes to place rooms and connect them
         self._traverse(bsp)

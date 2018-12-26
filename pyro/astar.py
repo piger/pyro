@@ -33,12 +33,8 @@ def heuristic(a, b):
 def astar(dungeon, start, goal, diagonal=True):
     close_set = set()
     came_from = {}
-    gscore = {
-        start: 0
-    }
-    fscore = {
-        start: heuristic(start, goal)
-    }
+    gscore = {start: 0}
+    fscore = {start: heuristic(start, goal)}
     oheap = PriorityQueue()
 
     if diagonal:

@@ -8,10 +8,10 @@ from .potion import PotionComponent
 
 
 COMPONENT_CLASS = {
-    'health': HealthComponent,
-    'combat': CombatComponent,
-    'door': DoorComponent,
-    'monster_ai': MonsterAiComponent,
-    'potion': PotionComponent,
-    'inventory': InventoryComponent,
+    "health": HealthComponent,
+    "combat": CombatComponent,
+    "door": DoorComponent,
+    "monster_ai": MonsterAiComponent,
+    "potion": PotionComponent,
+    "inventory": InventoryComponent,
 }

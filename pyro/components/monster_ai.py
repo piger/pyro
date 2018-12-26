@@ -23,12 +23,12 @@ class MonsterAiComponent(Component):
     def config(self, values):
         for i in range(0, len(values), 2):
             name = values[i]
-            value = values[i+1]
-            if name == 'FOV_RADIUS':
+            value = values[i + 1]
+            if name == "FOV_RADIUS":
                 self.radius = int(value)
-            elif name == 'DIAGONAL':
+            elif name == "DIAGONAL":
                 self.can_move_diagonal = bool(int(value))
-            elif name == 'AGGRESSIVE':
+            elif name == "AGGRESSIVE":
                 self.aggressive = bool(int(value))
 
     def setup(self, game):
@@ -54,7 +54,7 @@ class MonsterAiComponent(Component):
             return False
 
         for entity_id in new_cell.entities:
-            if entity_id in entity_manager.components['monster_ai']:
+            if entity_id in entity_manager.components["monster_ai"]:
                 # we can't move, there's another AI in that cell
                 return False
 
@@ -73,7 +73,7 @@ class MonsterAiComponent(Component):
                 continue
             for eid in cell.entities:
                 e = game.world.entity_manager.get_entity(eid)
-                if e in game.world.entity_manager.components['monster_ai']:
+                if e in game.world.entity_manager.components["monster_ai"]:
                     continue
             candidates.append(dest)
 
@@ -120,8 +120,9 @@ class MonsterAiComponent(Component):
 
         if not adjacent:
             # update fov
-            self.fov_map.compute_fov(entity.position.x, entity.position.y,
-                                     radius=self.radius, algorithm=tcod.FOV_DIAMOND)
+            self.fov_map.compute_fov(
+                entity.position.x, entity.position.y, radius=self.radius, algorithm=tcod.FOV_DIAMOND
+            )
             # if the player position is "lit", then we see the player
             self.chasing = self.fov_map.fov[player.position.y, player.position.x]
         elif adjacent:
@@ -149,8 +150,7 @@ class MonsterAiComponent(Component):
         else:
             if self.last_player_pos is not None:
                 print("remembering the chase")
-                path = astar(cur_map, entity.position, self.last_player_pos,
-                             self.can_move_diagonal)
+                path = astar(cur_map, entity.position, self.last_player_pos, self.can_move_diagonal)
                 self.move_to(entity, cur_map, em, path[0])
             else:
                 # move randomly, but not all the times

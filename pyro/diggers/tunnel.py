@@ -48,7 +48,7 @@ class TunnelingGameMap(GameMap):
             if is_weird:
                 for y, line in enumerate(lines):
                     for x, c in enumerate(line):
-                        if c == '#':
+                        if c == "#":
                             self.cells[room.x + x][room.y + y].kind = WALL
                 is_weird = False
 

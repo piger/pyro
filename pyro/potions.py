@@ -7,7 +7,16 @@ POTION_AVATAR = 173
 POTION_COLOR = [72, 209, 204]
 
 POTION_COLORS = [
-    'blue', 'yellow', 'cyan', 'black', 'white', 'red', 'green', 'magenta', 'brown', 'orange',
+    "blue",
+    "yellow",
+    "cyan",
+    "black",
+    "white",
+    "red",
+    "green",
+    "magenta",
+    "brown",
+    "orange",
 ]
 
 POTIONS_MAPPING = {}
@@ -32,17 +41,17 @@ class PotionSystem(object):
             self.discovered_potions[potion_type] = False
 
     def get_name_for_potion(self, potion):
-        pc = potion.get_component('potion')
+        pc = potion.get_component("potion")
         if self.discovered_potions[pc.potion_type]:
             return pc.display_name
         return self.potions_colors[pc.potion_type]
 
     def set_discovered(self, potion):
-        pc = potion.get_component('potion')
+        pc = potion.get_component("potion")
         self.discovered_potions[pc.potion_type] = True
 
     def is_discovered(self, potion):
-        pc = potion.get_component('potion')
+        pc = potion.get_component("potion")
         return self.discovered_potions[pc.potion_type]
 
 

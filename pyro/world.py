@@ -10,7 +10,7 @@ class World:
         self.entity_manager = EntityManager()
 
     def create_map(self, width, height, level=1, dungeon_algorithm=None):
-        if dungeon_algorithm in (None, 'bsp'):
+        if dungeon_algorithm in (None, "bsp"):
             MapClass = BspGameMap
         else:
             MapClass = TunnelingGameMap

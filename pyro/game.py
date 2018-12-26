@@ -47,10 +47,10 @@ class Game(object):
 
         if new_scene_name in self.scenes:
             self.current_scene = self.scenes[new_scene_name]
-        elif new_scene_name == 'dungeon':
+        elif new_scene_name == "dungeon":
             self.current_scene = DungeonScene()
             self.current_scene.setup(self)
-        elif new_scene_name == 'quit':
+        elif new_scene_name == "quit":
             self.running = False
 
     def game_loop(self):
@@ -58,14 +58,14 @@ class Game(object):
             updated = False
 
             for event in tdl.event.get():
-                if event.type == 'KEYDOWN':
+                if event.type == "KEYDOWN":
                     self.current_scene.keydown_event(event, self)
                     self.current_scene.update(self)
                     if self.next_scene:
                         self.change_scene()
                     updated = True
                     break
-                elif event.type == 'QUIT':
+                elif event.type == "QUIT":
                     self.running = False
                     break
 
