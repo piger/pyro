@@ -6,7 +6,7 @@ from .utils import Direction
 from . import WALL, VOID
 
 
-class PriorityQueue(object):
+class PriorityQueue:
     def __init__(self):
         self.elements = []
 

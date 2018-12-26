@@ -6,7 +6,7 @@ from .scenes.misc import StartScreen
 from .scenes.dungeon import DungeonScene
 
 
-class Game(object):
+class Game:
     def __init__(self, seed, game_width, game_height, font, screen_width, screen_height):
         self.seed = seed
         self.game_width = game_width

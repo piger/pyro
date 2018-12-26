@@ -10,7 +10,7 @@ from tcod.random import Random
 logger = logging.getLogger(__name__)
 
 
-class TcodRandom(object):
+class TcodRandom:
     """Helper class to be able to use a tcod.random.Random generator globally"""
 
     def __init__(self):
@@ -74,7 +74,7 @@ def center_text(text, width):
 
 
 @total_ordering
-class Vector2(object):
+class Vector2:
     def __init__(self, x_or_tuple, maybe_y=None):
         if maybe_y is None and isinstance(x_or_tuple, tuple):
             self.x, self.y = x_or_tuple
@@ -125,7 +125,7 @@ class Vector2(object):
         return "Vector2(%d, %d)" % (self.x, self.y)
 
 
-class Direction(object):
+class Direction:
     NORTH = Vector2(0, -1)
     SOUTH = Vector2(0, 1)
     EAST = Vector2(1, 0)
@@ -157,7 +157,7 @@ class Direction(object):
         return (cls.NORTH_EAST, cls.SOUTH_EAST, cls.SOUTH_WEST, cls.NORTH_WEST)
 
 
-class Rect(object):
+class Rect:
     def __init__(self, x, y, width, height):
         self.x = x
         self.y = y
@@ -219,7 +219,7 @@ class Rect(object):
         return "Rect(x=%d, y=%d, width=%d, height=%d)" % (self.x, self.y, self.width, self.height)
 
 
-class PopupWindow(object):
+class PopupWindow:
     """A popup window to display variable length text.
 
     The width of this window is fixed while the height is resized based on the length

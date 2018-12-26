@@ -37,7 +37,7 @@ def parse_capability(line):
     return (name, results)
 
 
-class Entity(object):
+class Entity:
     def __init__(self, eid, name, avatar, color, layer=LAYER_CREATURES):
         self.eid = eid
         self.name = name
@@ -86,7 +86,7 @@ class Entity(object):
         )
 
 
-class EntityManager(object):
+class EntityManager:
     def __init__(self):
         # used to track the first free entity ID that can be assigned
         self._eid = 0

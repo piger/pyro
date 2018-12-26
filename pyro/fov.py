@@ -17,7 +17,7 @@ multipliers = [
 # 1, 0, 0, -1 -> SE-E
 
 
-class Fov(object):
+class Fov:
     def __init__(self, radius=6):
         self.radius = radius
         self.mapdata = None

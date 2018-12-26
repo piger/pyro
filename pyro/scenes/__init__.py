@@ -1,4 +1,4 @@
-class Scene(object):
+class Scene:
     def __init__(self):
         self.DEBUG = False
 

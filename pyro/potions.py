@@ -22,7 +22,7 @@ POTION_COLORS = [
 POTIONS_MAPPING = {}
 
 
-class PotionSystem(object):
+class PotionSystem:
     def __init__(self):
         self.potions_colors = {}
         self.potions_quaff = {}
