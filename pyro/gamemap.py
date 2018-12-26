@@ -264,6 +264,14 @@ class GameMap:
                 self.cells[x][y].kind = ROOM
                 self.cells[x][y].room_id = room.rid
 
+    def _tag_rooms(self):
+        """Set the kind of each room cell to ROOM"""
+
+        for room in list(self.rooms.values()):
+            for y in range(room.y+1, room.endY-1):
+                for x in range(room.x+1, room.endX-1):
+                    self.cells[x][y].kind = ROOM
+
     def _add_features(self):
         frequency = 8.0
         fx = self.width / frequency
@@ -315,6 +323,15 @@ class GameMap:
                             self.get_at(pos + Direction.WEST).kind == WALL
                     ):
                         self._maybe_place_door(entity_manager, x, i)
+
+    def _place_outer_walls(self):
+        for x in range(self.width):
+            self.cells[x][0].kind = WALL
+            self.cells[x][self.height-1].kind = WALL
+
+        for y in range(self.height):
+            self.cells[0][y].kind = WALL
+            self.cells[self.width-1][y].kind = WALL
 
     def _maybe_place_door(self, entity_manager, x, y):
         pos = Vector2(x, y)

@@ -13,14 +13,7 @@ class TunnelingGameMap(GameMap):
         weird_done = False
         is_weird = False
 
-        # place outer walls
-        for x in range(self.width):
-            self.cells[x][0].kind = WALL
-            self.cells[x][self.height-1].kind = WALL
-
-        for y in range(self.height):
-            self.cells[0][y].kind = WALL
-            self.cells[self.width-1][y].kind = WALL
+        self._place_outer_walls()
 
         for _ in range(max_rooms):
             lines = []
@@ -65,12 +58,7 @@ class TunnelingGameMap(GameMap):
             else:
                 self.start_room_id = room.rid
 
-        # Convert 'tunnel' blocks inside rooms into room blocks
-        for room in list(self.rooms.values()):
-            for y in range(room.y+1, room.endY-1):
-                for x in range(room.x+1, room.endX-1):
-                    self.cells[x][y].kind = ROOM
-
+        self._tag_rooms()
         self._select_start_and_end(entity_manager)
         self._place_creatures_in_rooms(level, entity_manager)
         self._place_doors(entity_manager)
