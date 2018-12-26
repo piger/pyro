@@ -152,7 +152,7 @@ class DungeonScene(Scene):
         self.init_visited()
 
         # init AI
-        for ai in list(self.world.entity_manager.components["monster_ai"].values()):
+        for ai in self.world.entity_manager.components["monster_ai"].values():
             ai.setup(self)
 
     def init_fov(self, cur_map):

@@ -33,7 +33,7 @@ class TunnelingGameMap(GameMap):
             room = Room(x, y, width, height)
 
             failed = False
-            for other_room in list(self.rooms.values()):
+            for other_room in self.rooms.values():
                 if room.intersect(other_room):
                     failed = True
                     break
@@ -53,7 +53,7 @@ class TunnelingGameMap(GameMap):
                 is_weird = False
 
             if len(self.rooms) > 1:
-                last_room = list(self.rooms.values())[-2]
+                last_room = self.rooms.values()[-2]
                 self._connect_rooms(room, last_room)
             else:
                 self.start_room_id = room.rid

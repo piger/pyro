@@ -37,12 +37,12 @@ class BspGameMap(GameMap):
         n1 = Rect(node1.x, node1.y, node1.width, node1.height)
         n2 = Rect(node2.x, node2.y, node2.width, node2.height)
 
-        for room in list(self.rooms.values()):
+        for room in self.rooms.values():
             if room.intersect(n1):
                 room_a = room
                 break
 
-        for room in list(self.rooms.values()):
+        for room in self.rooms.values():
             if room.intersect(n2) and room != room_a:
                 room_b = room
                 break
@@ -85,13 +85,14 @@ class BspGameMap(GameMap):
         self._traverse(bsp)
 
         # we're lazy and we just delete unconnected rooms
-        unconnected_rooms = [room for room in list(self.rooms.values()) if not room.connected]
+        unconnected_rooms = [room for room in self.rooms.values() if not room.connected]
         logger.debug("BSP map: Deleting %d unconnected rooms" % len(unconnected_rooms))
         for room in unconnected_rooms:
             self._cancel_room(room)
 
         self._tag_rooms()
         self._select_start_and_end(entity_manager)
+        self._place_special_rooms()
         self._place_creatures_in_rooms(level, entity_manager)
         self._place_doors(entity_manager)
         self._add_features()

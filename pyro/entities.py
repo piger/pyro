@@ -71,10 +71,10 @@ class Entity(object):
         return self.position
 
     def is_monster(self):
-        return any([c.name == "monster_ai" for c in list(self.components.values())])
+        return any([c.name == "monster_ai" for c in self.components.values()])
 
     def is_potion(self):
-        return any([c.name == "potion" for c in list(self.components.values())])
+        return any([c.name == "potion" for c in self.components.values()])
 
     def __repr__(self):
         return "<Entity(eid=%d, name=%s, display_name=%s, position=%r, components=%r)>" % (

@@ -182,7 +182,7 @@ class GameMap:
         del self.rooms[room.rid]
 
     def _place_creatures_in_rooms(self, level, entity_manager):
-        rooms = [room for room in list(self.rooms.values()) if room.rid != self.start_room_id]
+        rooms = [room for room in self.rooms.values() if room.rid != self.start_room_id]
         creatures = [("boar", level * 20), ("worm", level * 12), ("goblin", 9), ("fairy", 3)]
         for creature_name, amount in creatures:
             for _ in range(amount):
@@ -272,7 +272,7 @@ class GameMap:
     def _tag_rooms(self):
         """Set the kind of each room cell to ROOM"""
 
-        for room in list(self.rooms.values()):
+        for room in self.rooms.values():
             for y in range(room.y + 1, room.endY - 1):
                 for x in range(room.x + 1, room.endX - 1):
                     self.cells[x][y].kind = ROOM
@@ -306,7 +306,7 @@ class GameMap:
                     self.cells[x][y].feature = "floor"
 
     def _place_doors(self, entity_manager):
-        for room in list(self.rooms.values()):
+        for room in self.rooms.values():
             # openings = []
 
             # inspect room sides, except corners
