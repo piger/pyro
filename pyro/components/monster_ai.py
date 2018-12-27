@@ -1,9 +1,13 @@
 import random
 import inspect
+import logging
 import tcod
 from . import Component
 from ..astar import astar
 from ..utils import Direction, weighted_choice
+
+
+logger = logging.getLogger(__name__)
 
 
 class MonsterAiComponent(Component):
@@ -32,7 +36,7 @@ class MonsterAiComponent(Component):
                 self.aggressive = bool(int(value))
 
     def setup(self, game):
-        """Must be called during game initialization, after fov_map is computed"""
+        """Must be called during game initialization, after game.fov_map is computed"""
 
         self.fov_map = tcod.map.Map(width=game.game_width, height=game.game_height)
         for y in range(game.game_height):
@@ -126,8 +130,8 @@ class MonsterAiComponent(Component):
             # if the player position is "lit", then we see the player
             self.chasing = self.fov_map.fov[player.position.y, player.position.x]
         elif adjacent:
-            print("attacking")
-            game.enemy_fight_player(entity)
+            logger.debug(f"{entity} attacking {player}")
+            game.fight(entity, player)
             return
 
         if self.chasing:
@@ -136,20 +140,20 @@ class MonsterAiComponent(Component):
                 new_pos = path[0]
                 if new_pos == player.position:
                     # attack
-                    print("attacking")
-                    game.enemy_fight_player(entity)
+                    logger.debug(f"{entity} attacking {player}")
+                    game.fight(entity, player)
             elif path:
-                print("chasing")
+                logger.debug(f"{entity} chasing the player")
                 self.last_player_pos = path[-1]
 
                 new_pos = path[0]
                 if not self.move_to(entity, cur_map, em, new_pos):
-                    print("can't move, cell is busy")
+                    logger.warning(f"{entity} can't move to {new_pos}: cell is busy")
             else:
-                print("path is empty!?")
+                logger.warning("A* Path for {entity} is empty")
         else:
             if self.last_player_pos is not None:
-                print("remembering the chase")
+                logger.debug(f"{entity} can't see player but is still chasing him")
                 path = astar(cur_map, entity.position, self.last_player_pos, self.can_move_diagonal)
                 self.move_to(entity, cur_map, em, path[0])
             else:

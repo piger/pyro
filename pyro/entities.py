@@ -77,13 +77,7 @@ class Entity:
         return any([c.name == "potion" for c in self.components.values()])
 
     def __repr__(self):
-        return "<Entity(eid=%d, name=%s, display_name=%s, position=%r, components=%r)>" % (
-            self.eid,
-            self.name,
-            self.display_name,
-            self.position,
-            self.components,
-        )
+        return f"<Entity(eid={self.eid}, name={self.name} ({self.display_name}), pos={self.position})>"
 
 
 class EntityManager:

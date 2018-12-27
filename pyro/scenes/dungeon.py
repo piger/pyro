@@ -375,7 +375,7 @@ class DungeonScene(Scene):
         for entity in entities:
             cc = em.get_component_by_eid(entity.eid, "combat")
             if cc is not None:
-                self.player_fight(entity, cc, em)
+                self.fight(self.player, entity)
                 is_fight = True
                 break
             ai = em.get_component_by_eid(entity.eid, "monster_ai")
@@ -387,64 +387,51 @@ class DungeonScene(Scene):
 
         return True
 
-    def player_fight(self, entity, entity_cc, em):
-        player_cc = em.get_component_by_eid(self.player.eid, "combat")
-        enemy_hc = em.get_component_by_eid(entity.eid, "health")
-
-        print(
-            "fight between player (%d/%d/%d) and %r (%d/%d/%d)"
-            % (
-                player_cc.damage,
-                player_cc.accuracy,
-                player_cc.defense,
-                entity.name,
-                entity_cc.damage,
-                entity_cc.accuracy,
-                entity_cc.defense,
-            )
-        )
-
-        if roll_to_hit(player_cc.accuracy, entity_cc.defense):
-            enemy_hc.health -= player_cc.damage
-            self.post_message(
-                "You hit {name} for {damage} ({health} left)".format(
-                    name=entity.name, damage=player_cc.damage, health=enemy_hc.health
-                )
-            )
-        else:
-            # show some details about the chance to hit
-            chance = chance_to_hit(player_cc.accuracy, entity_cc.defense)
-            self.post_message(f"You miss the {entity.name} ({chance}%%)")
-
-        if enemy_hc.health <= 0:
-            self.post_message(f"{entity.name} is dead")
-            self.world.destroy_entity(entity.eid)
-
-    def enemy_fight_player(self, entity):
+    def fight(self, attacker, defender):
         em = self.world.entity_manager
-        entity_cc = em.get_component_by_eid(entity.eid, "combat")
-        player_cc = em.get_component_by_eid(self.player.eid, "combat")
-        player_hc = em.get_component_by_eid(self.player.eid, "health")
-        self.enemy_fight(entity, entity_cc, self.player, player_cc, player_hc)
-
-    def enemy_fight(self, entity, entity_cc, other, other_cc, other_hc):
-        victim = other.name
-        if other.name == "player":
-            victim = "you"
-        if roll_to_hit(entity_cc.accuracy, other_cc.defense):
-            self.post_message(
-                "the %s hits %s for %d damage" % (entity.name, victim, entity_cc.damage)
-            )
-            other_hc.health -= entity_cc.damage
+        atk_cc = em.get_component_by_eid(attacker.eid, "combat")
+        def_cc = em.get_component_by_eid(defender.eid, "combat")
+        def_hc = em.get_component_by_eid(defender.eid, "health")
+        player_attacking = attacker.eid == self.player.eid
+        player_defending = defender.eid == self.player.eid
+        if player_defending:
+            target = "you"
         else:
-            self.post_message("the %s miss %s" % (entity.name, victim))
+            target = defender.name
 
-        if other_hc.health <= 0:
-            if other.name == "player":
+        if roll_to_hit(atk_cc.accuracy, def_cc.defense):
+            def_hc.health -= atk_cc.damage
+            if player_attacking:
+                self.post_message(
+                    "You hit {name} for {damage} ({health} left)".format(
+                        name=defender.name, damage=atk_cc.damage, health=def_hc.health
+                    )
+                )
+            else:
+                self.post_message(
+                    "The {name} hist {target} for {damage} damage".format(
+                        name=attacker.name, target=target, damage=atk_cc.damage
+                    )
+                )
+        else:
+            if player_attacking:
+                chance = chance_to_hit(player_cc.accuracy, entity_cc.defense)
+                self.post_message(f"You miss the {target} ({chance}%%)")
+            else:
+                if player_defending:
+                    self.post_message("The {name} misses you".format(name=attacker.name))
+                else:
+                    self.post_message("The {name} misses the {target}".format(
+                        name=attacker.name, target=target)
+                    )
+
+        if def_hc.health <= 0:
+            if player_defending:
                 self.post_message("You are dead!")
                 self.player_is_dead = True
             else:
-                self.world.destroy_entity(entity.eid)
+                self.post_message(f"{target} is dead")
+                self.world.destroy_entity(defender.eid)
 
     def move_enemies(self):
         self.do_render = True
