@@ -44,7 +44,7 @@ class MonsterAiComponent(Component):
                 self.fov_map.walkable[y, x] = game.fov_map.walkable[y, x]
                 self.fov_map.transparent[y, x] = game.fov_map.transparent[y, x]
 
-    def move_to(self, entity, cur_map, entity_manager, pos):
+    def move_to(self, monster, cur_map, entity_manager, pos):
         """Move the entity to a pos, if possible"""
 
         new_cell = cur_map.get_at(pos)
@@ -62,16 +62,16 @@ class MonsterAiComponent(Component):
                 # we can't move, there's another AI in that cell
                 return False
 
-        cur_map.move_entity(entity, pos)
+        cur_map.move_entity(monster, pos)
         return True
 
-    def wander(self, entity, game):
+    def wander(self, monster, game):
         """Wander around randomly"""
 
         candidates = []
         cur_map = game.world.get_current_map()
         for d in Direction.all():
-            dest = entity.position + d
+            dest = monster.position + d
             cell = cur_map.get_at(dest)
             if not cell.walkable:
                 continue
@@ -94,70 +94,59 @@ class MonsterAiComponent(Component):
         else:
             winner = random.choice(candidates)
 
-        if self.move_to(entity, cur_map, game.world.entity_manager, winner):
+        if self.move_to(monster, cur_map, game.world.entity_manager, winner):
             self.cur_direction = winner.copy()
 
-    def update(self, entity, game):
+    def maybe_move(self, monster, game):
+        if random.random() < 0.3:
+            return
+        self.wander(monster, game)
+
+    def update(self, monster, game):
         """To be called every turn"""
 
         if not self.aggressive:
-            if random.random() < 0.3:
-                return
-            self.wander(entity, game)
+            self.maybe_move(monster, game)
             return
 
         player = game.player
         cur_map = game.world.get_current_map()
         em = game.world.entity_manager
 
-        if self.last_player_pos is not None and entity.position == self.last_player_pos:
+        if self.last_player_pos is not None and monster.position == self.last_player_pos:
             self.last_player_pos = None
+            logger.debug(f"{monster} stopping chase, reached last player position")
+            self.chasing = False
 
         # check if the player is directly adjacent, so that we can skip calculating the FOV for this
         # monster.
-        adjacent = False
         for d in Direction.all():
-            pos = entity.position + d
+            pos = monster.position + d
             if pos == player.position:
-                adjacent = True
+                self.last_player_pos = player.position.copy()
+                logger.debug(f"{monster} attacking {player}")
                 self.chasing = True
+                game.fight(monster, player)
+                return
 
-        if not adjacent:
-            # update fov
-            self.fov_map.compute_fov(
-                entity.position.x, entity.position.y, radius=self.radius, algorithm=tcod.FOV_DIAMOND
-            )
-            # if the player position is "lit", then we see the player
-            self.chasing = self.fov_map.fov[player.position.y, player.position.x]
-        elif adjacent:
-            logger.debug(f"{entity} attacking {player}")
-            game.fight(entity, player)
-            return
+        # update fov
+        self.fov_map.compute_fov(
+            monster.position.x, monster.position.y, radius=self.radius, algorithm=tcod.FOV_DIAMOND
+        )
+        # if the player position is "lit", then we see the player.
+        # if we're already chasing (going to lasy_player_pos) we skip this check.
+        if self.fov_map.fov[player.position.y, player.position.x]:
+            self.chasing = True
+            self.last_player_pos = player.position.copy()
+            logger.debug(f"{monster} can see the player")
 
         if self.chasing:
-            path = astar(cur_map, entity.position, player.position, self.can_move_diagonal)
-            if len(path) == 1:
-                new_pos = path[0]
-                if new_pos == player.position:
-                    # attack
-                    logger.debug(f"{entity} attacking {player}")
-                    game.fight(entity, player)
-            elif path:
-                logger.debug(f"{entity} chasing the player")
-                self.last_player_pos = path[-1]
-
-                new_pos = path[0]
-                if not self.move_to(entity, cur_map, em, new_pos):
-                    logger.warning(f"{entity} can't move to {new_pos}: cell is busy")
+            path = astar(cur_map, monster.position, self.last_player_pos, self.can_move_diagonal)
+            if path:
+                logger.debug(f"{monster} chasing the player to {self.last_player_pos}")
+                if not self.move_to(monster, cur_map, em, path[0]):
+                    logger.warning(f"{monster} can't move to {path[0]}: cell is busy")
             else:
-                logger.warning("A* Path for {entity} is empty")
+                logger.warning("A* Path for {monster} is empty")
         else:
-            if self.last_player_pos is not None:
-                logger.debug(f"{entity} can't see player but is still chasing him")
-                path = astar(cur_map, entity.position, self.last_player_pos, self.can_move_diagonal)
-                self.move_to(entity, cur_map, em, path[0])
-            else:
-                # move randomly, but not all the times
-                if random.random() < 0.3:
-                    return
-                self.wander(entity, game)
+            self.maybe_move(monster, game)

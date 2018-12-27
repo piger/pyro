@@ -170,8 +170,9 @@ class DungeonScene(Scene):
                     fov_map.transparent[y, x] = True
                 # doors will block sight
                 for entity_id in cell.entities:
-                    door_components_db = self.world.entity_manager.components["door"]
-                    if entity_id in door_components_db:
+                    # XXX there must be a better way to do this.
+                    entity = self.world.entity_manager.get_entity(entity_id)
+                    if entity.name == 'door':
                         fov_map.transparent[y, x] = False
         self.fov_map = fov_map
 
@@ -415,7 +416,7 @@ class DungeonScene(Scene):
                 )
         else:
             if player_attacking:
-                chance = chance_to_hit(player_cc.accuracy, entity_cc.defense)
+                chance = chance_to_hit(atk_cc.accuracy, def_cc.defense)
                 self.post_message(f"You miss the {target} ({chance}%%)")
             else:
                 if player_defending:
