@@ -3,6 +3,7 @@ import random
 from collections import OrderedDict
 import noise
 from .utils import Rect, Vector2, Direction
+from .gamedata import gamedata
 from . import CORRIDOR, VOID, WALKABLE, BLOCKING, WALL, ROOM, PotionType
 
 
@@ -162,9 +163,8 @@ class GameMap:
             self.cells[x][y].value = str(value)
 
         # fill cells around this corridor cell if they are void
-        for c in self.get_cells_around(x, y):
-            if c.kind == VOID:
-                c.kind = WALL
+        for c in [cell for cell in self.get_cells_around(x, y) if cell.kind == VOID]:
+            c.kind = WALL
 
     def _cancel_room(self, room):
         """Remove a room from the map. Used by BSP.
@@ -180,8 +180,11 @@ class GameMap:
 
     def _place_creatures_in_rooms(self, level, entity_manager):
         rooms = [room for room in self.rooms.values() if room.rid != self.start_room_id]
-        creatures = [("boar", level * 20), ("worm", level * 12), ("goblin", 9), ("fairy", 3)]
-        for creature_name, amount in creatures:
+        floors_data = gamedata.get("floors")
+        # floors arrays starts from 0, levels starts from 1.
+        this_floor = floors_data[level-1]
+
+        for creature_name, amount in this_floor["monsters"].items():
             for _ in range(amount):
                 for j in range(5):
                     # retries 5 times

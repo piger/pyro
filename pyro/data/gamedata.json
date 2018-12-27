@@ -40,7 +40,8 @@
         205,
         16,
         118
-      ]
+      ],
+      "description": "This enormous worm is covered with dark purple plates of chitinous armor. Its giant, tooth-filled mouth is the size of an ox."
     },
     {
       "name": "goblin",
@@ -51,11 +52,12 @@
         "combat:DAMAGE:6:DEFENSE:10:ACCURACY:70",
         "monster_ai:FOV_RADIUS:7",
         "health:15"
-      ]
+      ],
+      "description": "This creature stands barely three feet tall, its scrawny, humanoid body dwarfed by its wide, ungainly head."
     },
     {
-      "name": "fairy",
-      "display_name": "Fairy",
+      "name": "faerie",
+      "display_name": "Faerie Seer",
       "avatar": "F",
       "color": [
         60,
@@ -64,7 +66,24 @@
       ],
       "can": [
         "monster_ai:DIAGONAL:0:AGGRESSIVE:0"
-      ]
+      ],
+      "description": "The figure before you looks fairly human. His eyes are covered with a linen cloth and he wears a simple robe of pure white. In his hands he holds a shallow, marble bowl into which he appears to be gazing, despite his obvious blindness. The air around him seems to twist and ripple."
+    },
+    {
+      "name": "dog",
+      "display_name": "Dog",
+      "avatar": "d",
+      "color": [
+        79,
+        49,
+        7
+      ],
+      "can": [
+        "combat:DAMAGE:5:DEFENSE:3:ACCURACY:75",
+        "monster_ai:FOV_RADIUS:6",
+        "health:8"
+      ],
+      "description": "This small dog has a rough coat and a hungry look in its dark brown eyes."
     },
     {
       "name": "stairs_up",
@@ -191,5 +210,17 @@
     }
   ],
   "scrolls": [],
-  "weapons": []
+  "weapons": [],
+  "floors": [
+    {
+      "name": "first floor",
+      "monsters": {
+        "boar": 20,
+        "worm": 12,
+        "goblin": 9,
+        "faerie": 3,
+        "dog": 6
+      }
+    }
+  ]
 }
