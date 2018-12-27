@@ -22,3 +22,7 @@ to avoid reinstalling python3:
 ``` shell
 ln -fs /usr/local/opt/python/libexec ~/.pyenv/versions/3.7.1
 ```
+
+## Credits
+
+Monster descriptions come from [d20PFSRD](http://www.d20pfsrd.com/).
