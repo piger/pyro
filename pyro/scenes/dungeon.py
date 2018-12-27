@@ -172,7 +172,7 @@ class DungeonScene(Scene):
                 for entity_id in cell.entities:
                     # XXX there must be a better way to do this.
                     entity = self.world.entity_manager.get_entity(entity_id)
-                    if entity.name == 'door':
+                    if entity.name == "door":
                         fov_map.transparent[y, x] = False
         self.fov_map = fov_map
 
@@ -422,8 +422,8 @@ class DungeonScene(Scene):
                 if player_defending:
                     self.post_message("The {name} misses you".format(name=attacker.name))
                 else:
-                    self.post_message("The {name} misses the {target}".format(
-                        name=attacker.name, target=target)
+                    self.post_message(
+                        "The {name} misses the {target}".format(name=attacker.name, target=target)
                     )
 
         if def_hc.health <= 0:

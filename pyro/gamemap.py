@@ -183,7 +183,7 @@ class GameMap:
         rooms = [room for room in self.rooms.values() if room.rid != self.start_room_id]
         floors_data = gamedata.get("floors")
         # floors arrays starts from 0, levels starts from 1.
-        this_floor = floors_data[level-1]
+        this_floor = floors_data[level - 1]
 
         for creature_name, amount in this_floor["monsters"].items():
             for _ in range(amount):

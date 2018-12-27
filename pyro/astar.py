@@ -26,15 +26,25 @@ class PriorityQueue:
         return False
 
 
-def heuristic(a, b):
+def _heuristic(a, b):
+    """Heuristic between two Vector2's"""
+
     return abs(a.x - b.x) + abs(a.y - b.y)
 
 
 def astar(dungeon, start, goal, diagonal=True):
+    """A* between two Vector2's.
+
+    - dungeon: a GameMap
+    - start: Vector2
+    - end: Vector2
+    - diagonal: bool - can move diagonally
+    """
+
     close_set = set()
     came_from = {}
-    gscore = {start: 0}
-    fscore = {start: heuristic(start, goal)}
+    g_score = {start: 0}
+    f_score = {start: _heuristic(start, goal)}
     oheap = PriorityQueue()
 
     if diagonal:
@@ -42,7 +52,7 @@ def astar(dungeon, start, goal, diagonal=True):
     else:
         directions = Direction.cardinal()
 
-    oheap.put(start, fscore[start])
+    oheap.put(start, f_score[start])
 
     while not oheap.empty():
         current = oheap.get()
@@ -57,16 +67,16 @@ def astar(dungeon, start, goal, diagonal=True):
         close_set.add(current)
         for d in directions:
             neighbor = current + d
-            tentative_g_score = gscore[current] + heuristic(current, neighbor)
+            tentative_g_score = g_score[current] + _heuristic(current, neighbor)
             cell = dungeon.get_at(neighbor)
             if cell is None or not cell.walkable:
                 continue
-            if neighbor in close_set and tentative_g_score >= gscore.get(neighbor, 0):
+            if neighbor in close_set and tentative_g_score >= g_score.get(neighbor, 0):
                 continue
 
-            if tentative_g_score < gscore.get(neighbor, 0) or not oheap.contain(neighbor):
+            if tentative_g_score < g_score.get(neighbor, 0) or not oheap.contain(neighbor):
                 came_from[neighbor] = current
-                gscore[neighbor] = tentative_g_score
-                fscore[neighbor] = tentative_g_score + heuristic(neighbor, goal)
-                oheap.put(neighbor, fscore[neighbor])
+                g_score[neighbor] = tentative_g_score
+                f_score[neighbor] = tentative_g_score + _heuristic(neighbor, goal)
+                oheap.put(neighbor, f_score[neighbor])
     return []
