@@ -114,12 +114,13 @@ class GameMap:
         logger.info("Map dimension: %dx%d", self.width, self.height)
         logger.info("Rooms count: %d", len(self.rooms))
 
-        room_width = 0
-        room_height = 0
         biggest_room = None
         for room in self.rooms.values():
-            if room.width > room_width and room.height > room_height:
+            if biggest_room is None:
                 biggest_room = room
+            else:
+                if room.width > biggest_room.width and room.height > biggest_room.height:
+                    biggest_room = room
 
         logger.info("The biggest room is %dx%d", biggest_room.width, biggest_room.height)
 
