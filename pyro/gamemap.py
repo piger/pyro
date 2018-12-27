@@ -308,31 +308,42 @@ class GameMap:
                     self.cells[x][y].feature = "floor"
 
     def _place_doors(self, entity_manager):
+        self._place_doors_axis(entity_manager, "x")
+        self._place_doors_axis(entity_manager, "y")
+
+    def _place_doors_axis(self, entity_manager, axis):
+        """Place doors on walls
+
+        Inspect the sides of a room (either on the X or the Y axis) and try to place a door on each
+        corridor cell found, but only when it's surrounded by walls and not in a corner.
+        """
         for room in self.rooms.values():
-            # inspect room sides, except corners, and try to place a door, but only
-            # between two walls.
-            for y in range(room.y + 1, room.endY - 1):
-                for i in (room.x, room.endX - 1):
-                    pos = Vector2(i, y)
+            if axis == "x":
+                wall_start = room.x + 1
+                wall_end = room.endX - 1
+                sides = (room.y, room.endY - 1)
+                # for a door on the X axis walls must be on the left and right sides.
+                directions = (Direction.EAST, Direction.WEST)
+            else:
+                wall_start = room.y + 1
+                wall_end = room.endY - 1
+                sides = (room.x, room.endX - 1)
+                # for a door on the Y axis walls must be on the top and bottom sides.
+                directions = (Direction.NORTH, Direction.SOUTH)
+
+            for v in range(wall_start, wall_end):
+                for i in sides:
+                    if axis == "x":
+                        pos = Vector2(v, i)
+                    else:
+                        pos = Vector2(i, v)
                     cell = self.get_at(pos)
                     if cell.kind != CORRIDOR:
                         continue
 
-                    cell_north = self.get_at(pos + Direction.NORTH)
-                    cell_south = self.get_at(pos + Direction.SOUTH)
-                    if cell_north.kind == WALL and cell_south.kind == WALL:
-                        self._maybe_place_door(entity_manager, pos)
-
-            for x in range(room.x + 1, room.endX - 1):
-                for i in (room.y, room.endY - 1):
-                    pos = Vector2(x, i)
-                    cell = self.get_at(pos)
-                    if cell.kind != CORRIDOR:
-                        continue
-
-                    cell_east = self.get_at(pos + Direction.EAST)
-                    cell_west = self.get_at(pos + Direction.WEST)
-                    if cell_east.kind == WALL and cell_west.kind == WALL:
+                    cell_one = self.get_at(pos + directions[0])
+                    cell_two = self.get_at(pos + directions[1])
+                    if cell_one.kind == WALL and cell_two.kind == WALL:
                         self._maybe_place_door(entity_manager, pos)
 
     def _place_outer_walls(self):
