@@ -163,16 +163,14 @@ class Rect:
         self.y = y
         self.width = width
         self.height = height
-        self.endX = self.x + self.width
-        self.endY = self.y + self.height
 
-    def __eq__(self, other):
-        return (
-            self.x == other.x
-            and self.y == other.y
-            and self.width == other.width
-            and self.height == other.height
-        )
+    @property
+    def endX(self):
+        return self.x + self.width
+
+    @property
+    def endY(self):
+        return self.y + self.height
 
     @property
     def center(self):
@@ -214,6 +212,14 @@ class Rect:
 
     def collidepoint(self, x, y):
         return x >= self.x and x <= self.endX and y >= self.y and y <= self.endY
+
+    def __eq__(self, other):
+        return (
+            self.x == other.x
+            and self.y == other.y
+            and self.width == other.width
+            and self.height == other.height
+        )
 
     def __repr__(self):
         return "Rect(x=%d, y=%d, width=%d, height=%d)" % (self.x, self.y, self.width, self.height)
