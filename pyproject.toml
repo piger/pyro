@@ -9,8 +9,6 @@ python = "^3.7"
 click = "^7.0"
 tcod = "^8.3"
 noise = "^1.2"
-jedi = "^0.13.2"
-rope = "^0.11.0"
 
 [tool.poetry.dev-dependencies]
 modernize = "^0.6.1"
@@ -21,6 +19,8 @@ pytest = "^4.0"
 see = "^1.4"
 better_exceptions = "^0.2.1"
 black = { version = "18.9b0", python = "^3.6" }
+jedi = "^0.13.2"
+flake8 = "^3.6"
 
 [tool.poetry.scripts]
 pyro = "pyro.main:run"
