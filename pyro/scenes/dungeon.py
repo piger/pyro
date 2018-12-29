@@ -185,10 +185,13 @@ class DungeonScene(Scene):
                     fov_map.transparent[y, x] = True
                 # doors will block sight
                 for entity_id in cell.entities:
-                    # XXX there must be a better way to do this.
                     entity = self.world.entity_manager.get_entity(entity_id)
-                    if entity.name == "door":
-                        fov_map.transparent[y, x] = False
+                    if entity.has_component("door"):
+                        dc = entity.get_component("door")
+                        if dc.is_open:
+                            fov_map.transparent[y, x] = True
+                        else:
+                            fov_map.transparent[y, x] = False
         self.fov_map = fov_map
 
     def init_visited(self):
@@ -384,22 +387,13 @@ class DungeonScene(Scene):
         if not dcell.entities:
             return True
 
-        em = self.world.entity_manager
-        entities = [em.get_entity(eid) for eid in dcell.entities]
-
-        is_fight = False
-        for entity in entities:
-            cc = em.get_component_by_eid(entity.eid, "combat")
-            if cc is not None:
+        for entity in [self.world.entity_manager.get_entity(eid) for eid in dcell.entities]:
+            if entity.has_component("combat"):
                 self.fight(self.player, entity)
-                is_fight = True
-                break
-            ai = em.get_component_by_eid(entity.eid, "monster_ai")
-            if ai is not None:
                 return False
-
-        if is_fight:
-            return False
+            # is this for non-aggressive entitites?
+            if entity.has_component("monster_ai"):
+                return False
 
         return True
 

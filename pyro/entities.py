@@ -1,17 +1,9 @@
-import inspect
-import random
 import re
-import json
-import pkg_resources
-import tcod
-import tcod.path
-import tcod.map
-from .utils import Vector2, Direction, weighted_choice
+from .utils import Vector2
 from . import LAYER_CREATURES, LAYER_ITEMS
 from .gamedata import gamedata
-from .astar import astar
 from .potions import POTION_AVATAR, POTION_COLOR
-from .components import COMPONENT_CLASS, HealthComponent, PotionComponent
+from .components import COMPONENT_CLASS, PotionComponent
 
 
 # https://web.njit.edu/~kevin/rgb.txt.html
