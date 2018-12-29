@@ -382,6 +382,7 @@ class DungeonScene(Scene):
         game_map = self.world.get_current_map()
         dcell = game_map.get_at(dest_vec.x, dest_vec.y)
         if not dcell.walkable:
+            self.post_message("Can't move over there!")
             return False
 
         if not dcell.entities:
@@ -393,6 +394,7 @@ class DungeonScene(Scene):
                 return False
             # is this for non-aggressive entitites?
             if entity.has_component("monster_ai"):
+                self.post_message("Can't move over there!")
                 return False
 
         return True
@@ -463,8 +465,6 @@ class DungeonScene(Scene):
             )
             self.visited[dest_vec.x][dest_vec.y] = True
             self.enemies_turn = True
-        else:
-            self.post_message("Can't move over there!")
 
     def move_eye(self, direction):
         dest_vec = self.eye_position + direction
@@ -472,7 +472,6 @@ class DungeonScene(Scene):
         dest_vec.y = clamp(dest_vec.y, 0, self.game_height - 1)
         self.eye_position.x = dest_vec.x
         self.eye_position.y = dest_vec.y
-
 
     def post_message(self, message):
         lines = textwrap.wrap(message, width=self.log_width)
