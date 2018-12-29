@@ -393,9 +393,17 @@ class DungeonScene(Scene):
                 self.fight(self.player, entity)
                 return False
             # is this for non-aggressive entitites?
-            if entity.has_component("monster_ai"):
+            elif entity.has_component("monster_ai"):
                 self.post_message("Can't move over there!")
                 return False
+            elif entity.has_component("door"):
+                # NOTE: we must check for combat before checking for a enemy creature!
+                # we open the door here, but it should really be opened in the caller function...
+                dc = entity.get_component("door")
+                if not dc.is_open:
+                    # currently we don't distinguish between opened and closed doors.
+                    dc.open()
+                return True
 
         return True
 

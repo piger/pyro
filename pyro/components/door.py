@@ -15,3 +15,9 @@ class DoorComponent(Component):
 
     def toggle(self):
         self.state = not self.state
+
+    def open(self):
+        self.state = True
+
+    def close(self):
+        self.state = False
