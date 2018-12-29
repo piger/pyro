@@ -25,6 +25,21 @@ from .. import (
 
 logger = logging.getLogger(__name__)
 
+KEY_DIRECTIONS = {
+    "UP": Direction.NORTH,
+    "k": Direction.NORTH,
+    "y": Direction.NORTH_WEST,
+    "u": Direction.NORTH_EAST,
+    "DOWN": Direction.SOUTH,
+    "j": Direction.SOUTH,
+    "LEFT": Direction.WEST,
+    "h": Direction.WEST,
+    "RIGHT":  Direction.EAST,
+    "l": Direction.EAST,
+    "b": Direction.SOUTH_WEST,
+    "n": Direction.SOUTH_EAST,
+}
+
 
 class DungeonScene(Scene):
     def __init__(self):
@@ -454,6 +469,8 @@ class DungeonScene(Scene):
             )
             self.visited[dest_vec.x][dest_vec.y] = True
             self.enemies_turn = True
+        else:
+            self.post_message("Can't move over there!")
 
     def move_eye(self, direction):
         dest_vec = self.eye_position + direction
@@ -462,29 +479,6 @@ class DungeonScene(Scene):
         self.eye_position.x = dest_vec.x
         self.eye_position.y = dest_vec.y
 
-    def player_take_item(self):
-        cur_map = self.world.get_current_map()
-        em = self.world.entity_manager
-        ic = self.player.get_component("inventory")
-        cell = cur_map.get_at(self.player.get_position())
-        if not cell.entities:
-            return False
-
-        to_remove = []
-        for entity_id in cell.entities:
-            entity = em.get_entity(entity_id)
-            if entity.is_potion():
-                ic.take_item(entity)
-                to_remove.append(entity.eid)
-                name = self.potion_system.get_name_for_potion(entity)
-                self.post_message("You took a %s potion" % name)
-
-        if not to_remove:
-            return False
-        for entity_id in to_remove:
-            cell.entities.remove(entity_id)
-        self.enemies_turn = True
-        return True
 
     def post_message(self, message):
         lines = textwrap.wrap(message, width=self.log_width)
@@ -511,41 +505,50 @@ class DungeonScene(Scene):
 
         if event.key == "ESCAPE":
             game.next_scene = "quit"
-            return
         elif event.char == "q":
             self.player_is_dead = True
             game.next_scene = "quit"
-            return
         elif event.key == "ENTER":
-            self.is_looking = not (self.is_looking)
-            if self.is_looking is True:
-                self.eye_position = self.player.get_position().copy()
-            return
-        elif event.key == "UP" or event.char == "k":
-            direction = Direction.NORTH
-        elif event.char == "y":
-            direction = Direction.NORTH_WEST
-        elif event.char == "u":
-            direction = Direction.NORTH_EAST
-        elif event.key == "DOWN" or event.char == "j":
-            direction = Direction.SOUTH
-        elif event.key == "LEFT" or event.char == "h":
-            direction = Direction.WEST
-        elif event.key == "RIGHT" or event.char == "l":
-            direction = Direction.EAST
-        elif event.char == "b":
-            direction = Direction.SOUTH_WEST
-        elif event.char == "n":
-            direction = Direction.SOUTH_EAST
+            self._cmd_toggle_look()
+        elif event.key in KEY_DIRECTIONS.keys():
+            self._cmd_movement(KEY_DIRECTIONS[event.key])
+        elif event.char in KEY_DIRECTIONS.keys():
+            self._cmd_movement(KEY_DIRECTIONS[event.char])
         elif event.char == ";" or event.char == "g":
-            self.player_take_item()
-            return
+            self._cmd_player_pickup()
         elif event.key == "SPACE" or event.char == "z":
             self.enemies_turn = True
+
+    def _cmd_toggle_look(self):
+        self.is_looking = not (self.is_looking)
+        if self.is_looking is True:
+            self.eye_position = self.player.get_position().copy()
+
+    def _cmd_movement(self, direction):
+        if self.is_looking:
+            self.move_eye(direction)
+        else:
+            self.move_player(direction)
+
+    def _cmd_player_pickup(self):
+        cur_map = self.world.get_current_map()
+        em = self.world.entity_manager
+        ic = self.player.get_component("inventory")
+        cell = cur_map.get_at(self.player.get_position())
+        if not cell.entities:
             return
 
-        if direction is not None:
-            if self.is_looking:
-                self.move_eye(direction)
-            else:
-                self.move_player(direction)
+        to_remove = []
+        for entity_id in cell.entities:
+            entity = em.get_entity(entity_id)
+            if entity.is_potion():
+                ic.take_item(entity)
+                to_remove.append(entity.eid)
+                name = self.potion_system.get_name_for_potion(entity)
+                self.post_message("You took a %s potion" % name)
+
+        if not to_remove:
+            return
+        for entity_id in to_remove:
+            cell.entities.remove(entity_id)
+        self.enemies_turn = True
