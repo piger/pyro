@@ -293,3 +293,11 @@ class PopupWindow:
         """Blit this popup onto another surface"""
 
         surface.blit(self.console, x, y, self.width, self.height, 0, 0)
+
+
+def probability(percent):
+    assert percent[-1] == "%"
+    value = int(percent[0:-1])
+    if random.random() <= (value / 100):
+        return True
+    return False

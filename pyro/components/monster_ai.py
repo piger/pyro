@@ -4,7 +4,7 @@ import logging
 import tcod
 from . import Component
 from ..astar import astar
-from ..utils import Direction, weighted_choice
+from ..utils import Direction, weighted_choice, probability
 
 
 logger = logging.getLogger(__name__)
@@ -88,9 +88,8 @@ class MonsterAiComponent(Component):
             self.cur_direction = winner.copy()
 
     def maybe_move(self, monster, game):
-        if random.random() < 0.3:
-            return
-        self.wander(monster, game)
+        if probability("70%"):
+            self.wander(monster, game)
 
     def update(self, monster, game):
         """To be called every turn"""
