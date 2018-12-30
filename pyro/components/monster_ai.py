@@ -15,7 +15,6 @@ class MonsterAiComponent(Component):
 
     def __init__(self):
         super(MonsterAiComponent, self).__init__()
-        self.fov_map = None
         self.radius = 4
         self.can_move_diagonal = True
         self.aggressive = True
@@ -34,15 +33,6 @@ class MonsterAiComponent(Component):
                 self.can_move_diagonal = bool(int(value))
             elif name == "AGGRESSIVE":
                 self.aggressive = bool(int(value))
-
-    def setup(self, game):
-        """Must be called during game initialization, after game.fov_map is computed"""
-
-        self.fov_map = tcod.map.Map(width=game.game_width, height=game.game_height)
-        for y in range(game.game_height):
-            for x in range(game.game_width):
-                self.fov_map.walkable[y, x] = game.fov_map.walkable[y, x]
-                self.fov_map.transparent[y, x] = game.fov_map.transparent[y, x]
 
     def move_to(self, monster, cur_map, entity_manager, pos):
         """Move the entity to a pos, if possible"""
@@ -112,6 +102,7 @@ class MonsterAiComponent(Component):
         player = game.player
         cur_map = game.world.get_current_map()
         em = game.world.entity_manager
+        fov_map = game.fov_map
 
         if self.last_player_pos is not None and monster.position == self.last_player_pos:
             self.last_player_pos = None
@@ -130,12 +121,12 @@ class MonsterAiComponent(Component):
                 return
 
         # update fov
-        self.fov_map.compute_fov(
+        fov_map.compute_fov(
             monster.position.x, monster.position.y, radius=self.radius, algorithm=tcod.FOV_DIAMOND
         )
         # if the player position is "lit", then we see the player.
         # if we're already chasing (going to lasy_player_pos) we skip this check.
-        if self.fov_map.fov[player.position.y, player.position.x]:
+        if fov_map.fov[player.position.y, player.position.x]:
             self.chasing = True
             self.last_player_pos = player.position.copy()
             logger.debug(f"{monster} can see the player")

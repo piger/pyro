@@ -166,10 +166,6 @@ class DungeonScene(Scene):
         # setup visited cells
         self.init_visited()
 
-        # init AI
-        for ai in self.world.entity_manager.components["monster_ai"].values():
-            ai.setup(self)
-
     def init_fov(self, cur_map):
         """Initialize the Field of View handler
 
@@ -493,8 +489,14 @@ class DungeonScene(Scene):
         return self.visited[x][y]
 
     def update(self, game):
+        position = self.player.get_position()
+
         if self.enemies_turn:
             self.move_enemies()
+            # re-calculate the FOV after the enemies were moved
+            self.fov_map.compute_fov(
+                position.x, position.y, radius=self.fov_radius, algorithm=tcod.FOV_DIAMOND
+            )
 
         if self.do_render:
             self.render_all(game)
@@ -518,6 +520,7 @@ class DungeonScene(Scene):
         elif event.char == ";" or event.char == "g":
             self._cmd_player_pickup()
         elif event.key == "SPACE" or event.char == "z":
+            self.post_message("You do nothing for a turn")
             self.enemies_turn = True
 
     def _cmd_toggle_look(self):
