@@ -34,7 +34,7 @@ KEY_DIRECTIONS = {
     "j": Direction.SOUTH,
     "LEFT": Direction.WEST,
     "h": Direction.WEST,
-    "RIGHT":  Direction.EAST,
+    "RIGHT": Direction.EAST,
     "l": Direction.EAST,
     "b": Direction.SOUTH_WEST,
     "n": Direction.SOUTH_EAST,
