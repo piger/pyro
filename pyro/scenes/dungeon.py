@@ -399,7 +399,9 @@ class DungeonScene(Scene):
                 if not dc.is_open:
                     # currently we don't distinguish between opened and closed doors.
                     dc.open()
-                return True
+                # returning True here means that the player will pass, but this is not OK
+                # when there could be more entities in the same cell (e.g. a monster).
+                # return True
 
         return True
 
