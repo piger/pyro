@@ -6,7 +6,7 @@ class DoorComponent(Component):
         super(DoorComponent, self).__init__()
         self.state = initial_state
 
-    def config(self, values):
+    def setup(self, config):
         pass
 
     @property

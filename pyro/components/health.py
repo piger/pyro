@@ -6,5 +6,5 @@ class HealthComponent(Component):
         super(HealthComponent, self).__init__()
         self.health = 0
 
-    def config(self, values):
-        self.health = int(values[0])
+    def setup(self, config):
+        self.health = int(config["HP"])

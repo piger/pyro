@@ -2,7 +2,7 @@ import re
 
 
 class Component:
-    def config(self, values):
+    def setup(self, config):
         raise NotImplementedError
 
     @property

@@ -8,9 +8,10 @@ class CombatComponent(Component):
         self.defense = defense
         self.accuracy = accuracy
 
-    def config(self, values):
-        m = {"DAMAGE": "damage", "DEFENSE": "defense", "ACCURACY": "accuracy"}
-        for i in range(0, len(values), 2):
-            name = values[i]
-            value = values[i + 1]
-            setattr(self, m[name], int(value))
+    def setup(self, config):
+        if "DAMAGE" in config:
+            self.damage = int(config["DAMAGE"])
+        if "DEFENSE" in config:
+            self.defense = int(config["DEFENSE"])
+        if "ACCURACY" in config:
+            self.accuracy = int(config["ACCURACY"])

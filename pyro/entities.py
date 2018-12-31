@@ -24,9 +24,15 @@ def parse_capability(line):
     if ":" not in line:
         return (line, [])
     name, line = line.split(":", 1)
-    results = re.split(r"(?<!\\):", line)
-    results = [x.replace("\\\\", "\\") for x in results]
-    return (name, results)
+    values = re.split(r"(?<!\\):", line)
+    values = [x.replace("\\\\", "\\") for x in values]
+    config = {}
+    for i in range(0, len(values), 2):
+        attr_name = values[i]
+        attr_value = values[i + 1]
+        config[attr_name] = attr_value
+
+    return (name, config)
 
 
 class Entity:
@@ -123,9 +129,9 @@ class EntityManager:
 
         # configure all the entity's capabilities.
         for cap in entity_data.get("can", []):
-            name, values = parse_capability(cap)
+            name, config = parse_capability(cap)
             comp = COMPONENT_CLASS[name]()
-            comp.config(values)
+            comp.setup(config)
 
             # store the capability for this Entity in the db
             self.register_component(entity, comp)

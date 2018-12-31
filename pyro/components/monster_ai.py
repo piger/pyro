@@ -23,16 +23,13 @@ class MonsterAiComponent(Component):
         self.last_player_pos = None
         self.cur_direction = None
 
-    def config(self, values):
-        for i in range(0, len(values), 2):
-            name = values[i]
-            value = values[i + 1]
-            if name == "FOV_RADIUS":
-                self.radius = int(value)
-            elif name == "DIAGONAL":
-                self.can_move_diagonal = bool(int(value))
-            elif name == "AGGRESSIVE":
-                self.aggressive = bool(int(value))
+    def setup(self, config):
+        if "FOV_RADIUS" in config:
+            self.radius = int(config["FOV_RADIUS"])
+        if "DIAGONAL" in config:
+            self.can_move_diagonal = bool(int(config["DIAGONAL"]))
+        if "AGGRESSIVE" in config:
+            self.aggressive = bool(int(config["AGGRESSIVE"]))
 
     def move_to(self, monster, cur_map, entity_manager, pos):
         """Move the entity to a pos, if possible"""

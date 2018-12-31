@@ -7,8 +7,8 @@ class InventoryComponent(Component):
         self.max_items = 10
         self.items = []
 
-    def config(self, values):
-        self.max_items = int(values[0])
+    def setup(self, config):
+        self.max_items = int(config["SIZE"])
 
     def take_item(self, entity):
         self.items.append(entity.eid)

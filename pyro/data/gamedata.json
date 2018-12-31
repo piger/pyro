@@ -7,8 +7,8 @@
       "color": [ 238, 233, 233 ],
       "can": [
         "combat:DAMAGE:5:DEFENSE:15:ACCURACY:100",
-        "health:100",
-        "inventory:10"
+        "health:HP:100",
+        "inventory:SIZE:10"
       ]
     },
     {
@@ -18,7 +18,7 @@
       "can": [
         "combat:DAMAGE:2:DEFENSE:6:ACCURACY:70",
         "monster_ai:FOV_RADIUS:5",
-        "health:10"
+        "health:HP:10"
       ],
       "color": [
         250,
@@ -34,7 +34,7 @@
       "can": [
         "combat:DAMAGE:5:DEFENSE:6:ACCURACY:50",
         "monster_ai:FOV_RADIUS:3:DIAGONAL:0",
-        "health:4"
+        "health:HP:4"
       ],
       "color": [
         205,
@@ -51,7 +51,7 @@
       "can": [
         "combat:DAMAGE:6:DEFENSE:10:ACCURACY:70",
         "monster_ai:FOV_RADIUS:7",
-        "health:15"
+        "health:HP:15"
       ],
       "description": "This creature stands barely three feet tall, its scrawny, humanoid body dwarfed by its wide, ungainly head."
     },
@@ -81,7 +81,7 @@
       "can": [
         "combat:DAMAGE:5:DEFENSE:3:ACCURACY:75",
         "monster_ai:FOV_RADIUS:6",
-        "health:8"
+        "health:HP:8"
       ],
       "description": "This small dog has a rough coat and a hungry look in its dark brown eyes."
     },

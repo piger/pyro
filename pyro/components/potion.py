@@ -14,5 +14,5 @@ class PotionComponent(Component):
         super(PotionComponent, self).__init__()
         self.potion_type = potion_type
 
-    def config(self, values):
+    def setup(self, config):
         return
