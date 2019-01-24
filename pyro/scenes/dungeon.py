@@ -25,6 +25,7 @@ from .. import (
 
 logger = logging.getLogger(__name__)
 
+# map a keyboard character or key to a direction, used to move the player
 KEY_DIRECTIONS = {
     "UP": Direction.NORTH,
     "k": Direction.NORTH,
@@ -42,26 +43,30 @@ KEY_DIRECTIONS = {
 
 
 class DungeonScene(Scene):
+    """The Scene that handles the core of the game."""
+
     def __init__(self):
         super(DungeonScene, self).__init__()
+        # fielv of view radius of the player
         self.fov_radius = 6
 
+        # size of the dungepn map
         self.game_width = 0
         self.game_height = 0
 
-        # size of info panel
+        # size of info panel in the UI
         self.panel_width = 0
         self.panel_height = 0
 
-        # size of map area console
+        # size of map area console in the UI
         self.display_width = 0
         self.display_height = 0
 
-        # size of message log console
+        # size of message log console in the UI
         self.log_width = 0
         self.log_height = 0
 
-        # size of status bar console
+        # size of status bar console in the UI
         self.status_width = 0
         self.status_height = 0
 
@@ -90,6 +95,8 @@ class DungeonScene(Scene):
         self.dungeon_algorithm = None
 
     def setup(self, game):
+        """Configure the UI and initialize the game."""
+
         self.DEBUG = game.DEBUG
 
         self.game_width = game.game_width
@@ -167,7 +174,10 @@ class DungeonScene(Scene):
         self.init_visited()
 
     def init_fov(self, cur_map):
-        """Initialize the Field of View handler
+        """Initialize the Field of View handler.
+
+        During initialization each dungeon map cell is visited and the FOV map is updated to record
+        wether the cell is walkable and transparent.
 
         NOTE: fov requires [y,x] addressing!
         """
@@ -191,6 +201,11 @@ class DungeonScene(Scene):
         self.fov_map = fov_map
 
     def init_visited(self):
+        """Initialize the visited cells map.
+
+        Initially the starting room is the only room already entirely marked as visited.
+        """
+
         cur_map = self.world.get_current_map()
         self.visited = [[False for y in range(self.game_height)] for x in range(self.game_width)]
 
@@ -207,6 +222,8 @@ class DungeonScene(Scene):
                 self.visited[x][y] = True
 
     def render_all(self, game):
+        """Render the game UI and elements."""
+
         game_map = self.world.get_current_map()
 
         self.console.clear(bg=DARK_BACKGROUND)
