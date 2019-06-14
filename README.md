@@ -6,18 +6,24 @@ This is an experiment aimed to practice a Entity-Component-System.
 
 ## Install
 
+First install [poetry](https://github.com/sdispater/poetry); the installer for poetry is smart
+enough to install it in a non-system wide location.
+
+Then:
+
 ``` shell
 brew install libtcod
-virtualenv venv
-. ./venv/bin/activate
-python setup.py install
+cd pyro
+poetry install
 ```
 
-Then run `pyro`.
+Then run `poetry run pyro`.
 
 ### pyenv
 
-to avoid reinstalling python3:
+NOTE: this is relevant only if you use pyenv.
+
+To avoid reinstalling python3:
 
 ``` shell
 ln -fs /usr/local/opt/python/libexec ~/.pyenv/versions/3.7.1
